@@ -7,11 +7,11 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 
-import { IInput } from '../interfaces';
+import { IInput, IModel } from '../interfaces';
 
 type IProps = {
     config: IInput;
-    model: String;
+    model: IModel[];
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -46,72 +46,70 @@ const MenuProps = {
   },
 };
 
-const names = [
-  'Oliver Hansen',
-  'Van Henry',
-  'April Tucker',
-  'Ralph Hubbard',
-  'Omar Alexander',
-  'Carlos Abbott',
-  'Miriam Wagner',
-  'Bradley Wilkerson',
-  'Virginia Andrews',
-  'Kelly Snyder',
-];
-
-function getStyles(name: string, personName: string[], theme: Theme) {
-  return {
-    fontWeight:
-      personName.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
-
+// function getStyles(name: string, personName: string[], theme: Theme) {
+//   return {
+//     fontWeight:
+//       personName.indexOf(name) === -1
+//         ? theme.typography.fontWeightRegular
+//         : theme.typography.fontWeightMedium,
+//   };
+// }
 export default function MultiCheckV1({config, model}: IProps) {
   const classes = useStyles();
   const theme = useTheme();
-  const [personName, setPersonName] = React.useState<string[]>([]);
+  console.log('!!!', config, model);
+  const [ids, setIds] = React.useState([] as string[]);
+  // const [ids, setIds] = React.useState(model.map((data) => data.id) || []);
+  const dataList = config.dataList || [];
 
-  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setPersonName(event.target.value as string[]);
-  };
+
+  // const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  //   setIds([event.target.value]);
+  // };
 
   const handleChangeMultiple = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const { options } = event.target as HTMLSelectElement;
-    const value: string[] = [];
-    for (let i = 0, l = options.length; i < l; i += 1) {
-      if (options[i].selected) {
-        value.push(options[i].value);
-      }
-    }
-    setPersonName(value);
+    console.log('event', event);
+    const options = event.target;
+    // const ids: string[] = [];
+    // console.log('options', options, 'target', event.target);
+    // for (let i = 0, l = options.length; i < l; i += 1) {
+    //   if (options[i].selected) {
+    //     ids.push(options[i].value);
+    //   }
+    // }
+    setIds(options.value as string[]);
   };
 
   return (
     <div>
       <FormControl className={classes.formControl}>
-        <InputLabel id="demo-mutiple-chip-label">Chip</InputLabel>
+        <InputLabel id="multiple-chip-label">Chip</InputLabel>
         <Select
-          labelId="demo-mutiple-chip-label"
-          id="demo-mutiple-chip"
+          labelId="multiple-chip-label"
+          id="multiple-chip"
           multiple
-          value={personName}
-          onChange={handleChange}
+          value={ids}
+          onChange={handleChangeMultiple}
           input={<Input id="select-multiple-chip" />}
           renderValue={(selected) => (
             <div className={classes.chips}>
-              {(selected as string[]).map((value) => (
-                <Chip key={value} label={value} className={classes.chip} />
+              {(selected as string[]).map((id) => (
+                <Chip key={id} label={
+                  config.dataList?.find((data) => {
+                    if (data.id === id) {
+                      return data.name;
+                    }
+                  })
+                } className={classes.chip} />
               ))}
             </div>
           )}
           MenuProps={MenuProps}
           margin="dense"
         >
-          {names.map((name) => (
-            <MenuItem key={name} value={name} style={getStyles(name, personName, theme)}>
-              {name}
+          {dataList.map((data) => (
+            <MenuItem key={data.id} value={data.id} style={{fontWeight: theme.typography.fontWeightMedium}}>
+              {data.name}
             </MenuItem>
           ))}
         </Select>

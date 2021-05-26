@@ -11,6 +11,7 @@ export interface IValidate {
   
 export interface IModel {
     id?: string;
+    line_id?: string;
     name: string;
     picture?: string;
     isSelected?: boolean;

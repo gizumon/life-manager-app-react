@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function SelectV1({config, model}: IProps) {
   const classes = useStyles();
-  const [item, setItem] = React.useState('');
+  const [item, setItem] = React.useState(model);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setItem(event.target.value as string);

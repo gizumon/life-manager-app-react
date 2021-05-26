@@ -259,7 +259,6 @@ const configs: IConfig[] = [
   },
 ];
 
-let selectedConfig: IConfig;
 let id: string | undefined;
 let type: IInputType | undefined;
 
@@ -281,15 +280,15 @@ const Input = () => {
     configs: configs,
   };
   console.log(pageConfig);
-  selectedConfig = pageConfig.configs.find((config) => config.type === type) || configs[tabMap.toIndex['pay']];
+  // selectedConfig = pageConfig.configs.find((config) => config.type === type) || configs[tabMap.toIndex['pay']];
 
   const classes = useStyles();
-  const [tabIndex, setValue] = React.useState(type === undefined ? 0 : tabMap.toIndex[type] as ITabIndex);
+  const [tabIndex, setTabIndex] = React.useState(type === undefined ? 0 : tabMap.toIndex[type] as ITabIndex);
+  const [selectedConfig, setSelectedConfig] = React.useState(pageConfig.configs.find((config) => config.type === type) || configs[tabMap.toIndex['pay']]);
 
-  const handleChange = (_: React.ChangeEvent<{}>, newValue: ITabIndex) => {
-    setValue(newValue);
-    selectedConfig = pageConfig.configs.find((config) => config.type === tabMap.toType[newValue]) || configs[tabMap.toIndex['pay']];
-    console.log('change detected!!: ', newValue, selectedConfig);
+  const onTabChange = (_: React.ChangeEvent<{}>, newValue: ITabIndex) => {
+    setTabIndex(newValue);
+    setSelectedConfig(pageConfig.configs.find((config) => config.type === tabMap.toType[newValue]) || configs[tabMap.toIndex['pay']]);
   };
 
   console.log('request type: ', type, selectedConfig);
@@ -300,7 +299,7 @@ const Input = () => {
           <Tabs
             variant="fullWidth"
             value={tabIndex}
-            onChange={handleChange}
+            onChange={onTabChange}
             aria-label="nav tabs"
           >
             <Tab label={<><PaymentIcon /> Pay</>} {...getTabProps(tabMap.toIndex['pay'])} />
