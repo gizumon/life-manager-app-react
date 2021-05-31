@@ -11,6 +11,8 @@ type IProps = {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
+      marginTop: 2,
+      marginBottom: 2,
     },
     textField: {
       marginLeft: theme.spacing(1),
@@ -27,7 +29,7 @@ export default function InputV1({ config, model }: IProps) {
         <div className={classes.root}>
             <TextField
                 label={config.name}
-                id="input-v1-field"
+                id={config.id}
                 defaultValue={model}
                 className={classes.textField}
                 placeholder={config.placeholder}

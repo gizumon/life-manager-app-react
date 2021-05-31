@@ -10,7 +10,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
-import { red } from '@material-ui/core/colors';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
@@ -18,8 +17,11 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import InputV1 from '../../components/InputV1';
 import SelectV1 from '../../components/SelectV1';
 import MultiCheckV1 from '../../components/MultiCheckV1';
+import DateV1 from '../../components/DateV1';
 import { IConfig, IPageConfig } from '../../interfaces';
 import CONST from '../../services/CONST';
+import { formatDate } from '../../services/utils';
+import SelectBtnsV1 from '../../components/SelectBtnsV1';
 
 type ITabIndex = 0 | 1 | 2;
 type IInputType = 'pay' | 'todo' | 'tobuy';
@@ -56,15 +58,8 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: 450,
       margin: '25px'
     },
-    expand: {
-      transform: 'rotate(0deg)',
-      marginLeft: 'auto',
-      transition: theme.transitions.create('transform', {
-        duration: theme.transitions.duration.shortest,
-      }),
-    },
-    expandOpen: {
-      transform: 'rotate(180deg)',
+    btns: {
+      padding: '0px',
     },
   }),
 );
@@ -84,6 +79,13 @@ const members = [
     picture: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
   },
 ];
+
+const memberAll = [{
+  id: 'all',
+  line_id: 'dummy_all_lineId',
+  name: '両方',
+  picture: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
+}];
 
 const configs: IConfig[] = [
   {
@@ -126,7 +128,7 @@ const configs: IConfig[] = [
       {
         id: 'category',
         name: 'カテゴリ',
-        type: 'select-btns',
+        type: 'select',
         placeholder: '-- カテゴリ --',
         icon: 'mdi-help-box',
         model: 'none',
@@ -186,7 +188,7 @@ const configs: IConfig[] = [
         type: 'date',
         placeholder: '2021/XX/XX',
         icon: 'mdi-calendar-clock',
-        model: new Date(), // TODO: mounted default person
+        model: formatDate(new Date()),
         validates: [
           {
             type: 'isDate',
@@ -203,7 +205,7 @@ const configs: IConfig[] = [
         model: '',
         validates: [],
         args: [],
-        dataList: members || [],
+        dataList: members.concat(memberAll) || [],
       },
     ],
   },
@@ -237,7 +239,7 @@ const configs: IConfig[] = [
         type: 'date',
         placeholder: '2021/XX/XX',
         icon: 'mdi-calendar-clock',
-        model: new Date(), // TODO: mounted default person
+        model: formatDate(new Date()),
         validates: [
           {
             type: 'isDate',
@@ -248,12 +250,13 @@ const configs: IConfig[] = [
       {
         id: 'doBy',
         name: '担当',
-        type: 'select-person-btn',
+        type: 'select-btns',
         placeholder: '',
         icon: 'mdi-account-circle',
         model: '',
         validates: [],
         args: [],
+        dataList: members || [],
       },
     ]
   },
@@ -315,20 +318,32 @@ const Input = () => {
                   console.log('loop in inputs', input);
                   if (input.type === 'number' || input.type === 'text') {
                     return (<InputV1 key={input.id} config={input} model={input.model}></InputV1>);
-                  } else if (input.type === 'select-btns') {
+                  } else if (input.type === 'select') {
                     return (<SelectV1 key={input.id} config={input} model={input.model}></SelectV1>);
                   } else if (input.type === 'multi-check') {
                     return (<MultiCheckV1 key={input.id} config={input} model={input.model}></MultiCheckV1>);
-                  } else {
-                    console.warn('Unknown type is detected in configs', input);
-                    return (<div>TBD</div>)              }
+                  } else if (input.type === 'date') {
+                    return (<DateV1 key={input.id} config={input} model={input.model}></DateV1>);
+                  }
                 })
               }
             </CardContent>
-          <CardActions disableSpacing>
-            {/* <IconButton aria-label="share">
-              <ShareIcon />
-            </IconButton> */}
+          <CardActions disableSpacing className={classes.btns}>
+            {
+              selectedConfig.inputs.map((input) => {
+                if (input.type === 'select-btns') {
+                  return (<SelectBtnsV1 key={input.id} config={input} model={input.model}></SelectBtnsV1>);
+                }
+              })
+            }
+            <div>
+              {/* <IconButton aria-label="share">
+                <PaymentIcon />
+              </IconButton>
+              <IconButton aria-label="share">
+                <PaymentIcon />
+              </IconButton> */}
+            </div>
           </CardActions>
         </Card>
       </Box>

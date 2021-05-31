@@ -83,7 +83,7 @@ export default function MultiCheckV1({config, model}: IProps) {
   return (
     <div>
       <FormControl className={classes.formControl}>
-        <InputLabel id="multiple-chip-label">Chip</InputLabel>
+        <InputLabel id="multiple-chip-label">{config.name}</InputLabel>
         <Select
           labelId="multiple-chip-label"
           id="multiple-chip"
