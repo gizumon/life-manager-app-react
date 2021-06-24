@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -7,7 +7,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 
-import { IInput, IModel } from '../interfaces';
+import { IInput } from '../interfaces';
 import { Avatar } from '@material-ui/core';
 
 type IProps = {
