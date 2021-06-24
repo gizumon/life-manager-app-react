@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme: Theme) =>
     card: {
       minWidth: 300,
       maxWidth: 450,
-      margin: '25px'
+      margin: '25px 25px 65px 25px',
     },
     btns: {
       padding: '0px',
@@ -206,49 +206,47 @@ export default function Input() {
   }, [formData]);
 
   return (
-    <div style={{ width: '100%' }}>
-      <Box display="flex" justifyContent="center">
-        <Card className={classes.card}>
-          <Tabs
-            variant="fullWidth"
-            value={tabIndex}
-            onChange={onTabChange}
-            aria-label="tabs"
-          >
-            <Tab label={<><PaymentIcon /> Pay</>} {...getTabProps(tabMap.toIndex['pay'])} />
-            <Tab label={<><AssignmentTurnedInIcon /> ToDo</>} {...getTabProps(tabMap.toIndex['todo'])} />
-            <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
-          </Tabs>
-          <CardContent>
-              {
-                isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
-                  if (input.type === 'text') {
-                    return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></InputV1>);
-                  } else if (input.type === 'number') {
-                    return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number"></InputV1>);
-                  } else if (input.type === 'select') {
-                    return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></SelectV1>);
-                  } else if (input.type === 'multi-check') {
-                    return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></MultiCheckV1>);
-                  } else if (input.type === 'date') {
-                    return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></DateV1>);
-                  }
-                })
-              }
-          </CardContent>
-          <CardActions disableSpacing className={classes.btns}>
+    <Box display="flex" justifyContent="center">
+      <Card className={classes.card}>
+        <Tabs
+          variant="fullWidth"
+          value={tabIndex}
+          onChange={onTabChange}
+          aria-label="tabs"
+        >
+          <Tab label={<><PaymentIcon /> Pay</>} {...getTabProps(tabMap.toIndex['pay'])} />
+          <Tab label={<><AssignmentTurnedInIcon /> ToDo</>} {...getTabProps(tabMap.toIndex['todo'])} />
+          <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
+        </Tabs>
+        <CardContent>
             {
               isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
-                if (input.type === 'select-btns') {
-                  return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={onClickTrigger}></SelectBtnsV1>);
+                if (input.type === 'text') {
+                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></InputV1>);
+                } else if (input.type === 'number') {
+                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number"></InputV1>);
+                } else if (input.type === 'select') {
+                  return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></SelectV1>);
+                } else if (input.type === 'multi-check') {
+                  return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></MultiCheckV1>);
+                } else if (input.type === 'date') {
+                  return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></DateV1>);
                 }
               })
             }
-          </CardActions>
-        </Card>
-        <ModalV1 open={isOpenSuccessModal} title='Success!' body={modalBody['success']} onClose={onSuccessModalClose}></ModalV1>
-        <ModalV1 open={isOpenErrorModal} title='Error!' body={modalBody['error']} onClose={onErrorModalClose}></ModalV1>
-      </Box>
-    </div>
+        </CardContent>
+        <CardActions disableSpacing className={classes.btns}>
+          {
+            isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
+              if (input.type === 'select-btns') {
+                return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={onClickTrigger}></SelectBtnsV1>);
+              }
+            })
+          }
+        </CardActions>
+      </Card>
+      <ModalV1 open={isOpenSuccessModal} title='Success!' body={modalBody['success']} onClose={onSuccessModalClose}></ModalV1>
+      <ModalV1 open={isOpenErrorModal} title='Error!' body={modalBody['error']} onClose={onErrorModalClose}></ModalV1>
+    </Box>
   );
 }

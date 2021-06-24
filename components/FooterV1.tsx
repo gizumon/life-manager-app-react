@@ -7,6 +7,7 @@ import ListIcon from '@material-ui/icons/List';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { useRouter } from 'next/router';
 import { IConfigType } from '../interfaces';
+import theme from '../styles/theme';
 
 type INavIndex = 0 | 1 | 2;
 type IUrlType = '/input' | '/view' | '/manage';
@@ -38,21 +39,18 @@ const useStyles = makeStyles({
     width: '100vw',
     bottom: '0px',
     zIndex: 1000,
+    background: theme.palette.grey[50],
   },
 });
 
 function makeUrl(baseUrl: string = '', id: string = '', type: string = ''): string {
   let url = baseUrl;
-  // ①id && type || ②id && !type || ③!id && type || ④!id && !type
   if (id) {
-    // ②
     url += `?id=${id}`;
     if (type) {
-      // ①
       url += `&type=${type}`;
     }
   } else if (type) {
-    // ③
     url += `?type=${type}`;
   }
   return url;
