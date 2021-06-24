@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { IInput } from '../interfaces';
 import { Button, ButtonGroup } from '@material-ui/core';

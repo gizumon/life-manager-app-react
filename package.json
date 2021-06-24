@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@firebase/database": "^0.10.2",
+    "@line/liff": "^2.11.1",
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
     "firebase": "^8.6.3",
