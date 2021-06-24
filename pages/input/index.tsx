@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import createTrigger from "react-use-trigger";
 
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -104,6 +105,7 @@ export default function Input() {
   const [isOpenErrorModal, setIsOpenErrorModal] = React.useState<boolean>(false);
   const [modalBody, setModalBody] = React.useState<{[key in string]: string}>({success: '', error: ''});
   const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+  const onClickTrigger = createTrigger();
 
   const getConfig = (type: IConfigType): IConfig => {
     return configs[tabMap.toIndex[type]] || null;
@@ -132,7 +134,7 @@ export default function Input() {
   };
 
   const isValidConfigType = (type: string) => {
-    return Object.keys(tabMap.toType).map((val) => val).includes(type);
+    return Object.keys(tabMap.toIndex).map((key) => key).includes(type);
   };
 
   const onSuccessModalClose = useCallback(() => {
@@ -147,16 +149,16 @@ export default function Input() {
       setModalBody({success: '', error: ''});
   }, []);
 
-  const sendForm = useCallback(() => {
-    if (selectedType && isValidConfigType(selectedType)) {
-      console.warn('selected id, type is invalid: ', selectedId, selectedType);
+  // onClick submit button
+  onClickTrigger.subscribe(() => {
+    const reqData = processData(formData);
+    const validator = validatorMap[selectedType as IConfigType] as ValidationService;
+    if (!selectedType || !isValidConfigType(selectedType) || !validator) {
+      console.warn('selected id, type is invalid: ', selectedType, isValidConfigType(selectedType), validator);
       setModalBody({error: '更新に失敗しました'});
       setIsOpenErrorModal(true);
       return;
     }
-
-    const reqData = processData(formData);
-    const validator = validatorMap[selectedType as IConfigType] as ValidationService;
     const [isValid, errMsg] = validator.validate(reqData);
     if (isValid) {
       firebaseService.setInput(selectedId, selectedType as IConfigType, reqData).then(() => {
@@ -169,7 +171,7 @@ export default function Input() {
     } else {
       console.warn('unknown error', selectedId, selectedType);
     }
-  }, [formData, selectedId, selectedType]);
+  });
 
   useEffect(() => {
     console.log('Change selected type: ', configs, selectedType);
@@ -238,7 +240,7 @@ export default function Input() {
             {
               isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
                 if (input.type === 'select-btns') {
-                  return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={sendForm}></SelectBtnsV1>);
+                  return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={onClickTrigger}></SelectBtnsV1>);
                 }
               })
             }

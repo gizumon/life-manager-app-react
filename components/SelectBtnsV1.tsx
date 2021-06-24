@@ -1,7 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { IInput } from '../interfaces';
 import { Button, ButtonGroup } from '@material-ui/core';
+import { useToggle } from '../hooks/useToggle';
+import { useUpdateEffect } from '../hooks/useUpdateEffect';
 
 type IProps = {
     config: IInput;
@@ -38,16 +40,22 @@ export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
     // const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     //   setItem(event.target.value as string);
     // };
+    const [isClick, setToggle] = useToggle();
 
     const onClickHandler = (id: string = '') => {
       return () => {
         setProps((prevVal: any, ) => {
           return {...prevVal, [config.id]: id}
         });
-        onClick();
+        setToggle();
       };
     };
-  
+
+    useUpdateEffect(() => {
+      // skip initial render behavior
+      onClick();
+    }, [isClick]);
+
     return (
         <ButtonGroup className={classes.root} variant="contained" color="secondary" aria-label="select-btns">
         {

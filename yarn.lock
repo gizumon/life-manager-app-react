@@ -1865,6 +1865,11 @@ ms@2.1.2:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
+nanoid@^2.0.1:
+  version "2.1.11"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-2.1.11.tgz#ec24b8a758d591561531b4176a01e3ab4f0f0280"
+  integrity sha512-s/snB+WGm6uwi0WjsZdaVcuf3KJXlfGl2LcxgwkEwJF0D/BWzVWAZW/XY4bFaiR7s0Jk3FPvlnepg1H1b1UwlA==
+
 nanoid@^3.1.22:
   version "3.1.23"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.23.tgz#f744086ce7c2bc47ee0a8472574d5c78e4183a81"
@@ -2276,6 +2281,13 @@ react-transition-group@^4.4.0:
     dom-helpers "^5.0.1"
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
+
+react-use-trigger@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/react-use-trigger/-/react-use-trigger-0.3.4.tgz#9399da8de29d5b92be2d50083d4aa783642656c3"
+  integrity sha512-rq7VWreQBNuHu7kDxM/gK7f9ABUlw6yDCtKleXkM48a9RkB6owfg5PjiSbyXHSawScdunIOiiKzWqU/9cv4WCA==
+  dependencies:
+    nanoid "^2.0.1"
 
 react@^17.0.2:
   version "17.0.2"
