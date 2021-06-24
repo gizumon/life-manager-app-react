@@ -1,38 +1,46 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
-// import '../../styles/globals.css';
-// import '../styles/react.css';  // ./src/App.css
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
-import IconButton from '@material-ui/core/IconButton';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 
+import { IConfig, IConfigType, IFormData } from '../../interfaces';
 import InputV1 from '../../components/InputV1';
 import SelectV1 from '../../components/SelectV1';
 import MultiCheckV1 from '../../components/MultiCheckV1';
 import DateV1 from '../../components/DateV1';
-import { IConfig, IPageConfig } from '../../interfaces';
-import CONST from '../../services/CONST';
-import { formatDate } from '../../services/utils';
 import SelectBtnsV1 from '../../components/SelectBtnsV1';
+import ModalV1 from '../../components/ModalV1';
+import { FirebaseService } from '../../services/firebaseService';
+import { ValidationService } from '../../services/validationService';
+import Utils from '../../services/utilsService';
 
 type ITabIndex = 0 | 1 | 2;
-type IInputType = 'pay' | 'todo' | 'tobuy';
-interface ITabMap {
+type ITabMap = {
   toType: {
-    [key in ITabIndex]: IInputType
+    [key in ITabIndex]: IConfigType
   },
   toIndex: {
-    [key in IInputType]: ITabIndex
+    [key in IConfigType]: ITabIndex
+  },
+  toName: {
+    [key in IConfigType]: string
   }
 };
+type IValidMap = {
+  [key in IConfigType]?: string[]
+};
+type IValidatorMap = {
+  [key in IConfigType]?: ValidationService;
+}
 
 const tabMap: ITabMap = {
   toType: {
@@ -44,8 +52,16 @@ const tabMap: ITabMap = {
     pay: 0,
     todo: 1,
     tobuy: 2,
-  }
+  },
+  toName: {
+    pay: '精算',
+    todo: 'ToDoリスト',
+    tobuy: '買い物リスト',
+  },
 }
+
+const validMap: IValidMap = {};
+const validatorMap: IValidatorMap = {};
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -64,207 +80,6 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-// TODO: replace 
-const members = [
-  {
-    id: '1',
-    line_id: 'dummy_1_lineId',
-    name: 'だみー君',
-    picture: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-  },
-  {
-    id: '2',
-    line_id: 'dummy_2_lineId',
-    name: 'てすとちゃん',
-    picture: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-  },
-];
-
-const memberAll = [{
-  id: 'all',
-  line_id: 'dummy_all_lineId',
-  name: '両方',
-  picture: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-}];
-
-const configs: IConfig[] = [
-  {
-    type: 'pay',
-    name: 'pay',
-    icon: 'mdi-account-cash',
-    description: 'お会計を追加してね',
-    inputs: [
-      {
-        id: 'price',
-        name: '金額',
-        type: 'number',
-        placeholder: 'ex) 2,000',
-        icon: 'mdi-cash-100',
-        model: null,
-        validates: [
-          {
-            type: 'isNotNull',
-          },
-          {
-            type: 'isLower',
-            args: [10],
-          },
-        ],
-      },
-      {
-        id: 'payedFor',
-        name: '誰の',
-        type: 'multi-check',
-        placeholder: '-- だれの --',
-        icon: 'mdi-account-circle',
-        model: members || [], // TODO: mounted default person
-        validates: [
-          {
-            type: 'isNotNull',
-          },
-        ],
-        dataList: members || [],
-      },
-      {
-        id: 'category',
-        name: 'カテゴリ',
-        type: 'select',
-        placeholder: '-- カテゴリ --',
-        icon: 'mdi-help-box',
-        model: 'none',
-        validates: [],
-        dataList: CONST.category,
-      },
-      {
-        id: 'memo',
-        name: '備考',
-        type: 'text',
-        placeholder: 'ex) コンビニ',
-        icon: 'mdi-tooltip-edit',
-        model: null,
-        validates: [],
-        args: [],
-      },
-      {
-        id: 'payedBy',
-        name: '支払ってくれた人',
-        type: 'select-btns',
-        placeholder: '',
-        icon: 'mdi-account-circle',
-        model: '',
-        validates: [],
-        args: [],
-        dataList: members || [],
-      },
-    ],
-  },
-  {
-    type: 'todo',
-    name: 'todo',
-    icon: 'mdi-calendar-check',
-    description: 'ToDoを追加してね',
-    inputs: [
-      {
-        id: 'task',
-        name: 'タスク',
-        type: 'text',
-        placeholder: 'ex) ごみ捨て',
-        icon: 'mdi-checkbox-marked',
-        model: '',
-        validates: [
-          {
-            type: 'iNotNull',
-          },
-          {
-            type: 'isLower',
-            args: [100],
-          },
-        ],
-        args: [],
-      },
-      {
-        id: 'dueDate',
-        name: '期限',
-        type: 'date',
-        placeholder: '2021/XX/XX',
-        icon: 'mdi-calendar-clock',
-        model: formatDate(new Date()),
-        validates: [
-          {
-            type: 'isDate',
-          },
-        ],
-        args: [],
-      },
-      {
-        id: 'doBy',
-        name: '担当',
-        type: 'select-btns',
-        placeholder: '',
-        icon: 'mdi-account-circle',
-        model: '',
-        validates: [],
-        args: [],
-        dataList: members.concat(memberAll) || [],
-      },
-    ],
-  },
-  {
-    type: 'tobuy',
-    name: 'tobuy',
-    icon: 'mdi-cart-plus',
-    description: '買う物リストを追加してね',
-    inputs: [
-      {
-        id: 'task',
-        name: 'タスク',
-        type: 'text',
-        placeholder: 'ex) しめじ',
-        icon: 'mdi-checkbox-marked',
-        model: '',
-        validates: [
-          {
-            type: 'iNotNull',
-          },
-          {
-            type: 'isLower',
-            args: [100],
-          },
-        ],
-        args: [],
-      },
-      {
-        id: 'dueDate',
-        name: '期限',
-        type: 'date',
-        placeholder: '2021/XX/XX',
-        icon: 'mdi-calendar-clock',
-        model: formatDate(new Date()),
-        validates: [
-          {
-            type: 'isDate',
-          },
-        ],
-        args: [],
-      },
-      {
-        id: 'doBy',
-        name: '担当',
-        type: 'select-btns',
-        placeholder: '',
-        icon: 'mdi-account-circle',
-        model: '',
-        validates: [],
-        args: [],
-        dataList: members || [],
-      },
-    ]
-  },
-];
-
-let id: string | undefined;
-let type: IInputType | undefined;
-
 function getTabProps(index: number) {
   return {
     id: `vertical-tab-${index}`,
@@ -272,29 +87,122 @@ function getTabProps(index: number) {
   };
 }
 
-const Input = () => {
-  const router = useRouter();
-  id = router.query.id as string | undefined;
-  type = router.query.type as IInputType | undefined;
-  const pageConfig: IPageConfig = {
-    valid: false,
-    selectedId: id,
-    selectedType: type,
-    configs: configs,
-  };
-  console.log(pageConfig);
-  // selectedConfig = pageConfig.configs.find((config) => config.type === type) || configs[tabMap.toIndex['pay']];
-
+export default function Input() {
   const classes = useStyles();
-  const [tabIndex, setTabIndex] = React.useState(type === undefined ? 0 : tabMap.toIndex[type] as ITabIndex);
-  const [selectedConfig, setSelectedConfig] = React.useState(pageConfig.configs.find((config) => config.type === type) || configs[tabMap.toIndex['pay']]);
+  const router = useRouter();
+  const firebaseService = new FirebaseService();
+  // to avoid Next bugs
+  const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id');
+  const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
 
-  const onTabChange = (_: React.ChangeEvent<{}>, newValue: ITabIndex) => {
-    setTabIndex(newValue);
-    setSelectedConfig(pageConfig.configs.find((config) => config.type === tabMap.toType[newValue]) || configs[tabMap.toIndex['pay']]);
+  const [tabIndex, setTabIndex] = React.useState<ITabIndex>(tabMap.toIndex[selectedType as IConfigType] || tabMap.toIndex['pay']);
+  console.log('default tab index: ', tabIndex);
+  const [configs, setConfigs] = React.useState<IConfig[]>([]);
+  // const [selectedConfig, setSelectedConfig] = React.useState<IConfig>();
+  const [formData, setFormData] = React.useState<IFormData>({});
+  const [isOpenSuccessModal, setIsOpenSuccessModal] = React.useState<boolean>(false);
+  const [isOpenErrorModal, setIsOpenErrorModal] = React.useState<boolean>(false);
+  const [modalBody, setModalBody] = React.useState<{[key in string]: string}>({success: '', error: ''});
+  const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+
+  const getConfig = (type: IConfigType): IConfig => {
+    return configs[tabMap.toIndex[type]] || null;
   };
 
-  console.log('request type: ', type, selectedConfig);
+  const onTabChange = useCallback((_: React.ChangeEvent<{}>, index: ITabIndex) => {
+    setTabIndex(index);
+    router.push(`/input?id=${selectedId}&type=${tabMap.toType[index]}`, undefined, {shallow: true});
+  }, []);
+  
+  const processData = (data: IFormData = {}): IFormData => {
+    let processedData: IFormData = {};
+    validMap[selectedType as IConfigType]?.forEach((id) => {
+      if (data.hasOwnProperty(id)) {
+        processedData[id] = data[id] || null;
+      }
+    });
+    return processedData;
+  };
+
+  const makeDefaultFormData = (configs: IConfig[]): IFormData => {
+    const data: IFormData = {};
+    configs.forEach(config => config.inputs.forEach((input) => data[input.id] = input.model));
+    console.log('!!!make default form data:', data);
+    return data;
+  };
+
+  const isValidConfigType = (type: string) => {
+    return Object.keys(tabMap.toType).map((val) => val).includes(type);
+  };
+
+  const onSuccessModalClose = useCallback(() => {
+      setIsOpenSuccessModal(false);
+      setModalBody({success: '', error: ''});
+      setFormData(makeDefaultFormData(configs));
+      console.log('on close', configs);
+  }, [configs]);
+
+  const onErrorModalClose = useCallback(() => {
+      setIsOpenErrorModal(false);
+      setModalBody({success: '', error: ''});
+  }, []);
+
+  const sendForm = useCallback(() => {
+    if (selectedType && isValidConfigType(selectedType)) {
+      console.warn('selected id, type is invalid: ', selectedId, selectedType);
+      setModalBody({error: '更新に失敗しました'});
+      setIsOpenErrorModal(true);
+      return;
+    }
+
+    const reqData = processData(formData);
+    const validator = validatorMap[selectedType as IConfigType] as ValidationService;
+    const [isValid, errMsg] = validator.validate(reqData);
+    if (isValid) {
+      firebaseService.setInput(selectedId, selectedType as IConfigType, reqData).then(() => {
+        setModalBody({success: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`});
+        setIsOpenSuccessModal(true);
+      });
+    } else if (!isValid) {
+      setModalBody({error: errMsg || '更新に失敗しました (エラー文言の生成に失敗)'});
+      setIsOpenErrorModal(true);
+    } else {
+      console.warn('unknown error', selectedId, selectedType);
+    }
+  }, [formData, selectedId, selectedType]);
+
+  useEffect(() => {
+    console.log('Change selected type: ', configs, selectedType);
+    if (configs.length > 0) {
+      // Already initialized
+    } else {
+      firebaseService.initialize().then(() => {
+        const members = firebaseService.members; // TODO: Get from line login
+        setConfigs(firebaseService.makePageConfigs(firebaseService.configs, firebaseService.categories, members));
+        // firebaseService.getInputs().then((dataList) => console.log('inputs items:', dataList));
+      });
+    }
+  }, [selectedType]);
+
+  useEffect(() => {
+    if (configs.length > 0) {
+      Object.keys(tabMap.toIndex).forEach((type: string) => {
+        validMap[type as IConfigType] = getConfig(type as IConfigType).inputs.map(input => input.id);
+      });
+      Object.keys(tabMap.toIndex).forEach((type: string) => {
+        validatorMap[type as IConfigType] = new ValidationService(getConfig(type as IConfigType));
+      });
+      setFormData(makeDefaultFormData(configs));
+      setIsInitialized(true);      }
+  }, [configs]);
+
+  useEffect(() => {
+    console.log('after set form data', formData);
+    return () => {
+      console.log('before set form data', formData);
+    }
+  }, [formData]);
+
   return (
     <div style={{ width: '100%' }}>
       <Box display="flex" justifyContent="center">
@@ -303,52 +211,42 @@ const Input = () => {
             variant="fullWidth"
             value={tabIndex}
             onChange={onTabChange}
-            aria-label="nav tabs"
+            aria-label="tabs"
           >
             <Tab label={<><PaymentIcon /> Pay</>} {...getTabProps(tabMap.toIndex['pay'])} />
             <Tab label={<><AssignmentTurnedInIcon /> ToDo</>} {...getTabProps(tabMap.toIndex['todo'])} />
             <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
           </Tabs>
-          {/* <TabPanel value={value} index={0}></TabPanel>
-          <TabPanel value={value} index={1}></TabPanel>
-          <TabPanel value={value} index={2}></TabPanel> */}
           <CardContent>
               {
-                selectedConfig.inputs.map((input) => {
-                  console.log('loop in inputs', input);
-                  if (input.type === 'number' || input.type === 'text') {
-                    return (<InputV1 key={input.id} config={input} model={input.model}></InputV1>);
+                isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
+                  if (input.type === 'text') {
+                    return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></InputV1>);
+                  } else if (input.type === 'number') {
+                    return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number"></InputV1>);
                   } else if (input.type === 'select') {
-                    return (<SelectV1 key={input.id} config={input} model={input.model}></SelectV1>);
+                    return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></SelectV1>);
                   } else if (input.type === 'multi-check') {
-                    return (<MultiCheckV1 key={input.id} config={input} model={input.model}></MultiCheckV1>);
+                    return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></MultiCheckV1>);
                   } else if (input.type === 'date') {
-                    return (<DateV1 key={input.id} config={input} model={input.model}></DateV1>);
+                    return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></DateV1>);
                   }
                 })
               }
-            </CardContent>
+          </CardContent>
           <CardActions disableSpacing className={classes.btns}>
             {
-              selectedConfig.inputs.map((input) => {
+              isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
                 if (input.type === 'select-btns') {
-                  return (<SelectBtnsV1 key={input.id} config={input} model={input.model}></SelectBtnsV1>);
+                  return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={sendForm}></SelectBtnsV1>);
                 }
               })
             }
-            <div>
-              {/* <IconButton aria-label="share">
-                <PaymentIcon />
-              </IconButton>
-              <IconButton aria-label="share">
-                <PaymentIcon />
-              </IconButton> */}
-            </div>
           </CardActions>
         </Card>
+        <ModalV1 open={isOpenSuccessModal} title='Success!' body={modalBody['success']} onClose={onSuccessModalClose}></ModalV1>
+        <ModalV1 open={isOpenErrorModal} title='Error!' body={modalBody['error']} onClose={onErrorModalClose}></ModalV1>
       </Box>
     </div>
   );
 }
-
-export default Input;

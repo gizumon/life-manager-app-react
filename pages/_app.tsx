@@ -5,6 +5,7 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from '../styles/theme';
 import FooterV1 from '../components/FooterV1';
+// import { FirebaseService } from '../services/firebaseService';
 export default function MyApp(props: any) {
   const { Component, pageProps } = props;
 
@@ -19,7 +20,7 @@ export default function MyApp(props: any) {
   return (
     <React.Fragment>
       <Head>
-        <title>🏠Life Manager🏠</title>
+        <title>LifeManager🏠</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
       </Head>
       <ThemeProvider theme={theme}>

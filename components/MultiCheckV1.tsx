@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -8,10 +8,12 @@ import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 
 import { IInput, IModel } from '../interfaces';
+import { Avatar } from '@material-ui/core';
 
 type IProps = {
     config: IInput;
-    model: IModel[];
+    model: string[];
+    setProps: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -46,39 +48,30 @@ const MenuProps = {
   },
 };
 
-// function getStyles(name: string, personName: string[], theme: Theme) {
-//   return {
-//     fontWeight:
-//       personName.indexOf(name) === -1
-//         ? theme.typography.fontWeightRegular
-//         : theme.typography.fontWeightMedium,
-//   };
-// }
-export default function MultiCheckV1({config, model}: IProps) {
+export default function MultiCheckV1({config, model = [], setProps}: IProps) {
   const classes = useStyles();
   const theme = useTheme();
-  console.log('!!!', config, model);
-  const [ids, setIds] = React.useState([] as string[]);
-  // const [ids, setIds] = React.useState(model.map((data) => data.id) || []);
+  // const [ids, setIds] = React.useState(model);
   const dataList = config.dataList || [];
 
+  const handleChangeMultiple = (event: React.ChangeEvent<{ value: unknown }>) => {
+    console.log('on change: ', event);
+    const options = event.target;
+    // setIds(options.value as string[]);
+    setProps((prevVal: any) => {
+      return {...prevVal, [config.id]: options.value}
+    });
+  };
 
-  // const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-  //   setIds([event.target.value]);
+  // const handleDelete = () => {
+
   // };
 
-  const handleChangeMultiple = (event: React.ChangeEvent<{ value: unknown }>) => {
-    console.log('event', event);
-    const options = event.target;
-    // const ids: string[] = [];
-    // console.log('options', options, 'target', event.target);
-    // for (let i = 0, l = options.length; i < l; i += 1) {
-    //   if (options[i].selected) {
-    //     ids.push(options[i].value);
-    //   }
-    // }
-    setIds(options.value as string[]);
-  };
+  // useEffect(() => {
+  //   setProps((prevVal: any) => {
+  //     return {...prevVal, [config.id]: ids}
+  //   });
+  // }, [ids]);
 
   return (
     <div>
@@ -88,19 +81,27 @@ export default function MultiCheckV1({config, model}: IProps) {
           labelId="multiple-chip-label"
           id="multiple-chip"
           multiple
-          value={ids}
+          value={model}
           onChange={handleChangeMultiple}
           input={<Input id="select-multiple-chip" />}
           renderValue={(selected) => (
             <div className={classes.chips}>
               {(selected as string[]).map((id) => (
                 <Chip key={id} label={
-                  config.dataList?.find((data) => {
-                    if (data.id === id) {
-                      return data.name;
-                    }
-                  })
-                } className={classes.chip} />
+                    config.dataList?.find((data) => {
+                      if (data.id === id) {
+                        return data.name;
+                      }
+                    })?.name
+                  }
+                  className={classes.chip}
+                  // onDelete={handleDelete}
+                  avatar={<Avatar src={
+                    config.dataList?.find((data) => {
+                      if (data.id === id) { return data.picture; }
+                    })?.picture}
+                  />}
+                />
               ))}
             </div>
           )}

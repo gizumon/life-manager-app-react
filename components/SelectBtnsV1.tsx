@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { IInput } from '../interfaces';
 import { Button, ButtonGroup } from '@material-ui/core';
 
 type IProps = {
     config: IInput;
-    model: String;
+    setProps: React.Dispatch<React.SetStateAction<any>>;
+    onClick: {
+      (): void;
+    };
 }
 
 // TODO: Need to fix the layout when there are over 4 items cases
@@ -27,13 +30,23 @@ const useStyles = makeStyles((_: Theme) =>
   }),
 );
 
-export default function SelectBtnsV1({config, model}: IProps) {
+// TODO: Need to control onClick values
+export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
     const classes = useStyles();
     // const [item, setItem] = React.useState(model);
   
     // const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     //   setItem(event.target.value as string);
     // };
+
+    const onClickHandler = (id: string = '') => {
+      return () => {
+        setProps((prevVal: any, ) => {
+          return {...prevVal, [config.id]: id}
+        });
+        onClick();
+      };
+    };
   
     return (
         <ButtonGroup className={classes.root} variant="contained" color="secondary" aria-label="select-btns">
@@ -44,7 +57,7 @@ export default function SelectBtnsV1({config, model}: IProps) {
                         value={data.id}
                         key={data.id}
                         className={classes.btn + ' ellipsis'}
-                        onClick={(test) => {console.log('!!!ON CLICK:', test)}}
+                        onClick={onClickHandler(data.id)}
                     >{data.name}</Button>
                 );
             })

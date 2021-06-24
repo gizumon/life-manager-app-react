@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -10,6 +10,7 @@ import { IInput } from '../interfaces';
 type IProps = {
     config: IInput;
     model: String;
+    setProps: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -21,13 +22,24 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-export default function SelectV1({config, model}: IProps) {
+export default function SelectV1({config, model, setProps}: IProps) {
   const classes = useStyles();
-  const [item, setItem] = React.useState(model);
+  // const [state, setState] = React.useState(model);
+  console.log('Select: ', model);
 
-  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setItem(event.target.value as string);
-  };
+  const handleChange = useCallback((event: React.ChangeEvent<{ value: unknown }>) => {
+    // setState(event.target.value as string);
+    setProps((prevVal: any) => {
+      console.log('handle change:', prevVal, event.target.value)
+      return {...prevVal, [config.id]: event.target.value}
+    });
+  }, []);
+
+  // useEffect(() => {
+  //   setProps((prevVal: any) => {
+  //     return {...prevVal, [config.id]: state}
+  //   });
+  // }, [state]);
 
   return (
     <div>
@@ -36,7 +48,7 @@ export default function SelectV1({config, model}: IProps) {
         <Select
           labelId="demo-simple-select-outlined-label"
           id="demo-simple-select-outlined"
-          value={item}
+          value={model}
           onChange={handleChange}
           label={config.name}
           margin="dense"

@@ -19,18 +19,18 @@ import InputV1 from '../../components/InputV1';
 import SelectV1 from '../../components/SelectV1';
 import MultiCheckV1 from '../../components/MultiCheckV1';
 import { IConfig } from '../../interfaces';
-import CONST from '../../services/CONST';
+import CONST from '../../services/constService';
 import { ClassNameMap } from '@material-ui/styles';
 
 type Props = IConfig;
 type ITabIndex = 0 | 1 | 2;
-type IInputType = 'pay' | 'todo' | 'tobuy';
+type IPageType = 'pay' | 'todo' | 'tobuy';
 interface ITabMap {
   toType: {
-    [key in ITabIndex]: IInputType
+    [key in ITabIndex]: IPageType
   },
   toIndex: {
-    [key in IInputType]: ITabIndex
+    [key in IPageType]: ITabIndex
   }
 };
 interface IState {}
@@ -90,14 +90,14 @@ const configs: IConfig[] = [
         dataList: members || [],
       },
       {
-        id: 'category',
+        id: 'payedCategory',
         name: 'カテゴリ',
         type: 'select-btns',
         placeholder: '-- カテゴリ --',
         icon: 'mdi-help-box',
         model: 'none',
         validates: [],
-        dataList: CONST.category,
+        dataList: CONST.payedCategories,
       },
       {
         id: 'memo',
@@ -228,7 +228,7 @@ const configs: IConfig[] = [
 // class component style
 class InputComponent extends Component<Props, IState> {
   id: string | undefined;  
-  type: IInputType | undefined;
+  type: IPageType | undefined;
   useStyles: (props?: any) => ClassNameMap<"root" | "card">;
   selectedConfig: IConfig | undefined;
   classes: ClassNameMap<any> | undefined;
@@ -264,7 +264,7 @@ class InputComponent extends Component<Props, IState> {
   initialize() {
     const router = useRouter();
     this.id = router.query.id as string | undefined;
-    this.type = router.query.type as IInputType | undefined;
+    this.type = router.query.type as IPageType | undefined;
     this.selectedConfig = configs.find((config) => config.type === this.type) || configs[this.tabMap.toIndex['pay']];
   
     this.classes = this.useStyles();
@@ -329,7 +329,7 @@ class InputComponent extends Component<Props, IState> {
 // const Input = () => {
 //   const router = useRouter();
 //   id = router.query.id as string | undefined;
-//   type = router.query.type as IInputType | undefined;
+//   type = router.query.type as IPageType | undefined;
 //   const pageConfig: IPageConfig = {
 //     valid: false,
 //     selectedId: id,

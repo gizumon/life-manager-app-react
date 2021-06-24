@@ -4,11 +4,44 @@
 //
 // import { User } from 'path/to/interfaces';
 
-export interface IValidate {
+/**
+ * Category
+ */
+export type categoryType = 'pay' | 'tobuy'; 
+export interface ICategory {
+    id: string;
+    name: string;
     type: string;
+    setting?: IRatioSetting[];
+};
+
+export interface IRatioSetting {
+    memberId: String;
+    ratio: Number;
+};
+
+/**
+ * Config
+ */
+export type IConfigType = 'pay' | 'todo' | 'tobuy';
+export type IInputType = 'number' | 'text' | 'date' | 'select' | 'multi-check' | 'select-btns';
+
+export interface IMember {
+    id: string;
+    lineId?: string;
+    name: string;
+    picture?: string;
+    groupId?: string; 
+}
+
+export type IValidatorType = 'isNotNull' | 'isEqual' | 'isLT' | 'isLE' | 'isGT' | 'isGE' | 'isBTW'
+                           | 'isNumber' | 'isString' | 'isDate' | 'isInclude' | 'isIncludeAll';
+
+export interface IValidate {
+    type: IValidatorType;
     args?: any[];
 }
-  
+
 export interface IModel {
     id?: string;
     line_id?: string;
@@ -20,17 +53,18 @@ export interface IModel {
 export interface IInput {
     id: string;
     name: string;
-    type: string;
+    type: IInputType;
     placeholder: string;
     icon: string;
-    model: IModel | any;
+    model: any;
+    // model: IModel | IModel[] | any;
     validates: IValidate[];
     args?: [];
     dataList?: IModel[];
 }
 
 export interface IConfig {
-    type: string;
+    type: IConfigType;
     name: string;
     icon: string;
     description: string;
@@ -42,4 +76,11 @@ export interface IPageConfig {
    selectedId: string | undefined;
    selectedType: string | undefined;
    configs: IConfig[]; 
+}
+
+/**
+ * IFormData
+ */
+export interface IFormData {
+    [key: string]: any;
 }
