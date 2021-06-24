@@ -1,7 +1,7 @@
 import CONST from './constService';
 import firebase from 'firebase/app';
 import 'firebase/database';
-import { IConfig, ICategory, IMember, IInput, IFormData, IInputType, IConfigType } from '../interfaces/index';
+import { IConfig, ICategory, IMember, IFormData, IConfigType } from '../interfaces/index';
 import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from './utilsService';
 
