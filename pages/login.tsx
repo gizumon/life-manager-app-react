@@ -1,12 +1,10 @@
-import LiffService from '../services/liffService';
+import styles from '../styles/Home.module.css'
 
 export default function Login() {
-  const config = {liffId: '1655623367-dEnwWVRZ'};
-  const liffService = new LiffService(config);
 
-  console.log(liffService);
   return (
-    <div>
+    <div className={styles.container}>
+      <h1>Login...</h1>
     </div>
   );
 }

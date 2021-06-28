@@ -23,6 +23,7 @@ import ModalV1 from '../../components/ModalV1';
 import { FirebaseService } from '../../services/firebaseService';
 import { ValidationService } from '../../services/validationService';
 import Utils from '../../services/utilsService';
+import { useUserState } from '../../ducks/user/selector';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -91,6 +92,8 @@ function getTabProps(index: number) {
 export default function Input() {
   const classes = useStyles();
   const router = useRouter();
+  const user = useUserState().user;
+  console.log('!!!!user :', user);
   const firebaseService = new FirebaseService();
   // to avoid Next bugs
   const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id');
@@ -113,6 +116,7 @@ export default function Input() {
 
   const onTabChange = useCallback((_: React.ChangeEvent<{}>, index: ITabIndex) => {
     setTabIndex(index);
+    console.log('!!!!user :', user);
     router.push(`/input?id=${selectedId}&type=${tabMap.toType[index]}`, undefined, {shallow: true});
   }, []);
   
