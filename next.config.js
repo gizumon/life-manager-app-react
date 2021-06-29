@@ -16,8 +16,8 @@ module.exports = {
             : isProd ? 'https://life-manager-app.herokuapp.com'
             : '',
     LIFF_ID : process.env.LIFF_ID
-            || isDev ? '1655623367-dEnwWVRZ'
-            : isProd ? '' // should define in environment process
+            || isDev ? '1655623367-ld4PDzpX'
+            : isProd ? '1655623367-dEnwWVRZ' // should define in environment process
             : '',
     FIREBASE_API_KEY: process.env.FIREBASE_API_KEY
                     || isDev ? 'AIzaSyABK5jEgFuu6rf6oG_1dhGcQKQxu0IzhQE'
