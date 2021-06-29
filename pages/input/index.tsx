@@ -168,6 +168,14 @@ export default function Input() {
       firebaseService.setInput(selectedId, selectedType as IConfigType, reqData).then(() => {
         setModalBody({success: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`});
         setIsOpenSuccessModal(true);
+        if (user.messageSender) {
+          user.messageSender([
+            {
+              type: 'text',
+              text: 'Hello, World!'
+            }
+          ]).then((res) => console.log(res)).catch(e => console.log(e));
+        }
       });
     } else if (!isValid) {
       setModalBody({error: errMsg || '更新に失敗しました (エラー文言の生成に失敗)'});

@@ -1,3 +1,4 @@
+import { SendMessagesParams } from '@line/liff/dist/lib/api/sendMessages';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type UserState = {
@@ -5,7 +6,7 @@ export type UserState = {
   displayName: string;
   pictureUrl: string;
   statusMessage: string;
-  messageSender?: () => any;
+  messageSender?: (params: SendMessagesParams) => Promise<void>;
 };
 
 export const initialState: UserState = {

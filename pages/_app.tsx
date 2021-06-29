@@ -12,6 +12,8 @@ import { Provider } from 'react-redux';
 import { useDispatch } from 'react-redux';
 // import { FirebaseService } from '../services/firebaseService';
 import { useRouter } from 'next/router';
+import userSlice from '../ducks/user/slice';
+import { UserState } from '../ducks/user/slice';
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
@@ -68,7 +70,9 @@ const Layout: FC = ({ children }) => {
   }
 
   const dispatch = useDispatch();
-  dispatch(liff?.getProfile());
+  liff?.getProfile().then(user => {
+    dispatch(userSlice.actions.setUser({...user, messageSender: liff.sendMessages} as UserState));
+  });
 
   return (
     <>{children}</>
