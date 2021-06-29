@@ -1,0 +1,21 @@
+version: '3'
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./:/usr/src/app
+    command: sh -c "yarn dev"
+    ports:
+      - "3000:3000"
+  nginx:
+    image: nginx:latest
+    volumes:
+      - "./docker/nginx/confs:/etc/nginx/conf.d"
+      - "./docker/nginx/certs:/etc/nginx/ssl"
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - webapp

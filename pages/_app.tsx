@@ -39,9 +39,9 @@ const Layout: FC = ({ children }) => {
   const classes = useStyles();
   const router = useRouter();
   const { initialized, loggedIn, login, liff } = useAuth();
-  // const redirectUri = process.env.ROOT_URL + router.asPath;
-  const redirectUri = process.env.ROOT_URL + '/';
-  console.log('Layout redirect uri: ', redirectUri);
+  const redirectUri = process.env.ROOT_URL + router.asPath;
+  // const redirectUri = process.env.ROOT_URL + '/';
+  // console.log('Layout redirect uri: ', redirectUri);
 
   if (!initialized) {
     return <CircularProgress size="50"/>

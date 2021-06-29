@@ -12,7 +12,7 @@ console.log(`Run on ${isDev ? 'DEV' : isProd ? 'PROD' : 'UNKNOWN'} environment..
 module.exports = {
   env: {
     ROOT_URL: process.env.ROOT_URL
-            || isDev ? 'http://localhost:3000'
+            || isDev ? 'https://localhost'
             : isProd ? 'https://life-manager-app.herokuapp.com'
             : '',
     LIFF_ID : process.env.LIFF_ID

@@ -1,4 +1,3 @@
-import { Link } from '@material-ui/core'
 import styles from '../styles/Home.module.css'
 
 export default function Home() {
