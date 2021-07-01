@@ -36,8 +36,8 @@ export const AuthProvider: FC = ({ children }) => {
 }
 
 type UseAuthReturn = {
-  initialized: boolean;
-  loggedIn: boolean;
+  isInitialized: boolean;
+  isLoggedIn: boolean;
   userId?: string;
   login: (obj?: {redirectUri: string}) => void;
   liff?: typeof Liff;
@@ -48,15 +48,15 @@ export const useAuth = (): UseAuthReturn => {
 
   if (!liff) {
     return {
-      initialized: false,
-      loggedIn: false,
+      isInitialized: false,
+      isLoggedIn: false,
       login: () => {},
     };
   }
 
   return {
-    initialized: true,
-    loggedIn: liff.isLoggedIn(),
+    isInitialized: true,
+    isLoggedIn: liff.isLoggedIn(),
     login: liff.login,
     userId: liff.getContext()?.userId,
     liff: liff,

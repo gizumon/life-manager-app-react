@@ -80,7 +80,7 @@ export class FirebaseService {
               id: '1',
               lineId: 'dummy_1_lineId',
               name: 'Tomoatsu',
-              picture: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
+              picture: 'https://profile.line-scdn.net/0hknDp_4O4NEF5CSIv6TlLFkVMOiwOJzIJAW0pd1gAbiNQOHUXEGZ6cFsJOHcDO3AfEWosJFsLbnVW',
               groupId: 'dummy_group_1'
             },
             {

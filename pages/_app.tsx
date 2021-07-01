@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import userSlice from '../ducks/user/slice';
 import { UserState } from '../ducks/user/slice';
+import { useFirebase, FirebaseProvider } from '../hooks/useFirebase';
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
@@ -40,16 +41,16 @@ const useStyles = makeStyles((_: Theme) =>
 const Layout: FC = ({ children }) => {
   const classes = useStyles();
   const router = useRouter();
-  const { initialized, loggedIn, login, liff } = useAuth();
+  // const { isInitialized, isLoggedIn, login, liff } = useAuth();
+  const liff = useAuth();
+  const firebase = useFirebase();
   const redirectUri = process.env.ROOT_URL + router.asPath;
-  // const redirectUri = process.env.ROOT_URL + '/';
-  // console.log('Layout redirect uri: ', redirectUri);
 
-  if (!initialized) {
-    return <CircularProgress size="50"/>
+  if (!liff.isInitialized) {
+    return <div>TEST</div>
   }
 
-  if (!loggedIn) {
+  if (!liff.isLoggedIn) {
     return (
       <div className={classes.root}>
           <CardMedia
@@ -62,7 +63,7 @@ const Layout: FC = ({ children }) => {
               className={classes.btn}
               size="large"
               variant="contained"
-              onClick={() => login({redirectUri: redirectUri})}
+              onClick={() => liff.login({redirectUri: redirectUri})}
             >LOGIN</Button>
           </CardMedia>
       </div>
@@ -70,9 +71,12 @@ const Layout: FC = ({ children }) => {
   }
 
   const dispatch = useDispatch();
-  liff?.getProfile().then(user => {
-    dispatch(userSlice.actions.setUser({...user, messageSender: liff.sendMessages} as UserState));
-  });
+  liff.liff?.getProfile().then(user => dispatch(userSlice.actions.setUser(user as UserState)));
+
+  if (!firebase.isInitialized) {
+    return <div>TEST</div>
+    // <CircularProgress size="50"/>
+  }
 
   return (
     <>{children}</>
@@ -97,16 +101,18 @@ export default function MyApp(props: any) {
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
       </Head>
       <AuthProvider>
-        <Provider store={createStore()}>
-          <Layout>
-            <ThemeProvider theme={theme}>
-              {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-              <CssBaseline />
-              <Component {...pageProps} />
-              <FooterV1></FooterV1>
-            </ThemeProvider>
-          </Layout>
-        </Provider>
+        <FirebaseProvider>
+          <Provider store={createStore()}>
+            <Layout>
+              <ThemeProvider theme={theme}>
+                {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+                <CssBaseline />
+                <Component {...pageProps} />
+                <FooterV1></FooterV1>
+              </ThemeProvider>
+            </Layout>
+          </Provider>          
+        </FirebaseProvider>
       </AuthProvider>
     </React.Fragment>
   );

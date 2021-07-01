@@ -24,6 +24,7 @@ import { FirebaseService } from '../../services/firebaseService';
 import { ValidationService } from '../../services/validationService';
 import Utils from '../../services/utilsService';
 import { useUserState } from '../../ducks/user/selector';
+import { useFirebase } from '../../hooks/useFirebase';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -92,8 +93,9 @@ function getTabProps(index: number) {
 export default function Input() {
   const classes = useStyles();
   const router = useRouter();
-  const user = useUserState().user;
-  console.log('!!!!user :', user);
+  // const user = useUserState().user;
+  // console.log('!!!!user :', user);
+  const { configs, pushInput } = useFirebase();
   const firebaseService = new FirebaseService();
   // to avoid Next bugs
   const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id');
@@ -101,7 +103,6 @@ export default function Input() {
 
   const [tabIndex, setTabIndex] = React.useState<ITabIndex>(tabMap.toIndex[selectedType as IConfigType] || tabMap.toIndex['pay']);
   console.log('default tab index: ', tabIndex);
-  const [configs, setConfigs] = React.useState<IConfig[]>([]);
   // const [selectedConfig, setSelectedConfig] = React.useState<IConfig>();
   const [formData, setFormData] = React.useState<IFormData>({});
   const [isOpenSuccessModal, setIsOpenSuccessModal] = React.useState<boolean>(false);
@@ -116,7 +117,7 @@ export default function Input() {
 
   const onTabChange = useCallback((_: React.ChangeEvent<{}>, index: ITabIndex) => {
     setTabIndex(index);
-    console.log('!!!!user :', user);
+    // console.log('!!!!user :', user);
     router.push(`/input?id=${selectedId}&type=${tabMap.toType[index]}`, undefined, {shallow: true});
   }, []);
   
@@ -165,17 +166,18 @@ export default function Input() {
     }
     const [isValid, errMsg] = validator.validate(reqData);
     if (isValid) {
-      firebaseService.setInput(selectedId, selectedType as IConfigType, reqData).then(() => {
+      pushInput(selectedId, selectedType as IConfigType, reqData).then(() => {
+      // firebaseService.setInput(selectedId, selectedType as IConfigType, reqData).then(() => {
         setModalBody({success: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`});
         setIsOpenSuccessModal(true);
-        if (user.messageSender) {
-          user.messageSender([
-            {
-              type: 'text',
-              text: 'Hello, World!'
-            }
-          ]).then((res) => console.log(res)).catch(e => console.log(e));
-        }
+        // if (user?.messageSender) {
+        //   user.messageSender([
+        //     {
+        //       type: 'text',
+        //       text: 'Hello, World!'
+        //     }
+        //   ]).then((res) => console.log(res)).catch(e => console.log(e));
+        // }
       });
     } else if (!isValid) {
       setModalBody({error: errMsg || '更新に失敗しました (エラー文言の生成に失敗)'});
@@ -190,11 +192,12 @@ export default function Input() {
     if (configs.length > 0) {
       // Already initialized
     } else {
-      firebaseService.initialize().then(() => {
-        const members = firebaseService.members; // TODO: Get from line login
-        setConfigs(firebaseService.makePageConfigs(firebaseService.configs, firebaseService.categories, members));
-        // firebaseService.getInputs().then((dataList) => console.log('inputs items:', dataList));
-      });
+      // firebaseService.initialize().then(() => {
+      //   const members = firebaseService.members; // TODO: Get from line login
+      //   setConfigs(firebaseService.makePageConfigs(firebaseService.configs, firebaseService.categories, members));
+      //   // firebaseService.getInputs().then((dataList) => console.log('inputs items:', dataList));
+      // });
+
     }
   }, [selectedType]);
 
@@ -207,7 +210,8 @@ export default function Input() {
         validatorMap[type as IConfigType] = new ValidationService(getConfig(type as IConfigType));
       });
       setFormData(makeDefaultFormData(configs));
-      setIsInitialized(true);      }
+      setIsInitialized(true);
+      }
   }, [configs]);
 
   useEffect(() => {

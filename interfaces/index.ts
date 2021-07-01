@@ -27,7 +27,7 @@ export type IConfigType = 'pay' | 'todo' | 'tobuy';
 export type IInputType = 'number' | 'text' | 'date' | 'select' | 'multi-check' | 'select-btns';
 
 export interface IMember {
-    id: string;
+    id?: string;
     lineId?: string;
     name: string;
     picture?: string;
@@ -76,6 +76,14 @@ export interface IPageConfig {
    selectedId: string | undefined;
    selectedType: string | undefined;
    configs: IConfig[]; 
+}
+
+/**
+ * Group
+ */
+ export interface IGroup {
+    id: string;
+    members: IMember[];
 }
 
 /**

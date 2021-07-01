@@ -6,7 +6,7 @@ export type UserState = {
   displayName: string;
   pictureUrl: string;
   statusMessage: string;
-  messageSender?: (params: SendMessagesParams) => Promise<void>;
+  // messageSender?: (params: SendMessagesParams) => Promise<void>;
 };
 
 export const initialState: UserState = {
