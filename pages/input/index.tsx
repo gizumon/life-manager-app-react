@@ -20,10 +20,8 @@ import MultiCheckV1 from '../../components/MultiCheckV1';
 import DateV1 from '../../components/DateV1';
 import SelectBtnsV1 from '../../components/SelectBtnsV1';
 import ModalV1 from '../../components/ModalV1';
-import { FirebaseService } from '../../services/firebaseService';
 import { ValidationService } from '../../services/validationService';
 import Utils from '../../services/utilsService';
-import { useUserState } from '../../ducks/user/selector';
 import { useFirebase } from '../../hooks/useFirebase';
 
 type ITabIndex = 0 | 1 | 2;
@@ -96,7 +94,6 @@ export default function Input() {
   // const user = useUserState().user;
   // console.log('!!!!user :', user);
   const { configs, pushInput } = useFirebase();
-  const firebaseService = new FirebaseService();
   // to avoid Next bugs
   const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id');
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
@@ -165,7 +162,7 @@ export default function Input() {
       return;
     }
     const [isValid, errMsg] = validator.validate(reqData);
-    if (isValid) {
+    if (isValid && pushInput) {
       pushInput(selectedId, selectedType as IConfigType, reqData).then(() => {
       // firebaseService.setInput(selectedId, selectedType as IConfigType, reqData).then(() => {
         setModalBody({success: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`});
@@ -186,20 +183,6 @@ export default function Input() {
       console.warn('unknown error', selectedId, selectedType);
     }
   });
-
-  useEffect(() => {
-    console.log('Change selected type: ', configs, selectedType);
-    if (configs.length > 0) {
-      // Already initialized
-    } else {
-      // firebaseService.initialize().then(() => {
-      //   const members = firebaseService.members; // TODO: Get from line login
-      //   setConfigs(firebaseService.makePageConfigs(firebaseService.configs, firebaseService.categories, members));
-      //   // firebaseService.getInputs().then((dataList) => console.log('inputs items:', dataList));
-      // });
-
-    }
-  }, [selectedType]);
 
   useEffect(() => {
     if (configs.length > 0) {

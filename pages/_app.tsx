@@ -6,7 +6,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from '../styles/theme';
 import FooterV1 from '../components/FooterV1';
 import { AuthProvider, useAuth } from '../hooks/useAuthLiff';
-import { CircularProgress, createStyles, Theme, CardMedia, Button } from '@material-ui/core';
+import { createStyles, Theme, CardMedia, Button } from '@material-ui/core';
 import createStore from '../ducks/createStore';
 import { Provider } from 'react-redux';
 import { useDispatch } from 'react-redux';
@@ -15,6 +15,8 @@ import { useRouter } from 'next/router';
 import userSlice from '../ducks/user/slice';
 import { UserState } from '../ducks/user/slice';
 import { useFirebase, FirebaseProvider } from '../hooks/useFirebase';
+import Progress from '../components/AnimationProgressV1';
+import FadeWrapper from '../components/FadeWrapper';
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
@@ -47,12 +49,17 @@ const Layout: FC = ({ children }) => {
   const redirectUri = process.env.ROOT_URL + router.asPath;
 
   if (!liff.isInitialized) {
-    return <div>TEST</div>
+    return (
+      <FadeWrapper>
+        <Progress imgUrl="http://a.top4top.net/p_1990j031.gif"></Progress>
+      </FadeWrapper>
+    );
   }
 
   if (!liff.isLoggedIn) {
     return (
-      <div className={classes.root}>
+      <FadeWrapper>
+        <div className={classes.root}>
           <CardMedia
             className={classes.media}
             image="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260"
@@ -66,7 +73,8 @@ const Layout: FC = ({ children }) => {
               onClick={() => liff.login({redirectUri: redirectUri})}
             >LOGIN</Button>
           </CardMedia>
-      </div>
+        </div>
+      </FadeWrapper>
     );
   }
 
@@ -74,8 +82,11 @@ const Layout: FC = ({ children }) => {
   liff.liff?.getProfile().then(user => dispatch(userSlice.actions.setUser(user as UserState)));
 
   if (!firebase.isInitialized) {
-    return <div>TEST</div>
-    // <CircularProgress size="50"/>
+    return (
+      <FadeWrapper>
+        <Progress imgUrl="http://a.top4top.net/p_1990j031.gif"></Progress>
+      </FadeWrapper>
+    );
   }
 
   return (
