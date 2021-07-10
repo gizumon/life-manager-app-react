@@ -46,12 +46,13 @@ const Layout: FC = ({ children }) => {
   // const { isInitialized, isLoggedIn, login, liff } = useAuth();
   const liff = useAuth();
   const firebase = useFirebase();
+  const dispatch = useDispatch();
   const redirectUri = process.env.ROOT_URL + router.asPath;
 
   if (!liff.isInitialized) {
     return (
       <FadeWrapper>
-        <Progress imgUrl="http://a.top4top.net/p_1990j031.gif"></Progress>
+        <Progress />
       </FadeWrapper>
     );
   }
@@ -78,13 +79,12 @@ const Layout: FC = ({ children }) => {
     );
   }
 
-  const dispatch = useDispatch();
   liff.liff?.getProfile().then(user => dispatch(userSlice.actions.setUser(user as UserState)));
 
   if (!firebase.isInitialized) {
     return (
       <FadeWrapper>
-        <Progress imgUrl="http://a.top4top.net/p_1990j031.gif"></Progress>
+        <Progress />
       </FadeWrapper>
     );
   }

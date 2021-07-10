@@ -23,6 +23,8 @@ import ModalV1 from '../../components/ModalV1';
 import { ValidationService } from '../../services/validationService';
 import Utils from '../../services/utilsService';
 import { useFirebase } from '../../hooks/useFirebase';
+import FadeWrapper from '../../components/FadeWrapper';
+import Progress from '../../components/AnimationProgressV1';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -164,7 +166,6 @@ export default function Input() {
     const [isValid, errMsg] = validator.validate(reqData);
     if (isValid && pushInput) {
       pushInput(selectedId, selectedType as IConfigType, reqData).then(() => {
-      // firebaseService.setInput(selectedId, selectedType as IConfigType, reqData).then(() => {
         setModalBody({success: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`});
         setIsOpenSuccessModal(true);
         // if (user?.messageSender) {
@@ -203,6 +204,14 @@ export default function Input() {
       console.log('before set form data', formData);
     }
   }, [formData]);
+
+  if (!configs || configs.length === 0) {
+    return (
+      <FadeWrapper>
+        <Progress />
+      </FadeWrapper> 
+    );
+  }
 
   return (
     <Box display="flex" justifyContent="center">
