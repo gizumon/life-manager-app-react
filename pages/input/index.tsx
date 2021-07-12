@@ -25,7 +25,7 @@ import Utils from '../../services/utilsService';
 import { useFirebase } from '../../hooks/useFirebase';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
-import { useUserState } from '../../ducks/user/selector';
+// import { useUserState } from '../../ducks/user/selector';
 import { useAuth } from '../../hooks/useAuthLiff';
 
 type ITabIndex = 0 | 1 | 2;
