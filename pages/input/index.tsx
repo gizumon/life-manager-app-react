@@ -95,7 +95,7 @@ function getTabProps(index: number) {
 export default function Input() {
   const classes = useStyles();
   const router = useRouter();
-  const user = useUserState().user;
+  // const user = useUserState().user;
   // console.log('!!!!user :', user);
   const { configs, pushInput } = useFirebase();
   const { liff } = useAuth();
