@@ -25,6 +25,8 @@ import Utils from '../../services/utilsService';
 import { useFirebase } from '../../hooks/useFirebase';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
+import { useUserState } from '../../ducks/user/selector';
+import { useAuth } from '../../hooks/useAuthLiff';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -93,9 +95,10 @@ function getTabProps(index: number) {
 export default function Input() {
   const classes = useStyles();
   const router = useRouter();
-  // const user = useUserState().user;
+  const user = useUserState().user;
   // console.log('!!!!user :', user);
   const { configs, pushInput } = useFirebase();
+  const { liff } = useAuth();
   // to avoid Next bugs
   const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id');
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
@@ -124,7 +127,7 @@ export default function Input() {
     let processedData: IFormData = {};
     validMap[selectedType as IConfigType]?.forEach((id) => {
       if (data.hasOwnProperty(id)) {
-        processedData[id] = data[id] || null;
+        processedData[id] = typeof data[id] === 'undefined' ? "" : data[id];
       }
     });
     return processedData;
@@ -168,17 +171,16 @@ export default function Input() {
       pushInput(selectedId, selectedType as IConfigType, reqData).then(() => {
         setModalBody({success: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`});
         setIsOpenSuccessModal(true);
-        // if (user?.messageSender) {
-        //   user.messageSender([
-        //     {
-        //       type: 'text',
-        //       text: 'Hello, World!'
-        //     }
-        //   ]).then((res) => console.log(res)).catch(e => console.log(e));
-        // }
+        liff?.sendMessages([
+          {
+            type: 'text',
+            text: 'Hello, World!'
+          }
+        ]);
       });
     } else if (!isValid) {
       setModalBody({error: errMsg || '更新に失敗しました (エラー文言の生成に失敗)'});
+      console.log('Invalid req data: ', formData, reqData, errMsg);
       setIsOpenErrorModal(true);
     } else {
       console.warn('unknown error', selectedId, selectedType);
@@ -230,15 +232,15 @@ export default function Input() {
             {
               isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
                 if (input.type === 'text') {
-                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></InputV1>);
+                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
                 } else if (input.type === 'number') {
-                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number"></InputV1>);
+                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number" />);
                 } else if (input.type === 'select') {
-                  return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></SelectV1>);
+                  return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
                 } else if (input.type === 'multi-check') {
-                  return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></MultiCheckV1>);
+                  return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
                 } else if (input.type === 'date') {
-                  return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData}></DateV1>);
+                  return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
                 }
               })
             }
@@ -247,14 +249,14 @@ export default function Input() {
           {
             isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
               if (input.type === 'select-btns') {
-                return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={onClickTrigger}></SelectBtnsV1>);
+                return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={onClickTrigger} />);
               }
             })
           }
         </CardActions>
       </Card>
-      <ModalV1 open={isOpenSuccessModal} title='Success!' body={modalBody['success']} onClose={onSuccessModalClose}></ModalV1>
-      <ModalV1 open={isOpenErrorModal} title='Error!' body={modalBody['error']} onClose={onErrorModalClose}></ModalV1>
+      <ModalV1 open={isOpenSuccessModal} title='Success!' body={modalBody['success']} onClose={onSuccessModalClose} />
+      <ModalV1 open={isOpenErrorModal} title='Error!' body={modalBody['error']} onClose={onErrorModalClose} />
     </Box>
   );
 }

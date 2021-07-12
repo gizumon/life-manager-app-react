@@ -119,7 +119,7 @@ export default function MyApp(props: any) {
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline />
                 <Component {...pageProps} />
-                <FooterV1></FooterV1>
+                <FooterV1 />
               </ThemeProvider>
             </Layout>
           </Provider>          

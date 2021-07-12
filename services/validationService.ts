@@ -129,7 +129,7 @@ export class ValidationService {
      * @returns 
      */
     private isNotNull(val: any): boolean {
-        return val !== undefined && val !== null;
+        return val !== undefined && val !== null && val !== "";
     }
 
     /**
