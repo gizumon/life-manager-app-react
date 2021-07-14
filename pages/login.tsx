@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function Login() {
   const router = useRouter();
   const { userId, user, liff, sendText } = useAuth();
-  const { members, pushMember, pushGroup } = useFirebase();
+  const { members, pushMember, pushGroup, isInitialized } = useFirebase();
   const [ code, setCode ] = useState<string>();
   const classes = useStyles();
 
@@ -106,15 +106,15 @@ export default function Login() {
   const hasMemberBelongGroup = member && member.groupId;
 
   // member is already exist, 
-  if (hasMemberBelongGroup) {
+  if (hasMemberBelongGroup && isInitialized) {
     const url = makeRedirectUri(redirectUri, (member as IMember).groupId);
     console.log('Make redirect URI', url)
     router.push(url, undefined, {shallow: true});
-    return <div>遷移中</div>
+    return <FadeWrapper><Progress message="ページ移動中。。。"/></FadeWrapper>
   }
 
   // user is exist in auth, but not in member.
-  if (!hasMemberBelongGroup && user) {
+  if (!hasMemberBelongGroup && user && isInitialized) {
     console.log('code input: ', member, user);
     return (
       <Card className={classes.card}>
@@ -144,7 +144,7 @@ export default function Login() {
   }
 
   console.log('Preparing...', userId, member, user);
-  return <FadeWrapper><Progress /></FadeWrapper>;
+  return <FadeWrapper><Progress message="準備中。。。"/></FadeWrapper>;
 }
 
 function makeRedirectUri(redirectUri: string, groupId: string = ''): string {
