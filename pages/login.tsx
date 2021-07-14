@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import Utils from '../services/utilsService';
 import Card from '@material-ui/core/Card';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Button, CardContent, Divider, IconButton, InputBase, TextField } from '@material-ui/core';
+import { Button, CardContent, Divider, IconButton, TextField } from '@material-ui/core';
 import { useState } from 'react';
 import { IMember } from '../interfaces/index';
 import TapAndPlayIcon from '@material-ui/icons/TapAndPlay';
@@ -132,7 +132,6 @@ export default function Login() {
             <IconButton className={classes.inputBtn} color="primary" onClick={applyCode} >
               <TapAndPlayIcon />
             </IconButton>
-            {/* <Button className={classes.textBtn} variant="contained" color="primary" onClick={applyCode} endIcon={<TapAndPlayIcon />}></Button> */}
           </div>
           <Divider className={classes.divider} orientation="horizontal" />
           <span>共有されたペアリングコードがない場合：</span>
