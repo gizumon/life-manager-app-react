@@ -1,5 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from "react"
 import Liff from '@line/liff'
+import { UserState } from '../ducks/user/slice';
+import { IMember } from "../interfaces";
 
 const AuthContext = createContext<typeof Liff | undefined>(undefined);
 
@@ -38,13 +40,16 @@ export const AuthProvider: FC = ({ children }) => {
 type UseAuthReturn = {
   isInitialized: boolean;
   isLoggedIn: boolean;
+  user?: UserState;
   userId?: string;
   login: (obj?: {redirectUri: string}) => void;
   liff?: typeof Liff;
+  sendText?: (message: string) => void;
 }
 
 export const useAuth = (): UseAuthReturn => {
   const liff = useContext(AuthContext);
+  const [user, setUser] = useState<UserState>();
 
   if (!liff) {
     return {
@@ -54,15 +59,40 @@ export const useAuth = (): UseAuthReturn => {
     };
   }
 
+  if (liff.isLoggedIn() && !user) {
+    liff.getProfile().then((u) => setUser(u as UserState));
+  }
+
   return {
     isInitialized: true,
     isLoggedIn: liff.isLoggedIn(),
     login: liff.login,
+    user: user,
     userId: liff.getContext()?.userId,
     liff: liff,
+    sendText: (message: string) => {
+      if (liff && liff.isApiAvailable('shareTargetPicker')) {
+        liff.sendMessages([{
+          type: 'text',
+          text: message,
+        }]);
+      } else {
+        console.error('Error in send messages', liff);
+        alert('メッセージ送信に失敗しました。');
+      }
+    },
   };
 }
 
+export const makeMemberFromUser = (user: UserState, groupId: string = '', id: string = ''): IMember => {
+  return {
+    id: id,
+    name: user.displayName,
+    lineId: user.userId,
+    picture: user.pictureUrl,
+    groupId: groupId,
+  }
+};
 // export const useMessage = (): any => {
 //   if (!liff) {
 //     return {}

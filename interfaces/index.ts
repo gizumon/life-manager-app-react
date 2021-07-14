@@ -31,7 +31,8 @@ export interface IMember {
     lineId?: string;
     name: string;
     picture?: string;
-    groupId?: string; 
+    groupId?: string;
+    timestamp?: any;
 }
 
 export type IValidatorType = 'isNotNull' | 'isEqual' | 'isLT' | 'isLE' | 'isGT' | 'isGE' | 'isBTW'
@@ -82,8 +83,9 @@ export interface IPageConfig {
  * Group
  */
  export interface IGroup {
-    id: string;
+    id?: string;
     members: IMember[];
+    timestamp?: any;
 }
 
 /**

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { IInput } from '../interfaces';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -28,12 +28,12 @@ export default function DateV1({config, model, setProps}: IProps) {
   const classes = useStyles();
   // const [state, setState] = useState(model);
 
-  const onChangeHandler = useCallback((event: any) => {
+  const onChangeHandler = (event: any) => {
     // setState(event.target.value);
     setProps((prevVal: any) => {
       return {...prevVal, [config.id]: Utils.formatDate(new Date(event.target.value))}
     });
-  }, []);
+  };
 
   // useEffect(() => {
   //   setProps((prevVal: any) => {

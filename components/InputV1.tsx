@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { IInput } from '../interfaces';
 import TextField from '@material-ui/core/TextField';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
@@ -28,12 +28,12 @@ export default function InputV1({ config, model, setProps, type='' }: IProps) {
   console.log('InputV1 model', model);
   const classes = useStyles();
 
-  const onChangeHandler = useCallback((event: any) => {
+  const onChangeHandler = (event: any) => {
     console.log('!!!On Input handler: ', event);
     setProps((prevVal: any) => {
       return {...prevVal, [config.id]: type === 'number' ? Number(event.target.value) : event.target.value}
     });
-  }, []);
+  };
 
   // useEffect(() => {
   //   setProps((prevVal: any) => {

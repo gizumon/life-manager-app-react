@@ -50,6 +50,14 @@ export const FirebaseProvider: FC = ({ children }) => {
   );
 }
 
+type IFirebaseData = {
+  configs: IConfig[];
+  categories: ICategory[];
+  members: {[key: string]: IMember};
+  groups: {[key: string]: IGroup};
+  inputs: any[];
+}
+
 type IDataStates = {
   configs: IConfig[];
   categories: ICategory[];
@@ -70,6 +78,8 @@ type IUseFirebaseReturn = IDataAndFlagStates & {
   setData?: (refPath: string, data: any) => Promise<void>;
   pushData?: (refPath: string, data: any) => Promise<void>;
   pushInput?: (id: string, type: string, data: any) => Promise<firebase.database.Reference>;
+  pushMember?: (data: IMember) => Promise<firebase.database.Reference>;
+  pushGroup?: (data: IGroup) => Promise<firebase.database.Reference>;
 }
 
 export const useFirebase = (): IUseFirebaseReturn => {
@@ -79,14 +89,20 @@ export const useFirebase = (): IUseFirebaseReturn => {
 
   if (firebaseApp && DB && !states.isRunInitialized) {
     setStates((data) => { return { ...data, isRunInitialized: true } });
-    asyncSetProperties().then((items: IDataStates) => {
-      const processedConfigs = makePageConfigs(items.configs, items.categories, items.members);
+    asyncSetProperties().then((items: IFirebaseData) => {
+      const members = convertObjectToArray(items.members) as IMember[];
+      const groups = convertObjectToArray(items.groups) as IGroup[];
+      const processedConfigs = makePageConfigs(items.configs, items.categories, members);
       setStates((data) => {
         return {
           ...data,
           isInitialized: true,
           ...items,
           configs: processedConfigs,
+          categories: items.categories,
+          members: members,
+          groups: groups,
+          inputs: items.inputs,
         }
       });
     });
@@ -100,17 +116,19 @@ export const useFirebase = (): IUseFirebaseReturn => {
     setData: setData,
     pushData: pushData,
     pushInput: pushInput,
+    pushMember: pushMember,
+    pushGroup: pushGroup,
   };
 }
 
-const asyncSetProperties = (): Promise<IDataStates> => {
+const asyncSetProperties = (): Promise<IFirebaseData> => {
   return new Promise(async (resolve, reject) => {
     const states: {[key in string]: any} = {};
     for (let key of ['configs', 'categories', 'members', 'groups', 'inputs']) {
       const items = await getData(refsMap[key as (keyof typeof refsMap)]).catch((err) => { reject(err); });
       states[key] = items;
     }
-    resolve(states as IDataStates);
+    resolve(states as IFirebaseData);
   });
 }
 
@@ -135,13 +153,47 @@ const pushInput = (id: string, type: string, data: any): Promise<firebase.databa
       return reject(`id or type is missing. id: ${id}: type: ${type}`);
     }
     const refName = `${refsMap.inputs}/${id}/${type}`;
-    data['TIMESTAMP'] = firebase.database.ServerValue.TIMESTAMP;
+    data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
     
     DB.ref(refName).push(data).then(val => {
       return resolve(val);
     }).catch(err => {
       console.warn(err);
-      return reject();
+      return reject(err);
+    });
+  });
+}
+
+const pushMember = (data: IMember): Promise<firebase.database.Reference> => {
+  return new Promise<firebase.database.Reference>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...')
+    }
+    const refName = refsMap.members;
+    data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
+
+    DB.ref(refName).push(data).then(val => {
+      return resolve(val);
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
+    });
+  });
+}
+
+const pushGroup = (data: IGroup): Promise<firebase.database.Reference> => {
+  return new Promise<firebase.database.Reference>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...')
+    }
+    const refName = refsMap.groups;
+    data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
+
+    DB.ref(refName).push(data).then(val => {
+      return resolve(val);
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
     });
   });
 }
@@ -169,4 +221,11 @@ const makePageConfigs = (configs: IConfig[], categories: ICategory[] = [], membe
     })
   })
   return configs;
+}
+
+const convertObjectToArray = (obj: {[key: string]: IMember | IGroup }) => {
+  return Object.keys(obj).map((key) => {
+    obj[key].id = key;
+    return obj[key];
+  });
 }

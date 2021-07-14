@@ -5,6 +5,7 @@ export type UserState = {
   displayName: string;
   pictureUrl: string;
   statusMessage: string;
+  timestamp?: any;
 };
 
 export const initialState: UserState = {

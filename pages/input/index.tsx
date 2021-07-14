@@ -26,7 +26,7 @@ import { useFirebase } from '../../hooks/useFirebase';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
 // import { useUserState } from '../../ducks/user/selector';
-import { useAuth } from '../../hooks/useAuthLiff';
+// import { useAuth } from '../../hooks/useAuthLiff';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -98,7 +98,7 @@ export default function Input() {
   // const user = useUserState().user;
   // console.log('!!!!user :', user);
   const { configs, pushInput } = useFirebase();
-  const { liff } = useAuth();
+  // const { liff } = useAuth();
   // to avoid Next bugs
   const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id');
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
@@ -171,12 +171,12 @@ export default function Input() {
       pushInput(selectedId, selectedType as IConfigType, reqData).then(() => {
         setModalBody({success: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`});
         setIsOpenSuccessModal(true);
-        liff?.sendMessages([
-          {
-            type: 'text',
-            text: 'Hello, World!'
-          }
-        ]);
+        // liff?.sendMessages([
+        //   {
+        //     type: 'text',
+        //     text: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`
+        //   }
+        // ]);
       });
     } else if (!isValid) {
       setModalBody({error: errMsg || '更新に失敗しました (エラー文言の生成に失敗)'});
