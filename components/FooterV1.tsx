@@ -6,8 +6,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import ListIcon from '@material-ui/icons/List';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { useRouter } from 'next/router';
-import { IConfigType } from '../interfaces';
 import theme from '../styles/theme';
+import Utils from '../services/utilsService';
 
 type INavIndex = 0 | 1 | 2;
 type IUrlType = '/input' | '/list' | '/manage';
@@ -59,8 +59,8 @@ function makeUrl(baseUrl: string = '', id: string = '', type: string = ''): stri
 export default function FooterV1() {
   const router = useRouter()
   const classes = useStyles();
-  const selectedId = router.query.id as string || '';
-  const selectedType = router.query.type as IConfigType || '';
+  const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id') || '';
+  const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
 
   const [navIndex, setNavIndex] = React.useState(navMap.toIndex[router.pathname as IUrlType] || 0);
   console.log('footer element', router);
