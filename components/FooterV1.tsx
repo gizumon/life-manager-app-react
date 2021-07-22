@@ -10,7 +10,7 @@ import { IConfigType } from '../interfaces';
 import theme from '../styles/theme';
 
 type INavIndex = 0 | 1 | 2;
-type IUrlType = '/input' | '/view' | '/manage';
+type IUrlType = '/input' | '/list' | '/manage';
 interface INavMap {
   toUrl: {
     [key in INavIndex]: IUrlType
@@ -23,12 +23,12 @@ interface INavMap {
 const navMap: INavMap = {
   toUrl: {
     0: '/input',
-    1: '/view',
+    1: '/list',
     2: '/manage',  
   },
   toIndex: {
     '/input': 0,
-    '/view': 1,
+    '/list': 1,
     '/manage': 2,
   }
 }
@@ -78,7 +78,7 @@ export default function FooterV1() {
       className={classes.root}
     >
       <BottomNavigationAction label="Input" icon={<EditIcon />} />
-      <BottomNavigationAction label="View" icon={<ListIcon />} />
+      <BottomNavigationAction label="List" icon={<ListIcon />} />
       <BottomNavigationAction label="Manage" icon={<SettingsIcon />} />
     </BottomNavigation>
   );

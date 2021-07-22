@@ -94,3 +94,35 @@ export interface IPageConfig {
 export interface IFormData {
     [key: string]: any;
 }
+
+/**
+ * IInputDate
+ */
+export interface IPay {
+    id: string;
+    price: number;
+    payedFor: string[];
+    payedCategory: string;
+    payedBy: string;
+    memo: string;
+    timestamp: number;
+}
+
+export interface IToBuy {
+    id: string;
+    item: string;
+    buyCategory: string;
+    buyBy: string;
+    buyDueDate: string;
+    timestamp: number;
+}
+
+export interface IToDo {
+    id: string;
+    task: string;
+    doBy: string;
+    doDueDate: string;
+    timestamp: number;
+}
+
+export type IInputData = IPay & IToBuy & IToDo;

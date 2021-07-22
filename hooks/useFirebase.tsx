@@ -2,7 +2,7 @@ import { createContext, FC, useContext, useEffect, useState } from "react"
 // import CONST from '../services/constService';
 import firebase from 'firebase/app';
 import 'firebase/database';
-import { IConfig, ICategory, IMember, IGroup } from '../interfaces/index';
+import { IConfig, ICategory, IMember, IGroup, IInputData, IConfigType } from '../interfaces/index';
 // import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from '../services/utilsService';
 
@@ -13,7 +13,7 @@ export const refsMap = {
     members: 'data/members',
     groups: 'data/groups',
     inputs: 'data/inputs'
-}
+};
 
 let DB: firebase.database.Database | undefined;
 
@@ -55,7 +55,7 @@ type IFirebaseData = {
   categories: ICategory[];
   members: {[key: string]: IMember};
   groups: {[key: string]: IGroup};
-  inputs: any[];
+  inputs: {[key: string]: {[key in IConfigType]: {[key in string]: IInputData}}};
 }
 
 type IDataStates = {
@@ -63,12 +63,12 @@ type IDataStates = {
   categories: ICategory[];
   members: IMember[];
   groups: IGroup[];
-  inputs: any[];
+  inputs: {[key in string]: {[key in IConfigType]: IInputData[]}};
 }
 
 type IDataAndFlagStates = IDataStates & {
   isRunInitialized: boolean;
-  isInitialized: boolean;  
+  isInitialized: boolean;
 }
 
 type IUseFirebaseReturn = IDataAndFlagStates & {
@@ -84,7 +84,7 @@ type IUseFirebaseReturn = IDataAndFlagStates & {
 
 export const useFirebase = (): IUseFirebaseReturn => {
   const firebaseApp = useContext(FirebaseContext);
-  const [states, setStates] = useState<IDataAndFlagStates>({isRunInitialized: false, isInitialized: false, configs: [], categories: [], members: [], groups: [], inputs: []});
+  const [states, setStates] = useState<IDataAndFlagStates>({isRunInitialized: false, isInitialized: false, configs: [], categories: [], members: [], groups: [], inputs: {}});
   DB = firebaseApp?.database();
 
   if (firebaseApp && DB && !states.isRunInitialized) {
@@ -92,6 +92,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
     asyncSetProperties().then((items: IFirebaseData) => {
       const members = convertObjectToArray(items.members) as IMember[];
       const groups = convertObjectToArray(items.groups) as IGroup[];
+      const inputs = convertInputsToArray(items.inputs) as {[key in string]: {[key in IConfigType]: IInputData[]}};
       const processedConfigs = makePageConfigs(items.configs, items.categories, members);
       setStates((data) => {
         return {
@@ -102,7 +103,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
           categories: items.categories,
           members: members,
           groups: groups,
-          inputs: items.inputs,
+          inputs: inputs,
         }
       });
     });
@@ -118,6 +119,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
     pushInput: pushInput,
     pushMember: pushMember,
     pushGroup: pushGroup,
+    
   };
 }
 
@@ -223,9 +225,25 @@ const makePageConfigs = (configs: IConfig[], categories: ICategory[] = [], membe
   return configs;
 }
 
-const convertObjectToArray = (obj: {[key: string]: IMember | IGroup }) => {
+const convertObjectToArray = (obj: {[key: string]: IMember | IGroup}) => {
   return Object.keys(obj).map((key) => {
     obj[key].id = key;
     return obj[key];
   });
+}
+
+const convertInputsToArray = (obj: {[key: string]: {[key in IConfigType]: {[key: string]: IInputData}}}): {[key in string]: {[key in IConfigType]: IInputData[]}} => {
+  const data: any = {};
+  Object.keys(obj).forEach(id => {
+    data[id] = data[id] || {};
+    Object.keys(obj[id]).forEach(key => {
+      if (obj && obj[id] && obj[id][key as IConfigType]) {
+        data[id][key] = Object.keys(obj[id][key as IConfigType]).map((dataId) => {
+          // obj[id][key as IConfigType][dataId].id = dataId;
+          return obj[id][key as IConfigType][dataId];
+        });
+      }
+    });
+  });
+  return data;
 }

@@ -3,12 +3,7 @@ import { useRouter } from 'next/router';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import createTrigger from "react-use-trigger";
 
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Box from '@material-ui/core/Box';
+import { Card, CardContent, CardActions, Tabs, Tab, Box } from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
@@ -122,7 +117,7 @@ export default function Input() {
     // console.log('!!!!user :', user);
     router.push(`/input?id=${selectedId}&type=${tabMap.toType[index]}`, undefined, {shallow: true});
   }, []);
-  
+
   const processData = (data: IFormData = {}): IFormData => {
     let processedData: IFormData = {};
     validMap[selectedType as IConfigType]?.forEach((id) => {
@@ -136,7 +131,6 @@ export default function Input() {
   const makeDefaultFormData = (configs: IConfig[]): IFormData => {
     const data: IFormData = {};
     configs.forEach(config => config.inputs.forEach((input) => data[input.id] = input.model));
-    console.log('!!!make default form data:', data);
     return data;
   };
 
@@ -148,7 +142,6 @@ export default function Input() {
       setIsOpenSuccessModal(false);
       setModalBody({success: '', error: ''});
       setFormData(makeDefaultFormData(configs));
-      console.log('on close', configs);
   }, [configs]);
 
   const onErrorModalClose = useCallback(() => {
@@ -189,29 +182,18 @@ export default function Input() {
 
   useEffect(() => {
     if (configs.length > 0) {
-      Object.keys(tabMap.toIndex).forEach((type: string) => {
-        validMap[type as IConfigType] = getConfig(type as IConfigType).inputs.map(input => input.id);
-      });
-      Object.keys(tabMap.toIndex).forEach((type: string) => {
-        validatorMap[type as IConfigType] = new ValidationService(getConfig(type as IConfigType));
-      });
+      Object.keys(tabMap.toIndex).forEach((type: string) => validMap[type as IConfigType] = getConfig(type as IConfigType).inputs.map(input => input.id));
+      Object.keys(tabMap.toIndex).forEach((type: string) => validatorMap[type as IConfigType] = new ValidationService(getConfig(type as IConfigType)));
       setFormData(makeDefaultFormData(configs));
       setIsInitialized(true);
-      }
+    }
   }, [configs]);
 
-  useEffect(() => {
-    console.log('after set form data', formData);
-    return () => {
-      console.log('before set form data', formData);
-    }
-  }, [formData]);
-
-  if (!configs || configs.length === 0) {
+  if (!configs || configs.length === 0 || !isInitialized) {
     return (
       <FadeWrapper>
         <Progress />
-      </FadeWrapper> 
+      </FadeWrapper>
     );
   }
 
