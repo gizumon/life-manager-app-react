@@ -35,11 +35,6 @@ const useStyles = makeStyles((_: Theme) =>
 // TODO: Need to control onClick values
 export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
     const classes = useStyles();
-    // const [item, setItem] = React.useState(model);
-  
-    // const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    //   setItem(event.target.value as string);
-    // };
     const [isClick, setToggle] = useToggle();
 
     const onClickHandler = (id: string = '') => {

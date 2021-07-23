@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
@@ -40,6 +40,9 @@ const useStyles = makeStyles({
     bottom: '0px',
     zIndex: 1000,
     background: theme.palette.grey[50],
+    '& .Mui-selected': {
+      color: theme.palette.secondary.dark,
+    }
   },
 });
 
@@ -63,12 +66,12 @@ export default function FooterV1() {
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
 
   const [navIndex, setNavIndex] = React.useState(navMap.toIndex[router.pathname as IUrlType] || 0);
-  console.log('footer element', router);
 
-  const onChangeNav = useCallback((_: React.ChangeEvent<{}>, index: INavIndex) => {
-    setNavIndex(index);
+  const onChangeNav = (_: React.ChangeEvent<{}>, index: INavIndex) => {
     router.push(makeUrl(navMap.toUrl[index], selectedId, selectedType), undefined, {shallow: true});
-  }, []);
+  };
+
+  router.events.on('routeChangeComplete', () => setNavIndex(navMap.toIndex[router.pathname as IUrlType]));
 
   return (
     <BottomNavigation

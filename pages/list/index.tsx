@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar } from '@material-ui/core';
 import { Card, CardContent, Tabs, Tab, Box } from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
@@ -9,6 +9,9 @@ import { IConfigType, IInputData, IInput, IConfig } from '../../interfaces';
 import { useRouter } from 'next/router';
 import Utils from '../../services/utilsService';
 import { useFirebase } from '../../hooks/useFirebase';
+import theme from '../../styles/theme';
+import CONST from '../../services/constService';
+import { ICategory } from '../../interfaces/index';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -28,6 +31,7 @@ type IDisplayMap = {
 
 type IDisplayData = {
   id: string;
+  dataId: string;
   name: string;
   value: any;
 };
@@ -57,12 +61,33 @@ const tabMap: ITabMap = {
 const useStyles = makeStyles({
   table: {
     minWidth: 300,
+    maxHeight: 300,
+    whiteSpace: 'nowrap',
+    '&> thead > tr > th': {
+      backgroundColor: theme.palette.secondary.dark,
+      color: '#fff',
+      fontWeight: 700,
+    },
   },
   card: {
     width: 350,
     margin: '25px 0px 65px 0px',
   },
+  tableContainer: {
+    maxHeight: 300,    
+  },
+  avatarBlock: {
+    display: 'flex',
+    '& .MuiAvatar-circle': {
+      width: 20,
+      height: 20,
+    }
+  }
 });
+
+const displayPictures: (keyof IInputData)[] = [
+  'payedFor', 'payedBy', 'buyBy', 'doBy'
+];
 
 function getTabProps(index: number) {
   return {
@@ -76,6 +101,7 @@ export default function List() {
   const router = useRouter();
   const { configs, inputs, members } = useFirebase();
   // TODO: Should use session
+  console.log('list component', router.query['id'], Utils.getQueryParam(router.asPath, 'id'));
   const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
 
@@ -100,6 +126,7 @@ export default function List() {
           Object.keys(data).forEach(key => {
             list.push({
               id: key,
+              dataId: data.id,
               name: displayMap[key],
               value: data[key as keyof IInputData],
             });
@@ -114,7 +141,7 @@ export default function List() {
       setDisplayMap(map);
     }
     console.log('created displayDataObjMap', displayDataObj, displayMap);
-  }, [inputs, selectedType]);
+  }, [inputs, selectedType, selectedId]);
 
   const onTabChange = (_: React.ChangeEvent<{}>, index: ITabIndex) => {
     setTabIndex(index);
@@ -135,28 +162,35 @@ export default function List() {
   };
 
   // TODO: should move in utils
-  const convertDisplayValue = (id: string, value: any): string => {
+  const convertDisplayValue = (id: string, value: any): string | string[] => {
     const convertFnMap: {[key in keyof IInputData]?: any} = {
-      payedFor: convertMembersName,
-      payedCategory: convertCategoryName,
-      payedBy: convertMemberName,
+      payedFor: convertMemberIcons,
+      payedCategory: convertPayedCategoryName,
+      payedBy: convertMemberIcon,
       timestamp: convertDatetime,
-      buyCategory: convertCategoryName,
-      buyBy: convertMemberName,
-      doBy: convertMemberName,
+      buyCategory: convertBuyCategoryName,
+      buyBy: convertMemberIcon,
+      doBy: convertMemberIcon,
+      price: convertNumber,
     };
     const fn = convertFnMap[id as keyof IInputData];
     return fn ? fn(value) : String(value);
   };
 
-  const convertMemberName = (id: string): string => members.find(member => member.id === id)?.name || 'Unknown';
+  const convertMemberIcon = (id: string): string[] => {
+    return id === 'ALL' ? ['全員']
+         : members.find(member => member.id === id) ? [ members.find(member => member.id === id)?.picture as string ]
+         : ['Unknown'];
+  }
   // const convertMembersName = (ids: string[]): string => ids.map(id => convertMemberName(id)).join(', ');
-  const convertMembersName = (ids: string[]): string => {
-    return (ids && ids.length > 0) ? ids.map(id => convertMemberName(id)).join(', ') : String(ids);
+  const convertMemberIcons = (ids: string[]): string[] => {
+    return (ids && ids.length > 0) ? ids.map(id => convertMemberIcon(id)[0]) : ids;
   };
 
-  const convertCategoryName = (id: string): string => id;
-  const convertDatetime = (timestamp: number): string => String(timestamp);
+  const convertPayedCategoryName = (id: string): string => CONST.payCategories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
+  const convertBuyCategoryName = (id: string): string => CONST.buyCategories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
+  const convertDatetime = (timestamp: number): string => new Date(timestamp).toISOString();
+  const convertNumber = (val: number): string => '¥' + String(Number(val).toLocaleString());
 
   return (
     <Box display="flex" justifyContent="center">
@@ -172,27 +206,37 @@ export default function List() {
           <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
         </Tabs>
         <CardContent>
-          <TableContainer component={Paper}>
-            <Table className={classes.table} size="small" aria-label="a dense table">
+          <TableContainer className={classes.tableContainer} component={Paper}>
+            <Table stickyHeader className={classes.table} size="small" aria-label="a dense table">
               <TableHead>
                 <TableRow>
                   {
-                    // isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input: IInput) => {
-                    //   <TableCell key={input.id}>{input.name}</TableCell>
-                    // })
                     isInitialized && Object.keys(displayMap).map(key => <TableCell key={key}>{displayMap[key]}</TableCell>)
                   }
                 </TableRow>
               </TableHead>
               <TableBody>
                 {
-                  isInitialized && getDisplayDataList(selectedType as IConfigType).map((row, index) => {
+                  isInitialized && getDisplayDataList(selectedType as IConfigType).map((row) => {
                     return (
-                      <TableRow key={index}>
+                      <TableRow key={row[0].dataId}>
                         {
                           Object.keys(displayMap).map(key => {
                             const col = row.find(data => data.id === key);
                             const value = col ? convertDisplayValue(col.id, col.value) : '';
+                            if (displayPictures.includes(col?.id as keyof IInputData)) {
+                              return (
+                                <TableCell key={key} align="right">
+                                  <div className={classes.avatarBlock}>{
+                                  (value as string[]).map((pic, index) => {
+                                    return (
+                                        <Avatar key={index} src={pic} />
+                                    );
+                                  })}
+                                  </div>
+                                </TableCell>
+                              )
+                            }
                             return (
                               <TableCell key={key} align="right">{value}</TableCell>
                             );

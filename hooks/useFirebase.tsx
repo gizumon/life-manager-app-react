@@ -239,7 +239,7 @@ const convertInputsToArray = (obj: {[key: string]: {[key in IConfigType]: {[key:
     Object.keys(obj[id]).forEach(key => {
       if (obj && obj[id] && obj[id][key as IConfigType]) {
         data[id][key] = Object.keys(obj[id][key as IConfigType]).map((dataId) => {
-          // obj[id][key as IConfigType][dataId].id = dataId;
+          obj[id][key as IConfigType][dataId].id = dataId;
           return obj[id][key as IConfigType][dataId];
         });
       }
