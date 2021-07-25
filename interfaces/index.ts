@@ -62,6 +62,7 @@ export interface IInput {
     validates: IValidate[];
     args?: [];
     dataList?: IModel[];
+    order?: number; 
 }
 
 export interface IConfig {

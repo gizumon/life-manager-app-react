@@ -24,6 +24,16 @@ namespace Utils {
         if (!arr || arr.length <= 1) { return ''; }
         return arr[1].replace(/&(.*)/, '') 
     }
+
+    /**
+     * sort object keys
+     * @param obj 
+     * @param sortFn 
+     * @returns sorted object
+     */
+    export function sortObject(obj: Object, sortFn?: (obj1: any, obj2: any) => number) {
+        return Object.fromEntries(Object.entries(obj).sort(sortFn));
+    }
 }
 
 export default Utils;

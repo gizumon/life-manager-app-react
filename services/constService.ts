@@ -112,7 +112,7 @@ namespace CONST {
         inputs: [
           {
             id: 'price',
-            name: '金額',
+            name: 'いくら',
             type: 'number',
             placeholder: 'ex) 2000',
             icon: 'mdi-cash-100',
@@ -130,6 +130,7 @@ namespace CONST {
                 args: [1000000],
               },
             ],
+            order: 3,
           },
           {
             id: 'payedFor',
@@ -148,10 +149,11 @@ namespace CONST {
               }
             ],
             dataList: [], // members
+            order: 4,
           },
           {
             id: 'payedCategory',
-            name: 'カテゴリ',
+            name: 'どんな',
             type: 'select',
             placeholder: '-- カテゴリ --',
             icon: 'mdi-help-box',
@@ -163,20 +165,22 @@ namespace CONST {
               }
             ],
             dataList: CONST.payCategories,
+            order: 5,
           },
           {
             id: 'memo',
-            name: '備考',
+            name: '何を',
             type: 'text',
             placeholder: 'ex) コンビニ',
             icon: 'mdi-tooltip-edit',
             model: '',
             validates: [],
             args: [],
+            order: 2,
           },
           {
             id: 'payedBy',
-            name: '支払ってくれた人',
+            name: '誰が',
             type: 'select-btns',
             placeholder: '',
             icon: 'mdi-account-circle',
@@ -192,6 +196,7 @@ namespace CONST {
             ],
             args: [],
             dataList: [], // members
+            order: 1,
           },
         ],
       },
@@ -217,6 +222,7 @@ namespace CONST {
               },
             ],
             args: [],
+            order: 2,
           },
           {
             id: 'doDueDate',
@@ -231,6 +237,7 @@ namespace CONST {
               },
             ],
             args: [],
+            order: 3,
           },
           {
             id: 'doBy',
@@ -249,6 +256,7 @@ namespace CONST {
             ],
             args: [],
             dataList: [], // members
+            order: 1,
           },
         ],
       },
@@ -274,6 +282,7 @@ namespace CONST {
               },
             ],
             args: [],
+            order: 2,
           },
           {
             id: 'buyCategory',
@@ -284,6 +293,7 @@ namespace CONST {
             model: 'none',
             validates: [],
             dataList: CONST.buyCategories, // categories
+            order: 3,
           },
           {
             id: 'buyDueDate',
@@ -298,6 +308,7 @@ namespace CONST {
               },
             ],
             args: [],
+            order: 4,
           },
           {
             id: 'buyBy',
@@ -316,6 +327,7 @@ namespace CONST {
             ],
             args: [],
             dataList: [], // members + all
+            order: 1,
           },
         ]
       },

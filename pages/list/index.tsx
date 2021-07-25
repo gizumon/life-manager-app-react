@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar } from '@material-ui/core';
-import { Card, CardContent, Tabs, Tab, Box } from '@material-ui/core';
+import { Card, CardContent, Tabs, Tab, Box, Chip } from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
@@ -59,22 +59,22 @@ const tabMap: ITabMap = {
 }
 
 const useStyles = makeStyles({
-  table: {
-    minWidth: 300,
-    maxHeight: 300,
-    whiteSpace: 'nowrap',
-    '&> thead > tr > th': {
-      backgroundColor: theme.palette.secondary.dark,
-      color: '#fff',
-      fontWeight: 700,
-    },
-  },
   card: {
     width: 350,
     margin: '25px 0px 65px 0px',
   },
   tableContainer: {
-    maxHeight: 300,    
+    maxHeight: 320,
+  },
+  table: {
+    minWidth: 300,
+    whiteSpace: 'nowrap',
+    '&> thead > tr > th': {
+      backgroundColor: theme.palette.secondary.dark,
+      color: '#fff',
+      fontWeight: 700,
+      padding: '6px 10px',
+    },
   },
   avatarBlock: {
     display: 'flex',
@@ -82,6 +82,13 @@ const useStyles = makeStyles({
       width: 20,
       height: 20,
     }
+  },
+  chips: {
+    marginBottom: '5px',
+    fontWeight: 700,
+    color: '#fff',
+    backgroundColor: theme.palette.error.main,
+    opacity: 0.9,
   }
 });
 
@@ -137,8 +144,15 @@ export default function List() {
       setDisplayDataObj(dataObj);
 
       const map: {[key in string]: string} = {};
-      getConfig(selectedType as IConfigType).inputs.forEach((input: IInput) => map[input.id] = input.name);
-      setDisplayMap(map);
+      const inputConfigs = getConfig(selectedType as IConfigType).inputs;
+      inputConfigs.forEach((input: IInput) => map[input.id] = input.name);
+      const sortedMap = Utils.sortObject(map, (key1: string, key2: string): number => {
+        const order1 = inputConfigs.find(input => input.id === key1[0])?.order || 100;
+        const order2 = inputConfigs.find(input => input.id === key2[0])?.order || 100;
+        return order1 < order2 ? -1 : order1 > order2 ? 1 : 0;
+      });
+      console.log('sorted map: ', sortedMap);
+      setDisplayMap(sortedMap);
     }
     console.log('created displayDataObjMap', displayDataObj, displayMap);
   }, [inputs, selectedType, selectedId]);
@@ -159,6 +173,37 @@ export default function List() {
   const getDisplayDataList = (type: IConfigType): IDisplayData[][] => {
     console.log(displayDataObj);
     return (displayDataObj && displayDataObj[type]) ? displayDataObj[type] : [];
+  };
+
+  const getCalculations = (): {id: string, name: string, picture: string, shouldReceive: number, shouldPay: number, diff: number, hasReimbursement: Boolean}[] => {
+    // way: calculate the amount payed for someone
+    const arr: {id: string, name: string, picture: string, shouldReceive: number, shouldPay: number, diff: number, hasReimbursement: Boolean}[] = [];
+    members.forEach((member) => {
+      const calcObj = {
+        id: member.id || '',
+        name: member.name,
+        picture: member.picture || '',
+        shouldReceive: 0,
+        shouldPay: 0,
+        diff: 0,
+        hasReimbursement: false
+      };
+      inputs[selectedId]['pay'].forEach((row) => {
+        const payed = row.payedBy === calcObj.id;
+        const isPayed = row.payedFor.includes(calcObj.id);
+        if (payed) {
+          calcObj.shouldReceive += isPayed ? (row.price - (row.price / row.payedFor.length)) : row.price;
+        }
+        if (isPayed) {
+          calcObj.shouldPay += payed ? 0 : (row.price / row.payedFor.length);
+        }
+      });
+      calcObj.diff = calcObj.shouldReceive - calcObj.shouldPay;
+      calcObj.hasReimbursement = calcObj.diff < 0;
+      arr.push(calcObj);
+    });
+    console.log('get calculations', arr);
+    return arr;
   };
 
   // TODO: should move in utils
@@ -206,6 +251,23 @@ export default function List() {
           <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
         </Tabs>
         <CardContent>
+          {
+            isInitialized && selectedType === 'pay' && (
+              <div>
+                {
+                  getCalculations().filter(obj => !obj.hasReimbursement).map(obj => {
+                    return (
+                      <Chip
+                        key={obj.id}
+                        className={classes.chips}
+                        avatar={<Avatar alt="who" src={obj.picture} />}
+                        label={`${obj.name} が ${obj.diff.toLocaleString()}円 立替中🙇‍♂️`}
+                      />)
+                  })
+                }
+              </div>
+            ) 
+          }
           <TableContainer className={classes.tableContainer} component={Paper}>
             <Table stickyHeader className={classes.table} size="small" aria-label="a dense table">
               <TableHead>
@@ -217,7 +279,7 @@ export default function List() {
               </TableHead>
               <TableBody>
                 {
-                  isInitialized && getDisplayDataList(selectedType as IConfigType).map((row) => {
+                  isInitialized && getDisplayDataList(selectedType as IConfigType).slice().reverse().map((row) => {
                     return (
                       <TableRow key={row[0].dataId}>
                         {
@@ -226,7 +288,7 @@ export default function List() {
                             const value = col ? convertDisplayValue(col.id, col.value) : '';
                             if (displayPictures.includes(col?.id as keyof IInputData)) {
                               return (
-                                <TableCell key={key} align="right">
+                                <TableCell key={key} align="left">
                                   <div className={classes.avatarBlock}>{
                                   (value as string[]).map((pic, index) => {
                                     return (
@@ -238,7 +300,7 @@ export default function List() {
                               )
                             }
                             return (
-                              <TableCell key={key} align="right">{value}</TableCell>
+                              <TableCell key={key} align="left">{value}</TableCell>
                             );
                           })
                         }

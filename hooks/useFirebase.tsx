@@ -3,7 +3,7 @@ import { createContext, FC, useContext, useEffect, useState } from "react"
 import firebase from 'firebase/app';
 import 'firebase/database';
 import { IConfig, ICategory, IMember, IGroup, IInputData, IConfigType } from '../interfaces/index';
-// import FirebaseFactory from '../test/factory/firebaseFactory';
+import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from '../services/utilsService';
 
 export const refsMap = {
@@ -88,6 +88,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
   DB = firebaseApp?.database();
 
   if (firebaseApp && DB && !states.isRunInitialized) {
+    dataFactory();
     setStates((data) => { return { ...data, isRunInitialized: true } });
     asyncSetProperties().then((items: IFirebaseData) => {
       const members = convertObjectToArray(items.members) as IMember[];
@@ -246,4 +247,12 @@ const convertInputsToArray = (obj: {[key: string]: {[key in IConfigType]: {[key:
     });
   });
   return data;
+}
+
+const dataFactory = () => {
+  DB?.ref(refsMap.isUseFactory).once('value').then((snapshot: firebase.database.DataSnapshot) => {
+      const isUseFactory = snapshot.val();
+      if (!isUseFactory) { return; }
+      FirebaseFactory.prepareAll(DB as firebase.database.Database);
+  });
 }

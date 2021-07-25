@@ -41,7 +41,7 @@ const useStyles = makeStyles({
     zIndex: 1000,
     background: theme.palette.grey[50],
     '& .Mui-selected': {
-      color: theme.palette.secondary.dark,
+      color: theme.palette.secondary.light,
     }
   },
 });
