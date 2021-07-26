@@ -68,10 +68,13 @@ export default function Manage() {
     // const propsX = {id: 'X', state: state, onClick: onClickOutSideComponent}
     return (
         <div>
-            <ChildTestV1 id='4' state={state} onClick={onClickFn}></ChildTestV1>
-            <ChildTestV1 id='5' state={state} onClick={onClickCallbackFn}></ChildTestV1>
-            <ChildTestV1 id='6' state={state} onClick={onClickCallbackFnDepsState}></ChildTestV1>
+            <div style={{display: 'none'}}>
+                <ChildTestV1 id='4' state={state} onClick={onClickFn}></ChildTestV1>
+                <ChildTestV1 id='5' state={state} onClick={onClickCallbackFn}></ChildTestV1>
+                <ChildTestV1 id='6' state={state} onClick={onClickCallbackFnDepsState}></ChildTestV1>
+            </div>
             {/* <ChildTestV1 id='X' state={state} onClick={onClickOutSideComponent}></ChildTestV1> */}
+            <h1>開発中です。。。待っててね</h1>
         </div>
     );
 }

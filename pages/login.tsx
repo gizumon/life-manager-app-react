@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { IMember } from '../interfaces/index';
 import TapAndPlayIcon from '@material-ui/icons/TapAndPlay';
 import SpeakerPhoneIcon from '@material-ui/icons/SpeakerPhone';
+import ModalV1 from '../components/ModalV1';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -55,44 +56,72 @@ const useStyles = makeStyles((theme: Theme) =>
  */
 export default function Login() {
   const router = useRouter();
-  const { userId, user, liff, sendText } = useAuth();
-  const { members, pushMember, pushGroup, isInitialized } = useFirebase();
+  const { userId, user, sendText } = useAuth();
+  const { isInitialized, members, pushMember, pushGroup, pushGroupMember, isExistGroup } = useFirebase();
   const [ code, setCode ] = useState<string>();
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const [modalMessage, setModalMessage] = useState<string>('');
+  const [onCloseFn, setOnCloseFn] = useState<() => void>(() => {});
   const classes = useStyles();
 
   const onChangeHandler = (event: any) => setCode(event.target.value);
+  const onCloseModalHandler = () => {
+    setIsOpenModal(false);
+    setModalMessage('');
+    onCloseFn();
+  }
+  const modalOn = (message: string, fn: () => void = () => {}) => {
+    setModalMessage(message);
+    // TODO: should detect onclose and should useModal
+    setOnCloseFn(() => fn);
+    setIsOpenModal(true);
+  };
   const generateCode = () => {
     if (user && pushMember && pushGroup) {
       const newMember = makeMemberFromUser(user);
-      pushGroup({members: [newMember]}).then(ref => {
-        console.log('push group', ref);
+      pushGroup().then(ref => {
         if (ref.key === null) {
           console.error('push group does not success', ref);
+          modalOn('Groupの作成に失敗しました。。')
           return;
         }
         newMember.groupId = ref.key;
-        const message = `ペアリングしたいユーザーへ下記のコードを共有ください。ペアリングコード：「${newMember.groupId}」`;
-        if (sendText && liff?.isApiAvailable('shareTargetPicker')) {
-          sendText(message);
-        } else {
-          alert(message);
-        }
         pushMember(newMember).then((_) => {
-          router.push(makeRedirectUri(redirectUri, newMember.groupId), undefined, {shallow: true});
+          // TODO: should ¥n
+          const message = `ペアリングしたいユーザーへ下記のコードを共有ください。　ペアリングコード：「${newMember.groupId}」`; 
+          try {
+            // TODO: Should avoid error
+            (sendText as (message: string) => void)(message);
+          } catch {
+            console.warn('Could not send text using liff', message);
+          }
+          modalOn(message, () => {
+            // TODO: should detect onclose and should useModal
+            router.push(makeRedirectUri(redirectUri, newMember.groupId), undefined, {shallow: true});
+            setOnCloseFn(() => {});
+          });
         });
       });
     } else {
-      console.error('firebase need to initialize...');
+      console.warn('firebase need to initialize...');
     }
   }
 
   const applyCode = () => {
-    if (user && pushMember && pushGroup) {
+    if (!code) {
+      return modalOn('ペアリングコードが入力されていません');
+    }
+    if (user && pushGroupMember && pushMember && isExistGroup) {
       const newMember = makeMemberFromUser(user);
       newMember.groupId = code;
-      pushGroup({members: [newMember]}).then(_ => {
-        pushMember(newMember).then(_ => {
-          router.push(makeRedirectUri(redirectUri, newMember.groupId), undefined, {shallow: true});
+      isExistGroup(newMember.groupId)?.then(isExist => {
+        if (!isExist) {
+          return modalOn(`入力されたペアリングコードは正しくないみたいです。。`);
+        }
+        pushGroupMember(newMember.groupId as string, newMember).then(_ => {
+          pushMember(newMember).then((_) => {
+            router.push(makeRedirectUri(redirectUri, newMember.groupId), undefined, {shallow: true});
+          });
         });
       });
     }
@@ -117,29 +146,32 @@ export default function Login() {
   if (!hasMemberBelongGroup && user && isInitialized) {
     console.log('code input: ', member, user);
     return (
-      <Card className={classes.card}>
-        <CardContent>
-          <span>共有されたペアリングコードがある場合：</span>
-          <div className={classes.block}>
-            <TextField
-              id="code"
-              label="ペアリングコード入力"
-              variant="outlined"
-              type="text"
-              margin="dense"
-              onChange={onChangeHandler}
-            />
-            <IconButton className={classes.inputBtn} color="primary" onClick={applyCode} >
-              <TapAndPlayIcon />
-            </IconButton>
-          </div>
-          <Divider className={classes.divider} orientation="horizontal" />
-          <span>共有されたペアリングコードがない場合：</span>
-          <div className={classes.block}>
-            <Button  variant="contained" color="primary" onClick={generateCode} endIcon={<SpeakerPhoneIcon />}>ペアリングコード発行</Button>
-          </div>
-        </CardContent>
-      </Card>
+      <>
+        <Card className={classes.card}>
+          <CardContent>
+            <span>共有されたペアリングコードがある場合：</span>
+            <div className={classes.block}>
+              <TextField
+                id="code"
+                label="ペアリングコード入力"
+                variant="outlined"
+                type="text"
+                margin="dense"
+                onChange={onChangeHandler}
+              />
+              <IconButton className={classes.inputBtn} color="primary" onClick={applyCode} >
+                <TapAndPlayIcon />
+              </IconButton>
+            </div>
+            <Divider className={classes.divider} orientation="horizontal" />
+            <span>ペアリングコードを持っていない場合：</span>
+            <div className={classes.block}>
+              <Button  variant="contained" color="primary" onClick={generateCode} endIcon={<SpeakerPhoneIcon />}>ペアリングコード発行</Button>
+            </div>
+          </CardContent>
+        </Card>
+        <ModalV1 open={isOpenModal} title='' body={modalMessage} onClose={onCloseModalHandler} />
+      </>
     );
   }
 

@@ -79,8 +79,6 @@ const Layout: FC = ({ children }) => {
     );
   }
 
-  liff.liff?.getProfile().then(user => dispatch(userSlice.actions.setUser(user as UserState)));
-
   if (!firebase.isInitialized) {
     return (
       <FadeWrapper>
@@ -88,6 +86,12 @@ const Layout: FC = ({ children }) => {
       </FadeWrapper>
     );
   }
+
+  liff.liff?.getProfile().then(user => {
+    dispatch(userSlice.actions.setUser(user as UserState));
+    sessionStorage.setItem('lid', user.userId);
+    // firebase.members.some((member) => )
+  });
 
   return (
     <>{children}</>

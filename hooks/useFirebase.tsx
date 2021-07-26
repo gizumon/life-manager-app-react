@@ -79,7 +79,9 @@ type IUseFirebaseReturn = IDataAndFlagStates & {
   pushData?: (refPath: string, data: any) => Promise<void>;
   pushInput?: (id: string, type: string, data: any) => Promise<firebase.database.Reference>;
   pushMember?: (data: IMember) => Promise<firebase.database.Reference>;
-  pushGroup?: (data: IGroup) => Promise<firebase.database.Reference>;
+  pushGroup?: (data?: IGroup) => Promise<firebase.database.Reference>;
+  pushGroupMember?: (groupId: string, data: IMember) => Promise<firebase.database.Reference>;
+  isExistGroup?: (groupId?: string) => Promise<boolean>;
 }
 
 export const useFirebase = (): IUseFirebaseReturn => {
@@ -120,7 +122,8 @@ export const useFirebase = (): IUseFirebaseReturn => {
     pushInput: pushInput,
     pushMember: pushMember,
     pushGroup: pushGroup,
-    
+    pushGroupMember: pushGroupMember,
+    isExistGroup: isExistGroup,
   };
 }
 
@@ -184,16 +187,47 @@ const pushMember = (data: IMember): Promise<firebase.database.Reference> => {
   });
 }
 
-const pushGroup = (data: IGroup): Promise<firebase.database.Reference> => {
+const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
       return reject('DB has not defined...')
     }
-    const refName = refsMap.groups;
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
-
-    DB.ref(refName).push(data).then(val => {
+    DB.ref(refsMap.groups).push(data).then(val => {
       return resolve(val);
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
+    });
+  });
+}
+
+const pushGroupMember = (groupId: string, data: IMember) => {
+  return new Promise<firebase.database.Reference>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...')
+    }
+    data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
+    DB.ref(refsMap.groups).child(`${groupId}/members`).push(data).then(val => {
+      return resolve(val);
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
+    });
+  });
+}
+
+const isExistGroup = (groupId: string = '') => {
+  return new Promise<boolean>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...');
+    }
+    if (!groupId) {
+      return resolve(false);
+    }
+    DB.ref(refsMap.groups).once('value').then(snapshot => {
+      const isExist = snapshot.hasChild(groupId);
+      return resolve(isExist);
     }).catch(err => {
       console.warn(err);
       return reject(err);

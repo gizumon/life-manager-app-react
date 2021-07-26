@@ -85,7 +85,7 @@ export interface IPageConfig {
  */
  export interface IGroup {
     id?: string;
-    members: IMember[];
+    members?: IMember[];
     timestamp?: any;
 }
 
