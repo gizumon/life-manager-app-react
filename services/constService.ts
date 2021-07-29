@@ -83,18 +83,27 @@ namespace CONST {
     export const buyCategories: ICategory[] = [
       {
         id: 'none',
-        name: '指定なし',
+        name: 'その他',
         type: 'tobuy',
+        isHide: false,
       },
       {
-        id: 'food',
-        name: '食料品',
+        id: 'super',
+        name: 'スーパー',
         type: 'tobuy',
+        isHide: false,
       },
       {
-        id: 'households',
-        name: '日用品',
+        id: 'oneDollarShop',
+        name: '100円均一',
         type: 'tobuy',
+        isHide: false,
+      },
+      {
+        id: 'drugstore',
+        name: '薬局',
+        type: 'tobuy',
+        isHide: false,
       },
       // {
       //   id: 'furniture',
@@ -226,7 +235,7 @@ namespace CONST {
           },
           {
             id: 'doDueDate',
-            name: '期限',
+            name: 'いつまで',
             type: 'date',
             placeholder: '2021/XX/XX',
             icon: 'mdi-calendar-clock',
@@ -286,9 +295,9 @@ namespace CONST {
           },
           {
             id: 'buyCategory',
-            name: 'カテゴリ',
+            name: 'どこで',
             type: 'select',
-            placeholder: '-- カテゴリ --',
+            placeholder: '-- 買う場所 --',
             icon: 'mdi-help-box',
             model: 'none',
             validates: [],
@@ -297,7 +306,7 @@ namespace CONST {
           },
           {
             id: 'buyDueDate',
-            name: '期限',
+            name: 'いつまで',
             type: 'date',
             placeholder: '2021/XX/XX',
             icon: 'mdi-calendar-clock',

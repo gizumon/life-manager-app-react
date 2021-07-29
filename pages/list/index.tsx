@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, Link } from '@material-ui/core';
 import { Card, CardContent, Tabs, Tab, Box, Chip } from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
@@ -12,6 +12,8 @@ import { useFirebase } from '../../hooks/useFirebase';
 import theme from '../../styles/theme';
 import CONST from '../../services/constService';
 import { ICategory } from '../../interfaces/index';
+import FadeWrapper from '../../components/FadeWrapper';
+import Progress from '../../components/AnimationProgressV1';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -89,6 +91,21 @@ const useStyles = makeStyles({
     color: '#fff',
     backgroundColor: theme.palette.error.main,
     opacity: 0.9,
+  },
+  messageBox: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    borderTop: 'solid 5px #eb8a44',
+    fontSize: '1rem',
+    fontWeight: 700,
+    boxShadow: '0 3px 5px rgb(0 0 0 / 22%)',
+    '&> a': {
+      marginRight: '7px',
+      fontSize: '1.2rem',
+      fontWeight: 900,
+    }
   }
 });
 
@@ -106,29 +123,36 @@ function getTabProps(index: number) {
 export default function List() {
   const classes = useStyles();
   const router = useRouter();
-  const { configs, inputs, members } = useFirebase();
+  // TODO: Should handle no inputs case 
+  const { configs, inputs, groupMembers, activateGroup, isInitialized } = useFirebase();
+  console.log('configs groupMembers', configs, groupMembers);
   // TODO: Should use session
-  console.log('list component', router.query['id'], Utils.getQueryParam(router.asPath, 'id'));
-  const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id') || '';
+  const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
 
   const [tabIndex, setTabIndex] = React.useState<ITabIndex>(tabMap.toIndex[selectedType as IConfigType] || tabMap.toIndex['pay']);
-  const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+  const [isPageInitialized, setIsPageInitialized] = React.useState<boolean>(false);
   const [displayMap, setDisplayMap] = React.useState<IDisplayMap>({});
   const [displayDataObj, setDisplayDataObj] = React.useState<IDisplayDataObject>({pay: [], todo: [], tobuy: []});
 
   useEffect(() => {
+    console.log('run activate group', activateGroup, selectedType);
+    if (activateGroup && selectedId) {
+      activateGroup(selectedId);
+    }
+  }, [isInitialized]);
+
+  useEffect(() => {
     if (configs.length > 0) {
-      setIsInitialized(true);
+      setIsPageInitialized(true);
     }
   }, [configs]);
 
   useEffect(() => {
-    console.log('!!!inputs change:', inputs, inputs[selectedId], selectedType);
-    if (inputs && inputs[selectedId] && selectedType) {
+    if (inputs && selectedType) {
       const dataObj: IDisplayDataObject = {pay: [], todo: [], tobuy: []};
-      Object.keys(inputs[selectedId]).forEach((type) => {
-        inputs[selectedId][type as IConfigType].forEach((data) => {
+      Object.keys(inputs).forEach((type) => {
+        inputs[type as IConfigType].forEach((data) => {
           const list: IDisplayData[] = [];
           Object.keys(data).forEach(key => {
             list.push({
@@ -144,14 +168,13 @@ export default function List() {
       setDisplayDataObj(dataObj);
 
       const map: {[key in string]: string} = {};
-      const inputConfigs = getConfig(selectedType as IConfigType).inputs;
-      inputConfigs.forEach((input: IInput) => map[input.id] = input.name);
+      const inputConfigs = getConfig(selectedType as IConfigType)?.inputs;
+      inputConfigs?.forEach((input: IInput) => map[input.id] = input.name);
       const sortedMap = Utils.sortObject(map, (key1: string, key2: string): number => {
         const order1 = inputConfigs.find(input => input.id === key1[0])?.order || 100;
         const order2 = inputConfigs.find(input => input.id === key2[0])?.order || 100;
         return order1 < order2 ? -1 : order1 > order2 ? 1 : 0;
       });
-      console.log('sorted map: ', sortedMap);
       setDisplayMap(sortedMap);
     }
     console.log('created displayDataObjMap', displayDataObj, displayMap);
@@ -159,16 +182,12 @@ export default function List() {
 
   const onTabChange = (_: React.ChangeEvent<{}>, index: ITabIndex) => {
     setTabIndex(index);
-    router.push(`/list?id=${selectedId}&type=${tabMap.toType[index]}`, undefined, {shallow: true});
+    router.push(Utils.makeUrl('/list', tabMap.toType[index]), undefined, {shallow: true});
   };
 
   const getConfig = (type: IConfigType): IConfig => {
     return configs[tabMap.toIndex[type]];
   };
-
-  // const getInputs = (index: ITabIndex): IInputData[] => {
-  //   return (typeof index === 'number' && inputs && selectedId) ? inputs[selectedId][tabMap.toType[index]] : [];
-  // };
 
   const getDisplayDataList = (type: IConfigType): IDisplayData[][] => {
     console.log(displayDataObj);
@@ -178,7 +197,7 @@ export default function List() {
   const getCalculations = (): {id: string, name: string, picture: string, shouldReceive: number, shouldPay: number, diff: number, hasReimbursement: Boolean}[] => {
     // way: calculate the amount payed for someone
     const arr: {id: string, name: string, picture: string, shouldReceive: number, shouldPay: number, diff: number, hasReimbursement: Boolean}[] = [];
-    members.forEach((member) => {
+    groupMembers.forEach((member) => {
       const calcObj = {
         id: member.id || '',
         name: member.name,
@@ -188,7 +207,7 @@ export default function List() {
         diff: 0,
         hasReimbursement: false
       };
-      inputs[selectedId]['pay'].forEach((row) => {
+      inputs['pay'].forEach((row) => {
         const payed = row.payedBy === calcObj.id;
         const isPayed = row.payedFor.includes(calcObj.id);
         if (payed) {
@@ -199,10 +218,9 @@ export default function List() {
         }
       });
       calcObj.diff = calcObj.shouldReceive - calcObj.shouldPay;
-      calcObj.hasReimbursement = calcObj.diff < 0;
+      calcObj.hasReimbursement = calcObj.diff <= 0;
       arr.push(calcObj);
     });
-    console.log('get calculations', arr);
     return arr;
   };
 
@@ -224,95 +242,119 @@ export default function List() {
 
   const convertMemberIcon = (id: string): string[] => {
     return id === 'ALL' ? ['全員']
-         : members.find(member => member.id === id) ? [ members.find(member => member.id === id)?.picture as string ]
+         : groupMembers.find(member => member.id === id) ? [ groupMembers.find(member => member.id === id)?.picture as string ]
          : ['Unknown'];
   }
   // const convertMembersName = (ids: string[]): string => ids.map(id => convertMemberName(id)).join(', ');
-  const convertMemberIcons = (ids: string[]): string[] => {
-    return (ids && ids.length > 0) ? ids.map(id => convertMemberIcon(id)[0]) : ids;
-  };
-
+  const convertMemberIcons = (ids: string[]): string[] => (ids && ids.length > 0) ? ids.map(id => convertMemberIcon(id)[0]) : ids;
   const convertPayedCategoryName = (id: string): string => CONST.payCategories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
   const convertBuyCategoryName = (id: string): string => CONST.buyCategories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
   const convertDatetime = (timestamp: number): string => new Date(timestamp).toISOString();
   const convertNumber = (val: number): string => '¥' + String(Number(val).toLocaleString());
 
+  const isLoading = !isPageInitialized || configs.length < 1 || groupMembers.length < 1;
+  const isShownTable = getDisplayDataList(selectedType as IConfigType).length > 0;
+
+  if (isLoading) {
+    return (<FadeWrapper><Progress /></FadeWrapper>);
+  }
+
   return (
-    <Box display="flex" justifyContent="center">
-      <Card className={classes.card}>
-        <Tabs
-          variant="fullWidth"
-          value={tabIndex}
-          onChange={onTabChange}
-          aria-label="tabs"
-        >
-          <Tab label={<><PaymentIcon /> Pay</>} {...getTabProps(tabMap.toIndex['pay'])} />
-          <Tab label={<><AssignmentTurnedInIcon /> ToDo</>} {...getTabProps(tabMap.toIndex['todo'])} />
-          <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
-        </Tabs>
-        <CardContent>
-          {
-            isInitialized && selectedType === 'pay' && (
-              <div>
-                {
-                  getCalculations().filter(obj => !obj.hasReimbursement).map(obj => {
-                    return (
-                      <Chip
-                        key={obj.id}
-                        className={classes.chips}
-                        avatar={<Avatar alt="who" src={obj.picture} />}
-                        label={`${obj.name} が ${obj.diff.toLocaleString()}円 立替中🙇‍♂️`}
-                      />)
-                  })
-                }
-              </div>
-            ) 
-          }
-          <TableContainer className={classes.tableContainer} component={Paper}>
-            <Table stickyHeader className={classes.table} size="small" aria-label="a dense table">
-              <TableHead>
-                <TableRow>
-                  {
-                    isInitialized && Object.keys(displayMap).map(key => <TableCell key={key}>{displayMap[key]}</TableCell>)
-                  }
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {
-                  isInitialized && getDisplayDataList(selectedType as IConfigType).slice().reverse().map((row) => {
-                    return (
-                      <TableRow key={row[0].dataId}>
+    <>
+      <Box display="flex" justifyContent="center">
+        <Card className={classes.card}>
+          <Tabs
+            variant="fullWidth"
+            value={tabIndex}
+            onChange={onTabChange}
+            aria-label="tabs"
+          >
+            <Tab label={<><PaymentIcon /> Pay</>} {...getTabProps(tabMap.toIndex['pay'])} />
+            <Tab label={<><AssignmentTurnedInIcon /> ToDo</>} {...getTabProps(tabMap.toIndex['todo'])} />
+            <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
+          </Tabs>
+          <CardContent>
+            <>
+              {
+                selectedType === 'pay' && (
+                  <div>
+                    {
+                      getCalculations().filter(obj => !obj.hasReimbursement).map(obj => {
+                        return (
+                          <Chip
+                            key={obj.id}
+                            className={classes.chips}
+                            avatar={<Avatar alt="who" src={obj.picture} />}
+                            label={`${obj.name} が ${obj.diff.toLocaleString()}円 立替中🙇‍♂️`}
+                          />)
+                      })
+                    }
+                  </div>
+                ) 
+              }
+            </>
+            <>
+              {
+                !isShownTable && (
+                  <div className={classes.messageBox}>
+                    <Link href={Utils.makeUrl('/input', selectedType)}>Input</Link> からデータを追加してね
+                  </div>
+                )
+              }
+            </>
+            <>
+              {
+                isShownTable &&
+                <TableContainer className={classes.tableContainer} component={Paper}>
+                  <Table stickyHeader className={classes.table} size="small" aria-label="a dense table">
+                    <TableHead>
+                      <TableRow>
                         {
-                          Object.keys(displayMap).map(key => {
-                            const col = row.find(data => data.id === key);
-                            const value = col ? convertDisplayValue(col.id, col.value) : '';
-                            if (displayPictures.includes(col?.id as keyof IInputData)) {
-                              return (
-                                <TableCell key={key} align="left">
-                                  <div className={classes.avatarBlock}>{
-                                  (value as string[]).map((pic, index) => {
-                                    return (
-                                        <Avatar key={index} src={pic} />
-                                    );
-                                  })}
-                                  </div>
-                                </TableCell>
-                              )
-                            }
+                          Object.keys(displayMap).map(key => <TableCell key={key}>{displayMap[key]}</TableCell>)
+                        }
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <>
+                        {
+                          getDisplayDataList(selectedType as IConfigType).slice().reverse().map((row) => {
                             return (
-                              <TableCell key={key} align="left">{value}</TableCell>
+                              <TableRow key={row[0].dataId}>
+                                {
+                                  Object.keys(displayMap).map(key => {
+                                    const col = row.find(data => data.id === key);
+                                    const value = col ? convertDisplayValue(col.id, col.value) : '';
+                                    if (displayPictures.includes(col?.id as keyof IInputData)) {
+                                      return (
+                                        <TableCell key={key} align="left">
+                                          <div className={classes.avatarBlock}>{
+                                          (value as string[]).map((pic, index) => {
+                                            return (
+                                                <Avatar key={index} src={pic} />
+                                            );
+                                          })}
+                                          </div>
+                                        </TableCell>
+                                      )
+                                    }
+                                    return (
+                                      <TableCell key={key} align="left">{value}</TableCell>
+                                    );
+                                  })
+                                }
+                              </TableRow>
                             );
                           })
                         }
-                      </TableRow>
-                    );
-                  })
-                }
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
-    </Box>
+                      </>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              }
+            </>
+          </CardContent>
+        </Card>
+      </Box>
+    </>
   );
 }

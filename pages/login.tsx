@@ -8,7 +8,6 @@ import Card from '@material-ui/core/Card';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Button, CardContent, Divider, IconButton, TextField } from '@material-ui/core';
 import { useState } from 'react';
-import { IMember } from '../interfaces/index';
 import TapAndPlayIcon from '@material-ui/icons/TapAndPlay';
 import SpeakerPhoneIcon from '@material-ui/icons/SpeakerPhone';
 import ModalV1 from '../components/ModalV1';
@@ -41,6 +40,12 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+const stateMap = {
+  isInitializing: 0,
+  isFoundUser: 1,
+  isNotFoundUser: 2,
+};
+
 /**
  * アクセス
  * 1. ログインのuserId情報からmember情報を取得
@@ -56,13 +61,18 @@ const useStyles = makeStyles((theme: Theme) =>
  */
 export default function Login() {
   const router = useRouter();
-  const { userId, user, sendText } = useAuth();
-  const { isInitialized, members, pushMember, pushGroup, pushGroupMember, isExistGroup } = useFirebase();
+  const { user, sendText } = useAuth();
+  const { isInitialized, pushGroup, updateGroupMember, isExistGroup, updateMember, getMember } = useFirebase();
   const [ code, setCode ] = useState<string>();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
+  const [state, setState] = useState<number>(stateMap.isInitializing);
   const [onCloseFn, setOnCloseFn] = useState<() => void>(() => {});
   const classes = useStyles();
+  const redirectUri = router.query['redirectUri'] as string
+                   || Utils.getQueryParam(router.asPath, 'redirectUri')
+                   || process.env.ROOT_URL + '/input?type=pay';
+  const groupId = sessionStorage.getItem('gid')
 
   const onChangeHandler = (event: any) => setCode(event.target.value);
   const onCloseModalHandler = () => {
@@ -70,14 +80,25 @@ export default function Login() {
     setModalMessage('');
     onCloseFn();
   }
+
   const modalOn = (message: string, fn: () => void = () => {}) => {
     setModalMessage(message);
     // TODO: should detect onclose and should useModal
     setOnCloseFn(() => fn);
     setIsOpenModal(true);
   };
+
+  const redirectWithLogin = (url: string, groupId: string = '') => {
+    sessionStorage.setItem('gid', groupId);
+    router.push(url, undefined, {shallow: true});
+  };
+
+  if (groupId) {
+    redirectWithLogin(redirectUri, groupId);
+  }
+
   const generateCode = () => {
-    if (user && pushMember && pushGroup) {
+    if (user && updateMember && pushGroup && updateGroupMember) {
       const newMember = makeMemberFromUser(user);
       pushGroup().then(ref => {
         if (ref.key === null) {
@@ -86,7 +107,8 @@ export default function Login() {
           return;
         }
         newMember.groupId = ref.key;
-        pushMember(newMember).then((_) => {
+        updateGroupMember(newMember.groupId, newMember);
+        updateMember(user.userId, newMember).then((_) => {
           // TODO: should ¥n
           const message = `ペアリングしたいユーザーへ下記のコードを共有ください。　ペアリングコード：「${newMember.groupId}」`; 
           try {
@@ -97,7 +119,7 @@ export default function Login() {
           }
           modalOn(message, () => {
             // TODO: should detect onclose and should useModal
-            router.push(makeRedirectUri(redirectUri, newMember.groupId), undefined, {shallow: true});
+            redirectWithLogin(redirectUri, newMember.groupId);
             setOnCloseFn(() => {});
           });
         });
@@ -111,78 +133,75 @@ export default function Login() {
     if (!code) {
       return modalOn('ペアリングコードが入力されていません');
     }
-    if (user && pushGroupMember && pushMember && isExistGroup) {
-      const newMember = makeMemberFromUser(user);
-      newMember.groupId = code;
-      isExistGroup(newMember.groupId)?.then(isExist => {
+    if (user && updateGroupMember && updateMember && isExistGroup) {
+      isExistGroup(code)?.then(isExist => {
         if (!isExist) {
           return modalOn(`入力されたペアリングコードは正しくないみたいです。。`);
         }
-        pushGroupMember(newMember.groupId as string, newMember).then(_ => {
-          pushMember(newMember).then((_) => {
-            router.push(makeRedirectUri(redirectUri, newMember.groupId), undefined, {shallow: true});
+        const newMember = makeMemberFromUser(user);
+        newMember.groupId = code;
+        updateGroupMember(newMember.groupId as string, newMember).then(_ => {
+          updateMember(user.userId, newMember).then((_) => {
+            redirectWithLogin(redirectUri, newMember.groupId);
           });
         });
       });
     }
   }
 
-  const member = members?.find((item) => item.lineId === userId);
-  const redirectUri = router.query['redirectUri'] as string
-                   || Utils.getQueryParam(router.asPath, 'redirectUri')
-                   || process.env.ROOT_URL + '/input?type=pay';
-
-  const hasMemberBelongGroup = member && member.groupId;
-
-  // member is already exist, 
-  if (hasMemberBelongGroup && isInitialized) {
-    const url = makeRedirectUri(redirectUri, (member as IMember).groupId);
-    console.log('Make redirect URI', url)
-    router.push(url, undefined, {shallow: true});
-    return <FadeWrapper><Progress message="ページ移動中。。。"/></FadeWrapper>
-  }
-
   // user is exist in auth, but not in member.
-  if (!hasMemberBelongGroup && user && isInitialized) {
-    console.log('code input: ', member, user);
-    return (
-      <>
-        <Card className={classes.card}>
-          <CardContent>
-            <span>共有されたペアリングコードがある場合：</span>
-            <div className={classes.block}>
-              <TextField
-                id="code"
-                label="ペアリングコード入力"
-                variant="outlined"
-                type="text"
-                margin="dense"
-                onChange={onChangeHandler}
-              />
-              <IconButton className={classes.inputBtn} color="primary" onClick={applyCode} >
-                <TapAndPlayIcon />
-              </IconButton>
-            </div>
-            <Divider className={classes.divider} orientation="horizontal" />
-            <span>ペアリングコードを持っていない場合：</span>
-            <div className={classes.block}>
-              <Button  variant="contained" color="primary" onClick={generateCode} endIcon={<SpeakerPhoneIcon />}>ペアリングコード発行</Button>
-            </div>
-          </CardContent>
-        </Card>
-        <ModalV1 open={isOpenModal} title='' body={modalMessage} onClose={onCloseModalHandler} />
-      </>
-    );
+  if (user && isInitialized) {
+    // no request when already check user open
+    if (getMember && state === stateMap.isInitializing) {
+      getMember(user.userId).then(member => {
+        if (member) {
+          redirectWithLogin(redirectUri, member.groupId);
+        }
+        setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
+      });
+    }
+    if (state === stateMap.isNotFoundUser) {
+      return (
+        <>
+          <Card className={classes.card}>
+            <CardContent>
+              <span>共有されたペアリングコードがある場合：</span>
+              <div className={classes.block}>
+                <TextField
+                  id="code"
+                  label="ペアリングコード入力"
+                  variant="outlined"
+                  type="text"
+                  margin="dense"
+                  onChange={onChangeHandler}
+                />
+                <IconButton className={classes.inputBtn} color="primary" onClick={applyCode} >
+                  <TapAndPlayIcon />
+                </IconButton>
+              </div>
+              <Divider className={classes.divider} orientation="horizontal" />
+              <span>ペアリングコードを持っていない場合：</span>
+              <div className={classes.block}>
+                <Button  variant="contained" color="primary" onClick={generateCode} endIcon={<SpeakerPhoneIcon />}>ペアリングコード発行</Button>
+              </div>
+            </CardContent>
+          </Card>
+          <ModalV1 open={isOpenModal} title='' body={modalMessage} onClose={onCloseModalHandler} />
+        </>
+      );
+    }
   }
 
-  console.log('Preparing...', userId, member, user);
-  return <FadeWrapper><Progress message="準備中。。。"/></FadeWrapper>;
+  const message = state === stateMap.isInitializing ? "ログイン中。。。"
+                : state === stateMap.isFoundUser ? "ユーザー確認中。。。"
+                : "ユーザーが見つかりませんでした。。。";
+  return <FadeWrapper><Progress message={message}/></FadeWrapper>;
 }
 
-function makeRedirectUri(redirectUri: string, groupId: string = ''): string {
-  const hasQuery = redirectUri.indexOf('?') > -1;
-  const id = groupId ? `id=${groupId}` : '';
-  const suffix = !id ? ''
-                     : `${hasQuery ? '&' : '?'}${id}`;
-  return redirectUri + suffix;
-}
+// function makeRedirectUri(redirectUri: string, groupId: string = ''): string {
+//   const hasQuery = redirectUri.indexOf('?') > -1;
+//   const id = groupId ? `id=${groupId}` : '';
+//   const suffix = !id ? ''
+//                      : `${hasQuery ? '&' : '?'}${id}`;
+//   return redirectUri + suffix;
+// }

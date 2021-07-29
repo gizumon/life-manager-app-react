@@ -12,6 +12,7 @@ export interface ICategory {
     id: string;
     name: string;
     type: string;
+    isHide?: boolean;
     setting?: IRatioSetting[];
 };
 
@@ -85,7 +86,7 @@ export interface IPageConfig {
  */
  export interface IGroup {
     id?: string;
-    members?: IMember[];
+    members?: {[key: string]: IMember};
     timestamp?: any;
 }
 

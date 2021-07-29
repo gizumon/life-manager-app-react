@@ -13,7 +13,7 @@ type IProps = {
     };
 }
 
-// TODO: Need to fix the layout when there are over 4 items cases
+// TODO: Need to fix the layout when there are over 4 btns cases
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
     root: {

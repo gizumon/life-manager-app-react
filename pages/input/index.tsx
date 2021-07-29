@@ -92,10 +92,9 @@ export default function Input() {
   const router = useRouter();
   // const user = useUserState().user;
   // console.log('!!!!user :', user);
-  const { configs, pushInput } = useFirebase();
-  // const { liff } = useAuth();
-  // to avoid Next bugs
-  const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id');
+  const { configs, pushInput, activateGroup, isInitialized } = useFirebase();
+
+  const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
 
   const [tabIndex, setTabIndex] = React.useState<ITabIndex>(tabMap.toIndex[selectedType as IConfigType] || tabMap.toIndex['pay']);
@@ -105,17 +104,14 @@ export default function Input() {
   const [isOpenSuccessModal, setIsOpenSuccessModal] = React.useState<boolean>(false);
   const [isOpenErrorModal, setIsOpenErrorModal] = React.useState<boolean>(false);
   const [modalBody, setModalBody] = React.useState<{[key in string]: string}>({success: '', error: ''});
-  const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+  const [isPageInitialized, setIsPageInitialized] = React.useState<boolean>(false);
   const onClickTrigger = createTrigger();
 
-  const getConfig = (type: IConfigType): IConfig => {
-    return configs[tabMap.toIndex[type]] || null;
-  };
+  const getConfig = (type: IConfigType): IConfig => configs[tabMap.toIndex[type]] || null;
 
   const onTabChange = useCallback((_: React.ChangeEvent<{}>, index: ITabIndex) => {
     setTabIndex(index);
-    // console.log('!!!!user :', user);
-    router.push(`/input?id=${selectedId}&type=${tabMap.toType[index]}`, undefined, {shallow: true});
+    router.push(`/input?type=${tabMap.toType[index]}`, undefined, {shallow: true});
   }, []);
 
   const processData = (data: IFormData = {}): IFormData => {
@@ -128,9 +124,9 @@ export default function Input() {
     return processedData;
   };
 
-  const makeDefaultFormData = (configs: IConfig[]): IFormData => {
+  const makeDefaultFormData = (list: IConfig[]): IFormData => {
     const data: IFormData = {};
-    configs.forEach(config => config.inputs.forEach((input) => data[input.id] = input.model));
+    list.forEach(config => config.inputs.forEach((input) => data[input.id] = input.model));
     return data;
   };
 
@@ -185,11 +181,19 @@ export default function Input() {
       Object.keys(tabMap.toIndex).forEach((type: string) => validMap[type as IConfigType] = getConfig(type as IConfigType).inputs.map(input => input.id));
       Object.keys(tabMap.toIndex).forEach((type: string) => validatorMap[type as IConfigType] = new ValidationService(getConfig(type as IConfigType)));
       setFormData(makeDefaultFormData(configs));
-      setIsInitialized(true);
+      setIsPageInitialized(true);
     }
   }, [configs]);
 
-  if (!configs || configs.length === 0 || !isInitialized) {
+  useEffect(() => {
+    if (activateGroup) {
+      activateGroup(selectedId);
+    }
+  }, [isInitialized]);
+
+  const isLoading = !configs || configs.length === 0 || !isPageInitialized;
+
+  if (isLoading) {
     return (
       <FadeWrapper>
         <Progress />
@@ -212,7 +216,7 @@ export default function Input() {
         </Tabs>
         <CardContent>
             {
-              isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
+              getConfig(selectedType as IConfigType)?.inputs.map((input) => {
                 if (input.type === 'text') {
                   return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
                 } else if (input.type === 'number') {
@@ -229,7 +233,7 @@ export default function Input() {
         </CardContent>
         <CardActions disableSpacing className={classes.btns}>
           {
-            isInitialized && getConfig(selectedType as IConfigType)?.inputs.map((input) => {
+            getConfig(selectedType as IConfigType)?.inputs.map((input) => {
               if (input.type === 'select-btns') {
                 return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={onClickTrigger} />);
               }

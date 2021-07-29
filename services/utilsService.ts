@@ -34,6 +34,17 @@ namespace Utils {
     export function sortObject(obj: Object, sortFn?: (obj1: any, obj2: any) => number) {
         return Object.fromEntries(Object.entries(obj).sort(sortFn));
     }
+
+    /**
+     * make url
+     * @param baseUrl 
+     * @param id 
+     * @param type 
+     * @returns 
+     */
+    export function makeUrl(baseUrl: string = '', type: string = ''): string {
+        return type ? `${baseUrl}?type=${type}` : baseUrl;
+    }
 }
 
 export default Utils;

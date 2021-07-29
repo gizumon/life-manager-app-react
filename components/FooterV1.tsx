@@ -42,33 +42,22 @@ const useStyles = makeStyles({
     background: theme.palette.grey[50],
     '& .Mui-selected': {
       color: theme.palette.secondary.light,
+    },
+    '& .Mui-disabled': {
+      color: theme.palette.grey[500],
     }
   },
 });
 
-function makeUrl(baseUrl: string = '', id: string = '', type: string = ''): string {
-  let url = baseUrl;
-  if (id) {
-    url += `?id=${id}`;
-    if (type) {
-      url += `&type=${type}`;
-    }
-  } else if (type) {
-    url += `?type=${type}`;
-  }
-  return url;
-}
-
 export default function FooterV1() {
   const router = useRouter()
   const classes = useStyles();
-  const selectedId = router.query['id'] as string || Utils.getQueryParam(router.asPath, 'id') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
-
+  const isLoginPage = router.asPath.indexOf('/login') > -1;
   const [navIndex, setNavIndex] = React.useState(navMap.toIndex[router.pathname as IUrlType] || 0);
 
   const onChangeNav = (_: React.ChangeEvent<{}>, index: INavIndex) => {
-    router.push(makeUrl(navMap.toUrl[index], selectedId, selectedType), undefined, {shallow: true});
+    router.push(Utils.makeUrl(navMap.toUrl[index], selectedType), undefined, {shallow: true});
   };
 
   router.events.on('routeChangeComplete', () => setNavIndex(navMap.toIndex[router.pathname as IUrlType]));
@@ -80,9 +69,9 @@ export default function FooterV1() {
       showLabels
       className={classes.root}
     >
-      <BottomNavigationAction label="Input" icon={<EditIcon />} />
-      <BottomNavigationAction label="List" icon={<ListIcon />} />
-      <BottomNavigationAction label="Manage" icon={<SettingsIcon />} />
+      <BottomNavigationAction label="Input" icon={<EditIcon />} disabled={isLoginPage}/>
+      <BottomNavigationAction label="List" icon={<ListIcon />} disabled={isLoginPage}/>
+      <BottomNavigationAction label="Manage" icon={<SettingsIcon />} disabled={isLoginPage}/>
     </BottomNavigation>
   );
 }

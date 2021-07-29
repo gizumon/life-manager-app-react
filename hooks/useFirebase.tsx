@@ -10,7 +10,7 @@ export const refsMap = {
     isUseFactory: 'triggers/isUseFactory',
     configs: 'masterdata/configs',
     categories: 'masterdata/categories',
-    members: 'data/members',
+    members: 'users',
     groups: 'data/groups',
     inputs: 'data/inputs'
 };
@@ -61,9 +61,16 @@ type IFirebaseData = {
 type IDataStates = {
   configs: IConfig[];
   categories: ICategory[];
-  members: IMember[];
+  // members: IMember[];
+  // inputs: {[key in string]: {[key in IConfigType]: IInputData[]}};
+}
+
+type IActivateDataStates = {
+  isGroupActivated: boolean;
+  configs: IConfig[];
   groups: IGroup[];
-  inputs: {[key in string]: {[key in IConfigType]: IInputData[]}};
+  groupMembers: IMember[];
+  inputs: {[key in IConfigType]: IInputData[]};
 }
 
 type IDataAndFlagStates = IDataStates & {
@@ -71,42 +78,69 @@ type IDataAndFlagStates = IDataStates & {
   isInitialized: boolean;
 }
 
-type IUseFirebaseReturn = IDataAndFlagStates & {
+type IUseFirebaseReturn = IDataAndFlagStates & IActivateDataStates & {
   firebase?: typeof firebase;
   db?: firebase.database.Database;
   getData?: (refPath: string) => Promise<any[]>;
   setData?: (refPath: string, data: any) => Promise<void>;
   pushData?: (refPath: string, data: any) => Promise<void>;
   pushInput?: (id: string, type: string, data: any) => Promise<firebase.database.Reference>;
-  pushMember?: (data: IMember) => Promise<firebase.database.Reference>;
+  // pushMember?: (data: IMember) => Promise<firebase.database.Reference>;
+  getMember?: (lineId: string) => Promise<IMember>;
+  updateMember?: (lineId: string, data: IMember) => Promise<firebase.database.Reference>;
   pushGroup?: (data?: IGroup) => Promise<firebase.database.Reference>;
-  pushGroupMember?: (groupId: string, data: IMember) => Promise<firebase.database.Reference>;
-  isExistGroup?: (groupId?: string) => Promise<boolean>;
+  updateGroupMember?: (groupId: string, data: IMember) => Promise<firebase.database.Reference>;
+  isExistGroup?: (groupId: string) => Promise<boolean>;
+  isExistMember?: (lineId: string) => Promise<boolean>;
+  activateGroup?: (groupId: string) => void;
+  makePageConfigs?: (configs: IConfig[], categories: ICategory[], members: IMember[]) => IConfig[];
 }
 
 export const useFirebase = (): IUseFirebaseReturn => {
   const firebaseApp = useContext(FirebaseContext);
-  const [states, setStates] = useState<IDataAndFlagStates>({isRunInitialized: false, isInitialized: false, configs: [], categories: [], members: [], groups: [], inputs: {}});
+  const [states, setStates] = useState<IDataAndFlagStates>({isRunInitialized: false, isInitialized: false, configs: [], categories: []});
+  const [activateState, setActivateState] = useState<IActivateDataStates>({isGroupActivated: false, groups: [], groupMembers: [], configs: [], inputs:  {pay: [], todo: [], tobuy:[]}});
   DB = firebaseApp?.database();
 
+  const activateGroup = (groupId: string) => {
+    if (!DB || !groupId || activateState.isGroupActivated || states.configs.length < 1) { return; }
+    DB.ref(refsMap.groups).child(groupId).once('value').then((groupSnap) => {
+      const group = groupSnap.val() as IGroup;
+      if (!group || !group.members) { return; }
+      const groupMembers = convertObjectToArray(group.members as {[key: string]: IMember}) as IMember[];
+      console.log('activate group: ', group, groupMembers);
+      
+      DB?.ref(refsMap.inputs).child(groupId).once('value').then((inputSnap) => {
+        const inputs = convertGroupInputsToArray(inputSnap.val() as {[key in IConfigType]: {[key: string]: IInputData}});
+        setActivateState({
+          isGroupActivated: true,
+          configs: makePageConfigs(states.configs, states.categories, groupMembers),
+          groups: [group],
+          groupMembers: groupMembers,
+          inputs: inputs || {pay: [], todo: [], tobuy:[]},
+        });
+      });
+    });
+  }
+
   if (firebaseApp && DB && !states.isRunInitialized) {
+    console.log('isRunInitializedはfalseのはず', states);
     dataFactory();
-    setStates((data) => { return { ...data, isRunInitialized: true } });
+    setStates((data) => {
+      return { ...data, isRunInitialized: true }
+    });
     asyncSetProperties().then((items: IFirebaseData) => {
-      const members = convertObjectToArray(items.members) as IMember[];
-      const groups = convertObjectToArray(items.groups) as IGroup[];
-      const inputs = convertInputsToArray(items.inputs) as {[key in string]: {[key in IConfigType]: IInputData[]}};
-      const processedConfigs = makePageConfigs(items.configs, items.categories, members);
+      // const members = convertObjectToArray(items.members) as IMember[];
+      // const groups = convertObjectToArray(items.groups) as IGroup[];
+      // const inputs = convertInputsToArray(items.inputs) as {[key in string]: {[key in IConfigType]: IInputData[]}};
       setStates((data) => {
+        console.log('こっちも走っちゃった。。。', items, data);
         return {
           ...data,
+          isRunInitialized: true,
           isInitialized: true,
-          ...items,
-          configs: processedConfigs,
+          configs: items.configs,
           categories: items.categories,
-          members: members,
-          groups: groups,
-          inputs: inputs,
         }
       });
     });
@@ -116,25 +150,32 @@ export const useFirebase = (): IUseFirebaseReturn => {
     firebase: firebaseApp,
     db: DB,
     ...states,
+    ...activateState,
+    // configs: activateState.configs.length > 0 ? activateState.configs : states.configs,
     getData: getData,
     setData: setData,
     pushData: pushData,
     pushInput: pushInput,
-    pushMember: pushMember,
+    // pushMember: pushMember,
+    getMember: getMember,
+    updateMember: updateMember,
     pushGroup: pushGroup,
-    pushGroupMember: pushGroupMember,
+    updateGroupMember: updateGroupMember,
     isExistGroup: isExistGroup,
+    isExistMember: isExistMember,
+    activateGroup: activateGroup,
+    makePageConfigs: makePageConfigs,
   };
 }
 
 const asyncSetProperties = (): Promise<IFirebaseData> => {
   return new Promise(async (resolve, reject) => {
-    const states: {[key in string]: any} = {};
-    for (let key of ['configs', 'categories', 'members', 'groups', 'inputs']) {
+    const obj: {[key in string]: any} = {};
+    for (let key of ['configs', 'categories',  'inputs']) {
       const items = await getData(refsMap[key as (keyof typeof refsMap)]).catch((err) => { reject(err); });
-      states[key] = items;
+      obj[key] = items;
     }
-    resolve(states as IFirebaseData);
+    resolve(obj as IFirebaseData);
   });
 }
 
@@ -143,7 +184,7 @@ const getData = async (refPath: string): Promise<any[]> => {
 }
 
 const setData = async (refPath: string, data: any): Promise<void> => {
-  return await DB?.ref(refPath).push(data).then((value) => value).catch(err => { console.warn(err); return err; });
+  return await DB?.ref(refPath).set(data).then((value) => value).catch(err => { console.warn(err); return err; });
 }
 
 const pushData = async (refPath: string, data: any): Promise<void> => {
@@ -170,15 +211,30 @@ const pushInput = (id: string, type: string, data: any): Promise<firebase.databa
   });
 }
 
-const pushMember = (data: IMember): Promise<firebase.database.Reference> => {
-  return new Promise<firebase.database.Reference>((resolve, reject) => {
+const getMember = (lineId: string): Promise<IMember> => {
+  return new Promise<IMember>((resolve, reject) => {
     if (!DB) {
       return reject('DB has not defined...')
     }
-    const refName = refsMap.members;
+    if(!lineId) {
+      return reject(`id is missing.`);
+    }
+    DB?.ref(refsMap.members).child(lineId).once('value').then((snapshot) => {
+      return resolve(snapshot.val());
+    }).catch(e => {
+      return reject(e);
+    });
+  });
+}
+
+const updateMember = (lineId: string, data: IMember): Promise<firebase.database.Reference> => {
+  return new Promise<firebase.database.Reference>((resolve, reject) => {
+    if (!DB || !lineId || !data) {
+      return reject('DB has not defined...');
+    }
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
 
-    DB.ref(refName).push(data).then(val => {
+    DB.ref(refsMap.members).child(lineId).update(data).then(val => {
       return resolve(val);
     }).catch(err => {
       console.warn(err);
@@ -190,7 +246,7 @@ const pushMember = (data: IMember): Promise<firebase.database.Reference> => {
 const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...')
+      return reject('DB has not defined...');
     }
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
     DB.ref(refsMap.groups).push(data).then(val => {
@@ -202,13 +258,16 @@ const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
   });
 }
 
-const pushGroupMember = (groupId: string, data: IMember) => {
+const updateGroupMember = (groupId: string, data: IMember) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...')
+      return reject('DB has not defined...');
+    }
+    if (!data.lineId) {
+      return reject('lineId has not defined...');
     }
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
-    DB.ref(refsMap.groups).child(`${groupId}/members`).push(data).then(val => {
+    DB.ref(refsMap.groups).child(`${groupId}/members`).child(data.lineId).update(data).then(val => {
       return resolve(val);
     }).catch(err => {
       console.warn(err);
@@ -227,6 +286,24 @@ const isExistGroup = (groupId: string = '') => {
     }
     DB.ref(refsMap.groups).once('value').then(snapshot => {
       const isExist = snapshot.hasChild(groupId);
+      return resolve(isExist);
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
+    });
+  });
+}
+
+const isExistMember = (lineId: string) => {
+  return new Promise<boolean>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...');
+    }
+    if (!lineId) {
+      return resolve(false);
+    }
+    DB.ref(refsMap.members).once('value').then(snapshot => {
+      const isExist = snapshot.hasChild(lineId);
       return resolve(isExist);
     }).catch(err => {
       console.warn(err);
@@ -255,30 +332,47 @@ const makePageConfigs = (configs: IConfig[], categories: ICategory[] = [], membe
                         : input.type === 'multi-check' && validate.type === 'isIncludeAll' ? input.dataList?.map(data => data.id)
                         : validate.args;
       });
-    })
-  })
+    });
+  });
   return configs;
 }
 
-const convertObjectToArray = (obj: {[key: string]: IMember | IGroup}) => {
-  return Object.keys(obj).map((key) => {
-    obj[key].id = key;
-    return obj[key];
+const convertObjectToArray = (obj: {[key: string]: IMember | IGroup}): (IMember | IGroup)[] => {
+  if (!obj) return [];
+  const data = Object.assign({}, obj);
+  return Object.keys(data).map((key) => {
+    data[key].id = key;
+    return data[key];
   });
 }
 
-const convertInputsToArray = (obj: {[key: string]: {[key in IConfigType]: {[key: string]: IInputData}}}): {[key in string]: {[key in IConfigType]: IInputData[]}} => {
-  const data: any = {};
-  Object.keys(obj).forEach(id => {
-    data[id] = data[id] || {};
-    Object.keys(obj[id]).forEach(key => {
-      if (obj && obj[id] && obj[id][key as IConfigType]) {
-        data[id][key] = Object.keys(obj[id][key as IConfigType]).map((dataId) => {
-          obj[id][key as IConfigType][dataId].id = dataId;
-          return obj[id][key as IConfigType][dataId];
-        });
-      }
-    });
+// const convertInputsToArray = (obj: {[key: string]: {[key in IConfigType]: {[key: string]: IInputData}}}): {[key in string]: {[key in IConfigType]: IInputData[]}} => {
+//   if (!obj) return {};
+//   const data: any = {};
+//   Object.keys(obj).forEach(id => {
+//     data[id] = data[id] || {};
+//     Object.keys(obj[id]).forEach(key => {
+//       if (obj && obj[id] && obj[id][key as IConfigType]) {
+//         data[id][key] = Object.keys(obj[id][key as IConfigType]).map((dataId) => {
+//           obj[id][key as IConfigType][dataId].id = dataId;
+//           return obj[id][key as IConfigType][dataId];
+//         });
+//       }
+//     });
+//   });
+//   return data;
+// }
+
+const convertGroupInputsToArray = (obj: {[key in IConfigType]: {[key: string]: IInputData}}): {[key in IConfigType]: IInputData[]} => {
+  if (!obj) return {pay: [], todo: [], tobuy:[]};
+  const data: any = {pay: [], todo: [], tobuy:[]};
+  Object.keys(obj).forEach(key => {
+    if (obj && obj[key as IConfigType]) {
+      data[key] = Object.keys(obj[key as IConfigType]).map((dataId) => {
+        obj[key as IConfigType][dataId].id = dataId;
+        return obj[key as IConfigType][dataId];
+      });
+    }
   });
   return data;
 }

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Head from 'next/head';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
@@ -40,6 +40,13 @@ const useStyles = makeStyles((_: Theme) =>
   }),
 );
 
+const stateMap = {
+  isInitializing: 0,
+  isNotExistMember: 1,
+  isExistMember: 2,
+  isCompletedInitialize: 3,
+}
+
 const Layout: FC = ({ children }) => {
   const classes = useStyles();
   const router = useRouter();
@@ -47,7 +54,17 @@ const Layout: FC = ({ children }) => {
   const liff = useAuth();
   const firebase = useFirebase();
   const dispatch = useDispatch();
-  const redirectUri = process.env.ROOT_URL + router.asPath;
+  const [state, setState] = useState<number>(stateMap.isInitializing);
+  const baseUri = process.env.ROOT_URL;
+  const redirectUri = baseUri + router.asPath;
+  const isLoginPage = router.asPath.indexOf('/login') > -1;
+
+  useEffect(() => {
+    const groupId = sessionStorage.getItem('gid');
+    if (!groupId && !isLoginPage) {
+      router.push(baseUri + '/login?redirectUri=' + redirectUri, undefined, {shallow: true});
+    }
+  })
 
   if (!liff.isInitialized) {
     return (
@@ -66,7 +83,6 @@ const Layout: FC = ({ children }) => {
             image="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260"
             title="Login Attentions"
           >
-            {/* TODO: Fix complex button */}
             <Button
               className={classes.btn}
               size="large"
@@ -79,19 +95,34 @@ const Layout: FC = ({ children }) => {
     );
   }
 
-  if (!firebase.isInitialized) {
+  if (!firebase.isInitialized || !firebase.getMember || !firebase.activateGroup) {
     return (
       <FadeWrapper>
-        <Progress />
+        <Progress message="準備中。。。"/>
       </FadeWrapper>
     );
   }
 
-  liff.liff?.getProfile().then(user => {
-    dispatch(userSlice.actions.setUser(user as UserState));
-    sessionStorage.setItem('lid', user.userId);
-    // firebase.members.some((member) => )
-  });
+  // must be already login in line
+  if (!firebase.isGroupActivated && state === stateMap.isInitializing) {
+    firebase.getMember(liff.userId as string).then(member => {
+      const isExistMember = !!member;
+      setState(isExistMember ? stateMap.isExistMember : stateMap.isNotExistMember);
+      if (isExistMember && firebase.activateGroup && member.groupId) {
+        firebase.activateGroup(member.groupId);
+      }
+    });
+  }
+
+  if (state === stateMap.isNotExistMember && !isLoginPage) {
+    router.push(baseUri + '/login?redirectUri=' + redirectUri, undefined, {shallow: true});
+  }
+
+  if (state !== stateMap.isCompletedInitialize) {
+    dispatch(userSlice.actions.setUser(liff.user as UserState));
+    sessionStorage.setItem('uid', liff.userId || '');
+    setState(stateMap.isCompletedInitialize);
+  }
 
   return (
     <>{children}</>
