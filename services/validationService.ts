@@ -93,7 +93,7 @@ export class ValidationService {
      * @returns 
      */
     private isEqual(val: any, args: [number | string]): boolean {
-        return val === args[0];
+        return this.isEmpty(val) || val === args[0];
     }
 
     /**
@@ -102,7 +102,7 @@ export class ValidationService {
      * @returns 
      */
     private isNumber(val: any): boolean {
-        return typeof val === 'number';
+        return this.isEmpty(val) || typeof val === 'number';
     }
 
     /**
@@ -111,7 +111,7 @@ export class ValidationService {
      * @returns 
      */
      private isString(val: any): boolean {
-        return typeof val === 'string';
+        return this.isEmpty(val) || typeof val === 'string';
     }
 
     /**
@@ -120,7 +120,7 @@ export class ValidationService {
      * @returns 
      */
     private isDateString(val: any): boolean {
-        return regexpDateString.test(val);
+        return this.isEmpty(val) || regexpDateString.test(val);
     }
 
     /**
@@ -129,7 +129,7 @@ export class ValidationService {
      * @returns 
      */
     private isNotNull(val: any): boolean {
-        return val !== undefined && val !== null && val !== "";
+        return !this.isEmpty(val);
     }
 
     /**
@@ -138,7 +138,7 @@ export class ValidationService {
      * @returns 
      */
     private isLT(val: any, args: [number]): boolean {
-        return this.isNumber(val) && val < args[0];
+        return this.isEmpty(val) || (this.isNumber(val) && val < args[0]);
     }
 
     /**
@@ -148,7 +148,7 @@ export class ValidationService {
      * @returns 
      */
     private isLE(val: any, args: [number]): boolean {
-        return this.isNumber(val) && val <= args[0];
+        return this.isEmpty(val) || (this.isNumber(val) && val <= args[0]);
     }
 
     /**
@@ -158,7 +158,7 @@ export class ValidationService {
      * @returns 
      */
     private isGT(val: any, args: [number]): boolean {
-        return this.isNumber(val) && val > args[0];
+        return this.isEmpty(val) || (this.isNumber(val) && val > args[0]);
     }
 
     /**
@@ -168,7 +168,7 @@ export class ValidationService {
      * @returns 
      */
     private isGE(val: any, args: [number]): boolean {
-        return this.isNumber(val) && val > args[0];
+        return this.isEmpty(val) || (this.isNumber(val) && val > args[0]);
     }
 
     /**
@@ -178,7 +178,7 @@ export class ValidationService {
      * @returns 
      */
     private isBTW(val: any, args: [number, number]) {
-        return this.isNumber(val) && val > args[0] && val < args[1];
+        return this.isEmpty(val) || (this.isNumber(val) && val > args[0] && val < args[1]);
     }
 
     /**
@@ -189,7 +189,7 @@ export class ValidationService {
      */
     private isInclude(val: any, args: any[] = []) {
         console.log('is include', 'val:', val, 'args :', args);
-        return args && args.length > 0 && args.includes(val);
+        return this.isEmpty(val) || (args && args.length > 0 && args.includes(val));
     }
 
     /**
@@ -200,5 +200,14 @@ export class ValidationService {
      */
     private isIncludeAll(vals: any[], args: any[] = []) {
         return vals.every((val) => this.isInclude(val, args));
+    }
+
+    /**
+     * is Empty
+     * @param val 
+     * @returns 
+     */
+    private isEmpty(val: any) {
+        return val === undefined || val === null || val === '';
     }
 }

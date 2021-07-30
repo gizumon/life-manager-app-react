@@ -78,6 +78,21 @@ namespace CONST {
             },
           ],
         },
+        {
+          id: 'fixed-cost',
+          name: '固定費',
+          type: 'pay',
+          setting: [
+            {
+                memberId: '1',
+                ratio: 1.0,
+            },
+            {
+                memberId: '2',
+                ratio: 1.0,
+            },
+          ],
+        },
     ];
 
     export const buyCategories: ICategory[] = [
@@ -140,6 +155,8 @@ namespace CONST {
               },
             ],
             order: 3,
+            isHideInput: false,
+            isHideList: false,
           },
           {
             id: 'payedFor',
@@ -159,6 +176,8 @@ namespace CONST {
             ],
             dataList: [], // members
             order: 4,
+            isHideInput: false,
+            isHideList: false,
           },
           {
             id: 'payedCategory',
@@ -175,6 +194,8 @@ namespace CONST {
             ],
             dataList: CONST.payCategories,
             order: 5,
+            isHideInput: false,
+            isHideList: false,
           },
           {
             id: 'memo',
@@ -186,6 +207,8 @@ namespace CONST {
             validates: [],
             args: [],
             order: 2,
+            isHideInput: false,
+            isHideList: false,
           },
           {
             id: 'payedBy',
@@ -206,6 +229,8 @@ namespace CONST {
             args: [],
             dataList: [], // members
             order: 1,
+            isHideInput: false,
+            isHideList: false,
           },
         ],
       },
@@ -232,6 +257,8 @@ namespace CONST {
             ],
             args: [],
             order: 2,
+            isHideInput: false,
+            isHideList: false,
           },
           {
             id: 'doDueDate',
@@ -247,6 +274,8 @@ namespace CONST {
             ],
             args: [],
             order: 3,
+            isHideInput: false,
+            isHideList: false,
           },
           {
             id: 'doBy',
@@ -266,6 +295,26 @@ namespace CONST {
             args: [],
             dataList: [], // members
             order: 1,
+            isHideInput: false,
+            isHideList: false,
+          },
+          {
+            id: 'doneDate',
+            name: '完了日',
+            type: 'date',
+            placeholder: '2021/XX/XX',
+            icon: 'mdi-calendar-clock',
+            model: '',
+            validates: [
+              {
+                type: 'isDate',
+              },
+            ],
+            args: [],
+            dataList: [],
+            order: 4,
+            isHideInput: true,
+            isHideList: true,
           },
         ],
       },
@@ -292,6 +341,8 @@ namespace CONST {
             ],
             args: [],
             order: 2,
+            isHideInput: false,
+            isHideList: false,
           },
           {
             id: 'buyCategory',
@@ -303,6 +354,8 @@ namespace CONST {
             validates: [],
             dataList: CONST.buyCategories, // categories
             order: 3,
+            isHideInput: false,
+            isHideList: false,
           },
           {
             id: 'buyDueDate',
@@ -318,6 +371,8 @@ namespace CONST {
             ],
             args: [],
             order: 4,
+            isHideInput: true,
+            isHideList: true,
           },
           {
             id: 'buyBy',
@@ -337,6 +392,8 @@ namespace CONST {
             args: [],
             dataList: [], // members + all
             order: 1,
+            isHideInput: false,
+            isHideList: false,
           },
         ]
       },

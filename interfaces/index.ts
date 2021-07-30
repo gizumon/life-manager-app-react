@@ -64,6 +64,8 @@ export interface IInput {
     args?: [];
     dataList?: IModel[];
     order?: number; 
+    isHideList: boolean;
+    isHideInput: boolean;
 }
 
 export interface IConfig {

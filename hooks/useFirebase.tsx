@@ -11,7 +11,7 @@ export const refsMap = {
     configs: 'masterdata/configs',
     categories: 'masterdata/categories',
     members: 'users',
-    groups: 'data/groups',
+    groups: 'groups',
     inputs: 'data/inputs'
 };
 
@@ -313,19 +313,21 @@ const isExistMember = (lineId: string) => {
 }
 
 const makePageConfigs = (configs: IConfig[], categories: ICategory[] = [], members: IMember[] = []): IConfig[] =>  {
+  const setTodayList = ['doDueDate', 'buyDueDate'];
+  const setMembersList = ['payedFor', 'payedBy'];
+  const setMembersWithAllList = ['doBy', 'buyBy'];
+  const setMemberIdList = ['payedFor'];
   configs.forEach((config) => {
     config.inputs.forEach((input) => {
-      input.dataList = input.id === 'payedFor' ? members
-                      : input.id === 'payedCategory' ? categories.filter((category) => category.type === 'pay')
-                      : input.id === 'payedBy' ? members
-                      : input.id === 'doBy' ? members.concat({id: 'ALL', name: '全員'})
-                      : input.id === 'doCategory' ?  categories.filter((category) => category.type === 'todo')
-                      : input.id === 'buyCategory' ?  categories.filter((category) => category.type === 'tobuy')
-                      : input.id === 'buyBy' ? members.concat({id: 'ALL', name: '全員'})
-                      : [];
-      input.model    = input.id === 'payedFor' ? members.map((member) => member.id)
-                      : input.type === 'date' ? Utils.formatDate(new Date())
-                      : input.model;
+      input.dataList = setMembersList.includes(input.id) ? members
+                     : setMembersWithAllList.includes(input.id) ? members.concat({id: 'ALL', name: '全員'})
+                     : input.id === 'payedCategory' ? categories.filter((category) => category.type === 'pay')
+                     : input.id === 'doCategory' ?  categories.filter((category) => category.type === 'todo')
+                     : input.id === 'buyCategory' ?  categories.filter((category) => category.type === 'tobuy')
+                     : [];
+      input.model    = setMemberIdList.includes(input.id) ? members.map((member) => member.id)
+                     : setTodayList.includes(input.id) ? Utils.formatDate(new Date())
+                     : input.model;
       input.validates?.forEach((validate) => {
           validate.args = input.type === 'select' && validate.type === 'isInclude' ? input.dataList?.map(data => data.id)
                         : input.type === 'select-btns' && validate.type === 'isInclude' ? input.dataList?.map(data => data.id)

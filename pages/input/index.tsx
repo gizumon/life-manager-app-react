@@ -216,7 +216,7 @@ export default function Input() {
         </Tabs>
         <CardContent>
             {
-              getConfig(selectedType as IConfigType)?.inputs.map((input) => {
+              getConfig(selectedType as IConfigType)?.inputs.filter((row) => !row.isHideInput).map((input) => {
                 if (input.type === 'text') {
                   return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
                 } else if (input.type === 'number') {

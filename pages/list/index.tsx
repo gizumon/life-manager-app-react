@@ -14,6 +14,7 @@ import CONST from '../../services/constService';
 import { ICategory } from '../../interfaces/index';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
+import CircularProgressV1 from '../../components/CircularProgressV1';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -150,32 +151,40 @@ export default function List() {
 
   useEffect(() => {
     if (inputs && selectedType) {
-      const dataObj: IDisplayDataObject = {pay: [], todo: [], tobuy: []};
-      Object.keys(inputs).forEach((type) => {
-        inputs[type as IConfigType].forEach((data) => {
-          const list: IDisplayData[] = [];
-          Object.keys(data).forEach(key => {
-            list.push({
-              id: key,
-              dataId: data.id,
-              name: displayMap[key],
-              value: data[key as keyof IInputData],
-            });
-          });
-          dataObj[type as IConfigType].push(list);
-        });
-      });
-      setDisplayDataObj(dataObj);
-
       const map: {[key in string]: string} = {};
       const inputConfigs = getConfig(selectedType as IConfigType)?.inputs;
-      inputConfigs?.forEach((input: IInput) => map[input.id] = input.name);
+      inputConfigs?.forEach((input: IInput) => {
+        if (!input.isHideList) {
+          map[input.id] = input.name;
+        }
+      });
       const sortedMap = Utils.sortObject(map, (key1: string, key2: string): number => {
         const order1 = inputConfigs.find(input => input.id === key1[0])?.order || 100;
         const order2 = inputConfigs.find(input => input.id === key2[0])?.order || 100;
         return order1 < order2 ? -1 : order1 > order2 ? 1 : 0;
       });
       setDisplayMap(sortedMap);
+
+      const dataObj: IDisplayDataObject = {pay: [], todo: [], tobuy: []};
+      Object.keys(inputs).forEach((type) => {
+        inputs[type as IConfigType].forEach((data) => {
+          const list: IDisplayData[] = [];
+          Object.keys(data).forEach(key => {
+            const isValid = !!sortedMap[key];
+            console.log('make display data obj', key, sortedMap[key], isValid, sortedMap);
+            if (isValid) {
+              list.push({
+                id: key,
+                dataId: data.id,
+                name: displayMap[key],
+                value: data[key as keyof IInputData],
+              });
+            }
+          });
+          dataObj[type as IConfigType].push(list);
+        });
+      });
+      setDisplayDataObj(dataObj);
     }
     console.log('created displayDataObjMap', displayDataObj, displayMap);
   }, [inputs, selectedType, selectedId]);
@@ -318,6 +327,10 @@ export default function List() {
                       <>
                         {
                           getDisplayDataList(selectedType as IConfigType).slice().reverse().map((row) => {
+                            console.log('get display datalist', row);
+                            if (row.length < 1) {
+                              return (<FadeWrapper><CircularProgressV1 /></FadeWrapper>)
+                            }
                             return (
                               <TableRow key={row[0].dataId}>
                                 {

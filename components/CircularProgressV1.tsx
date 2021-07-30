@@ -21,7 +21,7 @@ type IProps = {
     onClick?: (val: any) => any | void;
 }
 
-export default function Progress(props: IProps) {
+export default function CircularProgressV1(props: IProps) {
     console.log('Child component', props);
     const classes = useStyles();
     return (
