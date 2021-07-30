@@ -97,26 +97,26 @@ namespace CONST {
 
     export const buyCategories: ICategory[] = [
       {
-        id: 'none',
-        name: 'その他',
-        type: 'tobuy',
-        isHide: false,
-      },
-      {
         id: 'super',
         name: 'スーパー',
         type: 'tobuy',
         isHide: false,
       },
       {
-        id: 'oneDollarShop',
-        name: '100円均一',
+        id: 'drugstore',
+        name: '薬局',
         type: 'tobuy',
         isHide: false,
       },
       {
-        id: 'drugstore',
-        name: '薬局',
+        id: 'oneDollarShop',
+        name: '100均',
+        type: 'tobuy',
+        isHide: false,
+      },
+      {
+        id: 'none',
+        name: 'その他',
         type: 'tobuy',
         isHide: false,
       },
@@ -151,7 +151,7 @@ namespace CONST {
               },
               {
                 type: 'isLE',
-                args: [1000000],
+                args: [100000],
               },
             ],
             order: 3,
@@ -344,19 +344,19 @@ namespace CONST {
             isHideInput: false,
             isHideList: false,
           },
-          {
-            id: 'buyCategory',
-            name: 'どこで',
-            type: 'select',
-            placeholder: '-- 買う場所 --',
-            icon: 'mdi-help-box',
-            model: 'none',
-            validates: [],
-            dataList: CONST.buyCategories, // categories
-            order: 3,
-            isHideInput: false,
-            isHideList: false,
-          },
+          // {
+          //   id: 'buyCategory',
+          //   name: 'どこで',
+          //   type: 'select',
+          //   placeholder: '-- 買う場所 --',
+          //   icon: 'mdi-help-box',
+          //   model: 'none',
+          //   validates: [],
+          //   dataList: CONST.buyCategories, // categories
+          //   order: 3,
+          //   isHideInput: false,
+          //   isHideList: false,
+          // },
           {
             id: 'buyDueDate',
             name: 'いつまで',
@@ -370,7 +370,7 @@ namespace CONST {
               },
             ],
             args: [],
-            order: 4,
+            order: 3,
             isHideInput: true,
             isHideList: true,
           },
@@ -383,8 +383,6 @@ namespace CONST {
             model: '',
             validates: [
               {
-                type: 'isNotNull'
-              },{
                 type: 'isInclude',
                 args: []
               }
@@ -392,8 +390,29 @@ namespace CONST {
             args: [],
             dataList: [], // members + all
             order: 1,
+            isHideInput: true,
+            isHideList: true,
+          },
+          {
+            id: 'buyCategory',
+            name: 'どこで',
+            type: 'select-btns',
+            placeholder: '',
+            icon: 'mdi-help-box',
+            model: '',
+            validates: [{
+                type: 'isNotNull'
+              },{
+                type: 'isInclude',
+                args: []
+            }],
+            dataList: CONST.buyCategories, // categories
+            order: 4,
             isHideInput: false,
             isHideList: false,
+            args: [{
+              maxNumOfBtnsInRow: 3,
+            }],
           },
         ]
       },

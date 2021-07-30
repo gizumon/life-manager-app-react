@@ -61,7 +61,7 @@ export interface IInput {
     model: any;
     // model: IModel | IModel[] | any;
     validates: IValidate[];
-    args?: [];
+    args?: any[];
     dataList?: IModel[];
     order?: number; 
     isHideList: boolean;

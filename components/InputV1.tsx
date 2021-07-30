@@ -30,7 +30,7 @@ export default function InputV1({ config, model, setProps, type='' }: IProps) {
 
   const onChangeHandler = (event: any) => {
     setProps((prevVal: any) => {
-      return {...prevVal, [config.id]: formatValue(event.target.value)}
+      return {...prevVal, [config.id]: type === 'number' ? formatValue(event.target.value) : event.target.value}
     });
   };
 

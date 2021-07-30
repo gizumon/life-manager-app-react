@@ -233,7 +233,7 @@ export default function Input() {
         </CardContent>
         <CardActions disableSpacing className={classes.btns}>
           {
-            getConfig(selectedType as IConfigType)?.inputs.map((input) => {
+            getConfig(selectedType as IConfigType)?.inputs.filter((row) => !row.isHideInput).map((input) => {
               if (input.type === 'select-btns') {
                 return (<SelectBtnsV1 key={input.id} config={input} setProps={setFormData} onClick={onClickTrigger} />);
               }

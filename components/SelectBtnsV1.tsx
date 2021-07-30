@@ -17,13 +17,25 @@ type IProps = {
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
     root: {
+      display: 'flex',
+      flexFlow: 'column',
       margin: 0,
       width: '100%',
+    },
+    btnsGroup: {
+      margin: 0,
+      width: '100%',
+      marginBottom: '1px',
+      '&:first-child': {
+        borderRadius: '0px 0px 0px 0px',        
+      },
+      '&:last-child': {
+        borderRadius: '0px 0px 0px 4px',
+      }
     },
     btn: {
       flex: 1,
       flexGrow: 1,
-      borderRadius: '0px 0px 0px 4px',
       fontWeight: 700,
       height: '3rem',
       padding: '6px 4px',
@@ -34,37 +46,56 @@ const useStyles = makeStyles((_: Theme) =>
 
 // TODO: Need to control onClick values
 export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
-    const classes = useStyles();
-    const [isClick, setToggle] = useToggle();
+  const defaultMaxNumOfBtnInRow = 3;
+  const classes = useStyles();
+  const [isClick, setToggle] = useToggle();
+  const dataList = config.dataList || [];
+  const maxNumberOfBtnInRow = config.args && config.args[0] && typeof config.args[0]['maxNumberOfBtnInRow'] === 'number'
+                            ? config.args[0]['maxNumberOfBtnInRow'] : defaultMaxNumOfBtnInRow;
+  // const numOfRows = Math.floor((config.dataList?.length || 0) / maxNumberOfBtnInRow) + 1;
 
-    const onClickHandler = (id: string = '') => {
-      return () => {
-        setProps((prevVal: any, ) => {
-          return {...prevVal, [config.id]: id}
-        });
-        setToggle();
-      };
-    };
-
-    useUpdateEffect(() => {
-      // skip initial render behavior
-      onClick();
-    }, [isClick]);
-
-    return (
-        <ButtonGroup className={classes.root} variant="contained" color="secondary" aria-label="select-btns">
-        {
-            config.dataList?.map((data) => {
-                return (
-                    <Button
-                        value={data.id}
-                        key={data.id}
-                        className={classes.btn + ' ellipsis'}
-                        onClick={onClickHandler(data.id)}
-                    >{data.name}</Button>
-                );
-            })
-        }
-        </ButtonGroup>
-    );
+  const btnsRows = [];
+  for (let i=0; i <= dataList.length; i = i + maxNumberOfBtnInRow) {
+    const lastIndex = (i + maxNumberOfBtnInRow) > dataList.length ? dataList.length : i + maxNumberOfBtnInRow;
+    btnsRows.push(dataList.slice(i, lastIndex));
   }
+
+  const onClickHandler = (id: string = '') => {
+    return () => {
+      setProps((prevVal: any, ) => {
+        return {...prevVal, [config.id]: id}
+      });
+      setToggle();
+    };
+  };
+
+  useUpdateEffect(() => {
+    // skip initial render behavior
+    onClick();
+  }, [isClick]);
+
+  return (
+    <div className={classes.root}>
+      {
+        btnsRows.map((btns, index) => {
+          return (
+            <ButtonGroup key={index} className={classes.btnsGroup} variant="contained" color="secondary" aria-label="select-btns">
+              {
+                btns.map((btn) => {
+                  return (
+                    <Button
+                      value={btn.id}
+                      key={btn.id}
+                      className={classes.btn + ' ellipsis'}
+                      onClick={onClickHandler(btn.id)}
+                    >{btn.name}</Button>
+                  );
+                })
+              }
+            </ButtonGroup>
+          )
+        })
+      }
+    </div>
+  );
+}
