@@ -29,11 +29,42 @@ export default function InputV1({ config, model, setProps, type='' }: IProps) {
   const classes = useStyles();
 
   const onChangeHandler = (event: any) => {
-    console.log('!!!On Input handler: ', event);
     setProps((prevVal: any) => {
-      return {...prevVal, [config.id]: type === 'number' ? Number(event.target.value) : event.target.value}
+      return {...prevVal, [config.id]: formatValue(event.target.value)}
     });
   };
+
+  const formatValue = (val: number | any): number | null => {
+    if (val === undefined || val === null || val === '') { return null; }
+    let min: number | undefined;
+    let max: number | undefined;
+    let result: number;
+    const formattedVal = Math.floor(Number(val));
+    config.validates.forEach(valid => {
+      switch (valid.type) {
+        case 'isGT':
+        case 'isGE':
+          min = valid.args && valid.args[0];
+          break;
+        case 'isLT':
+        case 'isLE':
+          max = valid.args && valid.args[0];
+          break;
+        case 'isBTW':
+          min = valid.args && valid.args[0];
+          max = valid.args && valid.args[1];
+          break;
+      }
+    })
+    result = formattedVal;
+    if (min !== undefined) {
+      result = formattedVal < min ? min : result; 
+    }
+    if (max !== undefined) {
+      result = formattedVal > max ? max : result; 
+    }
+    return result;
+  } 
 
   // useEffect(() => {
   //   setProps((prevVal: any) => {

@@ -103,7 +103,7 @@ const Layout: FC = ({ children }) => {
     );
   }
 
-  // must be already login in line
+  // TODO: Can you login without activate group?
   if (!firebase.isGroupActivated && state === stateMap.isInitializing) {
     firebase.getMember(liff.userId as string).then(member => {
       const isExistMember = !!member;
