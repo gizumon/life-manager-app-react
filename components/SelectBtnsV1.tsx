@@ -25,9 +25,12 @@ const useStyles = makeStyles((_: Theme) =>
     btnsGroup: {
       margin: 0,
       width: '100%',
-      marginBottom: '1px',
+      borderTop: '1px solid rgb(17, 93, 86)',
+      '&> .MuiButton-root': {
+        borderRadius: '0px 0px 0px 0px',
+      },
       '&:first-child': {
-        borderRadius: '0px 0px 0px 0px',        
+        borderRadius: '0px 0px 0px 0px',
       },
       '&:last-child': {
         borderRadius: '0px 0px 0px 4px',
