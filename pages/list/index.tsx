@@ -125,7 +125,7 @@ export default function List() {
   const classes = useStyles();
   const router = useRouter();
   // TODO: Should handle no inputs case 
-  const { configs, inputs, groupMembers, activateGroup, isInitialized } = useFirebase();
+  const { configs, inputs, groupMembers, categories, activateGroup, isInitialized } = useFirebase();
   console.log('configs groupMembers', configs, groupMembers);
   // TODO: Should use session
   const selectedId = sessionStorage.getItem('gid') || '';
@@ -256,8 +256,8 @@ export default function List() {
   }
   // const convertMembersName = (ids: string[]): string => ids.map(id => convertMemberName(id)).join(', ');
   const convertMemberIcons = (ids: string[]): string[] => (ids && ids.length > 0) ? ids.map(id => convertMemberIcon(id)[0]) : ids;
-  const convertPayedCategoryName = (id: string): string => CONST.payCategories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
-  const convertBuyCategoryName = (id: string): string => CONST.buyCategories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
+  const convertPayedCategoryName = (id: string): string => categories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
+  const convertBuyCategoryName = (id: string): string => categories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
   const convertDatetime = (timestamp: number): string => new Date(timestamp).toISOString();
   const convertNumber = (val: number): string => '¥' + String(Number(val).toLocaleString());
 

@@ -5,7 +5,7 @@ namespace CONST {
     export const payCategories: ICategory[] = [
         {
           id: 'none',
-          name: '指定なし',
+          name: '指定なし❔',
           type: 'pay',
           setting: [
             {
@@ -20,7 +20,7 @@ namespace CONST {
         },
         {
           id: 'foods',
-          name: '飲食費',
+          name: '飲食費🍔',
           type: 'pay',
           setting: [
             {
@@ -35,7 +35,7 @@ namespace CONST {
         },
         {
           id: 'households',
-          name: '日用品',
+          name: '日用品🧻',
           type: 'pay',
           setting: [
             {
@@ -50,7 +50,7 @@ namespace CONST {
         },
         {
           id: 'hobbies',
-          name: '趣味',
+          name: '趣味⚽',
           type: 'pay',
           setting: [
             {
@@ -65,7 +65,7 @@ namespace CONST {
         },
         {
           id: 'furniture',
-          name: '家具・家電',
+          name: '家具・家電🛋',
           type: 'pay',
           setting: [
             {
@@ -80,7 +80,7 @@ namespace CONST {
         },
         {
           id: 'fixed-cost',
-          name: '固定費',
+          name: '固定費🏠',
           type: 'pay',
           setting: [
             {
@@ -98,25 +98,25 @@ namespace CONST {
     export const buyCategories: ICategory[] = [
       {
         id: 'super',
-        name: 'スーパー',
+        name: 'スーパー🛒',
         type: 'tobuy',
         isHide: false,
       },
       {
         id: 'drugstore',
-        name: '薬局',
+        name: '薬局💊',
         type: 'tobuy',
         isHide: false,
       },
       {
         id: 'oneDollarShop',
-        name: '100均',
+        name: '100均💴',
         type: 'tobuy',
         isHide: false,
       },
       {
         id: 'none',
-        name: 'その他',
+        name: 'その他❔',
         type: 'tobuy',
         isHide: false,
       },
