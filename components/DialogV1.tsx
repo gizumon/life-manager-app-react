@@ -56,9 +56,9 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
     onClose(value);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue((event.target as HTMLInputElement).value);
-  };
+  // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setValue((event.target as HTMLInputElement).value);
+  // };
 
   return (
     <Dialog
