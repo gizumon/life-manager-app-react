@@ -355,7 +355,7 @@ export default function ListPage() {
                               return (<FadeWrapper><CircularProgressV1 /></FadeWrapper>)
                             }
                             return (
-                              <TableRow key={row[0].dataId} hover selected onClick={onRowClickHandler} data-id={row[0].dataId}>
+                              <TableRow key={row[0].dataId} hover onClick={onRowClickHandler} data-id={row[0].dataId}>
                                 {
                                   Object.keys(displayMap).map(key => {
                                     const col = row.find(data => data.id === key);
