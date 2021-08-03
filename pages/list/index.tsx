@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, Link } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+         Paper, Avatar, Link, Grid, List, ListItem, ListItemText } from '@material-ui/core';
 import { Card, CardContent, Tabs, Tab, Box, Chip } from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
@@ -10,11 +11,12 @@ import { useRouter } from 'next/router';
 import Utils from '../../services/utilsService';
 import { useFirebase } from '../../hooks/useFirebase';
 import theme from '../../styles/theme';
-import CONST from '../../services/constService';
+// import ExpandMoreIcon from '@material-ui/icons/Details';
 import { ICategory } from '../../interfaces/index';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
 import CircularProgressV1 from '../../components/CircularProgressV1';
+import { DialogV1 } from '../../components/DialogV1';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -107,7 +109,7 @@ const useStyles = makeStyles({
       fontSize: '1.2rem',
       fontWeight: 900,
     }
-  }
+  },
 });
 
 const displayPictures: (keyof IInputData)[] = [
@@ -121,12 +123,18 @@ function getTabProps(index: number) {
   };
 }
 
-export default function List() {
+// const VirtualizeSwipeableViews = virtualize(SwipeableViews);
+// const slideRenderer = (_, index: number, children: any) => {
+//   const isActiveEdit = index % 2 === 1;
+//   return <>{children}</>
+// }
+
+export default function ListPage() {
   const classes = useStyles();
   const router = useRouter();
   // TODO: Should handle no inputs case 
-  const { configs, inputs, groupMembers, categories, activateGroup, isInitialized } = useFirebase();
-  console.log('configs groupMembers', configs, groupMembers);
+  const { configs, inputs, groupMembers, categories, activateGroup, isInitialized, deleteInput } = useFirebase();
+
   // TODO: Should use session
   const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
@@ -135,9 +143,10 @@ export default function List() {
   const [isPageInitialized, setIsPageInitialized] = React.useState<boolean>(false);
   const [displayMap, setDisplayMap] = React.useState<IDisplayMap>({});
   const [displayDataObj, setDisplayDataObj] = React.useState<IDisplayDataObject>({pay: [], todo: [], tobuy: []});
+  const [targetId, setTargetId] = React.useState<string>('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>(false);
 
   useEffect(() => {
-    console.log('run activate group', activateGroup, selectedType);
     if (activateGroup && selectedId) {
       activateGroup(selectedId);
     }
@@ -171,7 +180,6 @@ export default function List() {
           const list: IDisplayData[] = [];
           Object.keys(data).forEach(key => {
             const isValid = !!sortedMap[key];
-            console.log('make display data obj', key, sortedMap[key], isValid, sortedMap);
             if (isValid) {
               list.push({
                 id: key,
@@ -194,12 +202,25 @@ export default function List() {
     router.push(Utils.makeUrl('/list', tabMap.toType[index]), undefined, {shallow: true});
   };
 
+  const onCloseHandler = (value?: string) => {
+    setIsDeleteModalOpen(false);
+    if (value && deleteInput && activateGroup) {
+      deleteInput(selectedId, selectedType as IConfigType, value).then(() => {
+        activateGroup(selectedId);
+      }).catch(() => console.log('failed to delete'));
+    }
+  };
+
+  const onRowClickHandler: React.MouseEventHandler<HTMLTableRowElement> = (e) => {
+    setTargetId(e.currentTarget.getAttribute('data-id') || '')
+    setIsDeleteModalOpen(true);
+  }
+
   const getConfig = (type: IConfigType): IConfig => {
     return configs[tabMap.toIndex[type]];
   };
 
   const getDisplayDataList = (type: IConfigType): IDisplayData[][] => {
-    console.log(displayDataObj);
     return (displayDataObj && displayDataObj[type]) ? displayDataObj[type] : [];
   };
 
@@ -263,6 +284,7 @@ export default function List() {
 
   const isLoading = !isPageInitialized || configs.length < 1 || groupMembers.length < 1;
   const isShownTable = getDisplayDataList(selectedType as IConfigType).length > 0;
+  const isPay = selectedType === 'pay';
 
   if (isLoading) {
     return (<FadeWrapper><Progress /></FadeWrapper>);
@@ -285,7 +307,7 @@ export default function List() {
           <CardContent>
             <>
               {
-                selectedType === 'pay' && (
+                isPay && (
                   <div>
                     {
                       getCalculations().filter(obj => !obj.hasReimbursement).map(obj => {
@@ -294,7 +316,9 @@ export default function List() {
                             key={obj.id}
                             className={classes.chips}
                             avatar={<Avatar alt="who" src={obj.picture} />}
-                            label={`${obj.name} が ${obj.diff.toLocaleString()}円 立替中🙇‍♂️`}
+                            label={`${obj.name} が ${Math.floor(obj.diff).toLocaleString()}円 立替中🙇‍♂️`}
+                            // deleteIcon={<ExpandMoreIcon style={{ color: 'gray' }}/>}
+                            // onDelete={() => {console.log('click')}}
                           />)
                       })
                     }
@@ -327,27 +351,26 @@ export default function List() {
                       <>
                         {
                           getDisplayDataList(selectedType as IConfigType).slice().reverse().map((row) => {
-                            console.log('get display datalist', row);
                             if (row.length < 1) {
                               return (<FadeWrapper><CircularProgressV1 /></FadeWrapper>)
                             }
                             return (
-                              <TableRow key={row[0].dataId}>
+                              <TableRow key={row[0].dataId} hover selected onClick={onRowClickHandler} data-id={row[0].dataId}>
                                 {
                                   Object.keys(displayMap).map(key => {
                                     const col = row.find(data => data.id === key);
                                     const value = col ? convertDisplayValue(col.id, col.value) : '';
                                     if (displayPictures.includes(col?.id as keyof IInputData)) {
                                       return (
-                                        <TableCell key={key} align="left">
-                                          <div className={classes.avatarBlock}>{
-                                          (value as string[]).map((pic, index) => {
-                                            return (
-                                                <Avatar key={index} src={pic} />
-                                            );
-                                          })}
-                                          </div>
-                                        </TableCell>
+                                          <TableCell key={key} align="left">
+                                            <div className={classes.avatarBlock}>{
+                                            (value as string[]).map((pic, index) => {
+                                              return (
+                                                  <Avatar key={index} src={pic} />
+                                              );
+                                            })}
+                                            </div>
+                                          </TableCell>
                                       )
                                     }
                                     return (
@@ -367,7 +390,23 @@ export default function List() {
             </>
           </CardContent>
         </Card>
+        <DialogV1 id={targetId} value={targetId} title="" open={isDeleteModalOpen} content={modalContent} onClose={onCloseHandler}/>
       </Box>
     </>
   );
 }
+
+// TODO: Should display detail of data
+const modalContent = (
+  <Grid item xs={12} md={6}>
+    <div>
+      <List>
+        <ListItem>
+          <ListItemText
+            primary="削除しますか？"
+          />
+        </ListItem>
+      </List>
+    </div>
+  </Grid>
+);

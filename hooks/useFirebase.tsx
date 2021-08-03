@@ -84,7 +84,8 @@ type IUseFirebaseReturn = IDataAndFlagStates & IActivateDataStates & {
   getData?: (refPath: string) => Promise<any[]>;
   setData?: (refPath: string, data: any) => Promise<void>;
   pushData?: (refPath: string, data: any) => Promise<void>;
-  pushInput?: (id: string, type: string, data: any) => Promise<firebase.database.Reference>;
+  pushInput?: (groupId: string, type: string, data: any) => Promise<firebase.database.Reference>;
+  deleteInput?: (groupId: string, type: IConfigType, id: string) => Promise<void>;
   // pushMember?: (data: IMember) => Promise<firebase.database.Reference>;
   getMember?: (lineId: string) => Promise<IMember>;
   updateMember?: (lineId: string, data: IMember) => Promise<firebase.database.Reference>;
@@ -103,7 +104,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
   DB = firebaseApp?.database();
 
   const activateGroup = (groupId: string) => {
-    if (!DB || !groupId || activateState.isGroupActivated || states.configs.length < 1) { return; }
+    if (!DB || !groupId || states.configs.length < 1) { return; }
     DB.ref(refsMap.groups).child(groupId).once('value').then((groupSnap) => {
       const group = groupSnap.val() as IGroup;
       if (!group || !group.members) { return; }
@@ -156,6 +157,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
     setData: setData,
     pushData: pushData,
     pushInput: pushInput,
+    deleteInput: deleteInput,
     // pushMember: pushMember,
     getMember: getMember,
     updateMember: updateMember,
@@ -191,15 +193,15 @@ const pushData = async (refPath: string, data: any): Promise<void> => {
   return await DB?.ref(refPath).push(data).then((value) => value).catch(err => { console.warn(err); return err; });
 }
 
-const pushInput = (id: string, type: string, data: any): Promise<firebase.database.Reference> => {
+const pushInput = (groupId: string, type: string, data: any): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
       return reject('DB has not defined...')
     }
-    if (!id || !type) {
-      return reject(`id or type is missing. id: ${id}: type: ${type}`);
+    if (!groupId || !type) {
+      return reject(`groupId or type is missing. groupId: ${groupId}: type: ${type}`);
     }
-    const refName = `${refsMap.inputs}/${id}/${type}`;
+    const refName = `${refsMap.inputs}/${groupId}/${type}`;
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
     
     DB.ref(refName).push(data).then(val => {
@@ -207,6 +209,22 @@ const pushInput = (id: string, type: string, data: any): Promise<firebase.databa
     }).catch(err => {
       console.warn(err);
       return reject(err);
+    });
+  });
+}
+
+const deleteInput = (groupId: string, type: IConfigType, id: string): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...')
+    }
+    if (!type || !groupId || !id) {
+      return reject(`type or groupId or record id is missing. groupId: ${groupId}, type: ${type}, id: ${id}`);
+    }
+
+    const refName = `${refsMap.inputs}/${groupId}/${type}`;
+    DB.ref(refName).child(id).remove((err) => {
+      return !err ? resolve() : reject(); 
     });
   });
 }

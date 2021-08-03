@@ -70,9 +70,13 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: theme.palette.background.paper,
     },
     card: {
-      minWidth: 300,
+      minWidth: 350,
       maxWidth: 450,
       margin: '25px 25px 65px 25px',
+      // width: '100%',
+      '& .MuiCardContent-root': {
+        padding: '20px 16px 25px 16px',
+      }
     },
     btns: {
       padding: '0px',
