@@ -80,6 +80,12 @@ const useStyles = makeStyles({
       fontWeight: 700,
       padding: '6px 10px',
     },
+    '&> tbody > tr > td': {
+      maxWidth: '40vw',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+    }
   },
   avatarBlock: {
     display: 'flex',
@@ -122,12 +128,6 @@ function getTabProps(index: number) {
     'aria-controls': `vertical-tabpanel-${index}`,
   };
 }
-
-// const VirtualizeSwipeableViews = virtualize(SwipeableViews);
-// const slideRenderer = (_, index: number, children: any) => {
-//   const isActiveEdit = index % 2 === 1;
-//   return <>{children}</>
-// }
 
 export default function ListPage() {
   const classes = useStyles();
