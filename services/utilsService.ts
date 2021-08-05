@@ -45,6 +45,16 @@ namespace Utils {
     export function makeUrl(baseUrl: string = '', type: string = ''): string {
         return type ? `${baseUrl}?type=${type}` : baseUrl;
     }
+
+    /**
+     * has search key in specific string
+     * @param string 
+     * @param searchKey 
+     * @returns boolean
+     */
+    export function hasString(string: string, searchKey: string): boolean {
+        return string.indexOf(searchKey) > -1;
+    }
 }
 
 export default Utils;

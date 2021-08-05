@@ -17,6 +17,7 @@ import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
 import CircularProgressV1 from '../../components/CircularProgressV1';
 import { DialogV1 } from '../../components/DialogV1';
+import SearchBox from '../../components/SearchBoxV1';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -145,6 +146,7 @@ export default function ListPage() {
   const [displayDataObj, setDisplayDataObj] = React.useState<IDisplayDataObject>({pay: [], todo: [], tobuy: []});
   const [targetId, setTargetId] = React.useState<string>('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>(false);
+  const [searchKey, setSearchKey] = React.useState<string>('');
 
   useEffect(() => {
     if (activateGroup && selectedId) {
@@ -254,6 +256,10 @@ export default function ListPage() {
     return arr;
   };
 
+  const getMemberName = (memberId: string): string => {
+    return groupMembers.find(member => member.id === memberId)?.name || '';
+  }
+
   // TODO: should move in utils
   const convertDisplayValue = (id: string, value: any): string | string[] => {
     const convertFnMap: {[key in keyof IInputData]?: any} = {
@@ -305,6 +311,9 @@ export default function ListPage() {
             <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
           </Tabs>
           <CardContent>
+            <div>
+              <SearchBox value={searchKey} setValue={setSearchKey} />
+            </div>
             <>
               {
                 isPay && (
@@ -350,37 +359,46 @@ export default function ListPage() {
                     <TableBody>
                       <>
                         {
-                          getDisplayDataList(selectedType as IConfigType).slice().reverse().map((row) => {
-                            if (row.length < 1) {
-                              return (<FadeWrapper><CircularProgressV1 /></FadeWrapper>)
-                            }
-                            return (
-                              <TableRow key={row[0].dataId} hover onClick={onRowClickHandler} data-id={row[0].dataId}>
-                                {
-                                  Object.keys(displayMap).map(key => {
-                                    const col = row.find(data => data.id === key);
-                                    const value = col ? convertDisplayValue(col.id, col.value) : '';
-                                    if (displayPictures.includes(col?.id as keyof IInputData)) {
+                          getDisplayDataList(selectedType as IConfigType)
+                            .slice().reverse()
+                            .filter(row => row.some(col => {
+                              const value = convertDisplayValue(col.id, col.value);
+                              return typeof value === 'string' ? Utils.hasString(value, searchKey)
+                                                               : (Array.isArray(col.value) ? col.value.some(memberId => Utils.hasString(getMemberName(memberId), searchKey))
+                                                                                           : Utils.hasString(getMemberName(String(col.value)), searchKey));
+                            }))
+                            .map((row) => {
+                              if (row.length < 1) {
+                                return (<FadeWrapper><CircularProgressV1 /></FadeWrapper>)
+                              }
+                              return (
+                                <TableRow key={row[0].dataId} hover onClick={onRowClickHandler} data-id={row[0].dataId}>
+                                  {
+                                    Object.keys(displayMap).map(key => {
+                                      const col = row.find(data => data.id === key);
+                                      const value = col ? convertDisplayValue(col.id, col.value) : '';
+                                      if (displayPictures.includes(col?.id as keyof IInputData)) {
+                                        return (
+                                            <TableCell key={key} align="left">
+                                              <div className={classes.avatarBlock}>{
+                                              (value as string[]).map((pic, index) => {
+                                                return (
+                                                    <Avatar key={index} src={pic} />
+                                                );
+                                              })}
+                                              </div>
+                                            </TableCell>
+                                        )
+                                      }
                                       return (
-                                          <TableCell key={key} align="left">
-                                            <div className={classes.avatarBlock}>{
-                                            (value as string[]).map((pic, index) => {
-                                              return (
-                                                  <Avatar key={index} src={pic} />
-                                              );
-                                            })}
-                                            </div>
-                                          </TableCell>
-                                      )
-                                    }
-                                    return (
-                                      <TableCell key={key} align="left">{value}</TableCell>
-                                    );
-                                  })
-                                }
-                              </TableRow>
-                            );
-                          })
+                                        <TableCell key={key} align="left">{value}</TableCell>
+                                      );
+                                    })
+                                  }
+                                </TableRow>
+                              );
+                            }
+                          )
                         }
                       </>
                     </TableBody>
