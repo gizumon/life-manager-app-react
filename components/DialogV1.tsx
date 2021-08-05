@@ -23,18 +23,21 @@ export interface ConfirmationDialogRawProps {
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
-    paper: {
-      // position: 'absolute',
-      // width: 300,
-      // backgroundColor: theme.palette.background.paper,
-      // // border: '2px solid #000',
-      // boxShadow: theme.shadows[5],
-      // padding: theme.spacing(1, 2, 2),
-      // top: '50%',
-      // left: '50%',
-      // transform: 'translate(-50%, -50%)',
-      // transition: 'all 0.5s 0s ease',
+    root: {
+      '& .MuiPaper-root': {
+        minWidth: '300px',
+        maxWidth: '80vw',
+      },
+      '& .MuiPaper-rounded': {
+        borderRadius: '0px',
+      },
+      '& .MuiDialogContent-dividers': {
+        padding: '8px 8px',
+      },
     },
+    btns: {
+      padding: '2px',
+    }
   }),
 );
 
@@ -62,8 +65,8 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
 
   return (
     <Dialog
-      className={classes || defaultClasses.paper}
-      maxWidth="xs"
+      className={classes || defaultClasses.root}
+      maxWidth="md"
       onEntering={handleEntering}
       aria-labelledby="dialog-title"
       open={open}
@@ -75,11 +78,11 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
       <DialogContent dividers>
         {content}
       </DialogContent>
-      <DialogActions>
-        <Button autoFocus onClick={handleCancel} color="primary">
+      <DialogActions className={defaultClasses.btns}>
+        <Button autoFocus onClick={handleCancel} color="default">
           {cancelBtnTitle}
         </Button>
-        <Button onClick={handleOk} color="primary">
+        <Button onClick={handleOk} color="secondary">
           {okBtnTitle}
         </Button>
       </DialogActions>

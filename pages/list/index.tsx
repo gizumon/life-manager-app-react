@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-         Paper, Avatar, Link, Grid, List, ListItem, ListItemText } from '@material-ui/core';
+         Paper, Avatar, Link, Grid, List, ListItem, ListItemText, Divider } from '@material-ui/core';
 import { Card, CardContent, Tabs, Tab, Box, Chip } from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
@@ -11,7 +11,6 @@ import { useRouter } from 'next/router';
 import Utils from '../../services/utilsService';
 import { useFirebase } from '../../hooks/useFirebase';
 import theme from '../../styles/theme';
-// import ExpandMoreIcon from '@material-ui/icons/Details';
 import { ICategory } from '../../interfaces/index';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
@@ -117,6 +116,17 @@ const useStyles = makeStyles({
       fontWeight: 900,
     }
   },
+  dialog: {
+    '& .MuiListItem-root': {
+      '& span': {
+        overflowX: 'scroll',
+        whiteSpace: 'nowrap',
+      }
+    },
+    '& .MuiDivider-vertical': {
+      height: '16px',
+    },
+  },
 });
 
 const displayPictures: (keyof IInputData)[] = [
@@ -186,7 +196,7 @@ export default function ListPage() {
               list.push({
                 id: key,
                 dataId: data.id,
-                name: displayMap[key],
+                name: sortedMap[key],
                 value: data[key as keyof IInputData],
               });
             }
@@ -287,6 +297,47 @@ export default function ListPage() {
   const convertBuyCategoryName = (id: string): string => categories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
   const convertDatetime = (timestamp: number): string => new Date(timestamp).toISOString();
   const convertNumber = (val: number): string => '¥' + String(Number(val).toLocaleString());
+
+  const modalContent = (dataList: IDisplayData[]) => {
+    return (
+        <div className={classes.dialog}>
+          <List dense>
+            <Grid item xs={12} md={6}>
+            {
+              dataList.map(data => {
+                const value = convertDisplayValue(data.id, data.value);
+                return (
+                  <ListItem key={data.id}>
+                    <Grid item xs={3} md={1}>
+                      <ListItemText
+                        primary={data.name}
+                      />
+                    </Grid>
+                    <Grid item xs={1} md={1}>
+                      <Divider orientation="vertical" />
+                    </Grid>
+                    <Grid item xs={8} md={4}>
+                      <ListItemText
+                        primary={
+                          Array.isArray(value) ? (
+                            <div className={classes.avatarBlock}>
+                              {
+                                value.map((pic, index) => <Avatar key={index} src={pic} />)
+                              } 
+                            </div>
+                          ) : value
+                        }
+                      />
+                    </Grid>
+                  </ListItem>
+                );
+              })
+            }
+            </Grid>
+          </List>
+        </div>
+    )
+  };
 
   const isLoading = !isPageInitialized || configs.length < 1 || groupMembers.length < 1;
   const isShownTable = getDisplayDataList(selectedType as IConfigType).length > 0;
@@ -408,23 +459,8 @@ export default function ListPage() {
             </>
           </CardContent>
         </Card>
-        <DialogV1 id={targetId} value={targetId} title="" open={isDeleteModalOpen} content={modalContent} onClose={onCloseHandler}/>
+        <DialogV1 id={targetId} value={targetId} title="Remove?" open={isDeleteModalOpen} content={modalContent(getDisplayDataList(selectedType as IConfigType)?.find(row => row[0]?.dataId === targetId) || [])} onClose={onCloseHandler}/>
       </Box>
     </>
   );
 }
-
-// TODO: Should display detail of data
-const modalContent = (
-  <Grid item xs={12} md={6}>
-    <div>
-      <List>
-        <ListItem>
-          <ListItemText
-            primary="削除しますか？"
-          />
-        </ListItem>
-      </List>
-    </div>
-  </Grid>
-);
