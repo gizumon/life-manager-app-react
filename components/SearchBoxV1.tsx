@@ -58,6 +58,7 @@ export default function SearchBox({ value, setValue }: IProps) {
   };
 
   const onClickHandler = () => {
+    setValue('');
     setIsOpen(!isClose);
   }
 
