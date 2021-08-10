@@ -157,7 +157,7 @@ export default function MyApp(props: any) {
                 <FooterV1 />
               </ThemeProvider>
             </Layout>
-          </Provider>          
+          </Provider>
         </FirebaseProvider>
       </AuthProvider>
     </React.Fragment>

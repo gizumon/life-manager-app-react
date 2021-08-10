@@ -82,7 +82,7 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
         <Button autoFocus onClick={handleCancel} color="default">
           {cancelBtnTitle}
         </Button>
-        <Button onClick={handleOk} color="secondary">
+        <Button onClick={handleOk} color="primary">
           {okBtnTitle}
         </Button>
       </DialogActions>

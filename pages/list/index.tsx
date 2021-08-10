@@ -67,6 +67,9 @@ const useStyles = makeStyles({
   card: {
     width: 350,
     margin: '25px 0px 65px 0px',
+    '& .MuiTab-root': {
+      padding: '8px 12px',
+    },
   },
   tableContainer: {
     maxHeight: 320,
@@ -75,7 +78,7 @@ const useStyles = makeStyles({
     minWidth: 300,
     whiteSpace: 'nowrap',
     '&> thead > tr > th': {
-      backgroundColor: theme.palette.secondary.dark,
+      backgroundColor: theme.palette.primary.main,
       color: '#fff',
       fontWeight: 700,
       padding: '6px 10px',
@@ -106,7 +109,8 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    borderTop: 'solid 5px #eb8a44',
+    borderTop: 'solid 5px #000',
+    borderColor: theme.palette.warning.main,
     fontSize: '1rem',
     fontWeight: 700,
     boxShadow: '0 3px 5px rgb(0 0 0 / 22%)',
@@ -270,6 +274,36 @@ export default function ListPage() {
     return groupMembers.find(member => member.id === memberId)?.name || '';
   }
 
+  const isRowDisplay = (row: IDisplayData[] = []) => {
+    return row.some(col => {
+      const value = convertDisplayValue(col.id, col.value);
+      return typeof value === 'string' ? Utils.hasString(value, searchKey)
+                                      : (Array.isArray(col.value) ? col.value.some(memberId => Utils.hasString(getMemberName(memberId), searchKey))
+                                                                  : Utils.hasString(getMemberName(String(col.value)), searchKey));
+    })
+  }
+
+  const rowSortHandler = (row1: IDisplayData[], row2: IDisplayData[]): number => {
+    let result = 0;
+    const orderFuncMap = {
+      asc: (arg1: string | number, arg2: string | number) => Utils.asc(arg1, arg2),
+      desc: (arg1: string | number, arg2: string | number) => Utils.desc(arg1, arg2),
+      custom: (arg1: number, arg2: number) => (arg1 - arg2),
+    }
+
+    for (let setting of getConfig(selectedType as IConfigType).setting.order) {
+      if (setting.id === 'datetime') {
+        result = 0;
+      } else {
+        const arg1 = setting.type === 'custom' ? categories.find(category => category.id === row1.find(col => col.id === setting.id)?.value)?.setting?.order : row1.find(col => col.id === setting.id)?.value;
+        const arg2 = setting.type === 'custom' ? categories.find(category => category.id === row2.find(col => col.id === setting.id)?.value)?.setting?.order : row2.find(col => col.id === setting.id)?.value;
+        result = orderFuncMap[setting.type](arg1, arg2);  
+      }
+      if (result !== 0) break;
+    }
+    return result;
+  };
+
   // TODO: should move in utils
   const convertDisplayValue = (id: string, value: any): string | string[] => {
     const convertFnMap: {[key in keyof IInputData]?: any} = {
@@ -356,6 +390,7 @@ export default function ListPage() {
             value={tabIndex}
             onChange={onTabChange}
             aria-label="tabs"
+            indicatorColor="primary"
           >
             <Tab label={<><PaymentIcon /> Pay</>} {...getTabProps(tabMap.toIndex['pay'])} />
             <Tab label={<><AssignmentTurnedInIcon /> ToDo</>} {...getTabProps(tabMap.toIndex['todo'])} />
@@ -412,12 +447,8 @@ export default function ListPage() {
                         {
                           getDisplayDataList(selectedType as IConfigType)
                             .slice().reverse()
-                            .filter(row => row.some(col => {
-                              const value = convertDisplayValue(col.id, col.value);
-                              return typeof value === 'string' ? Utils.hasString(value, searchKey)
-                                                               : (Array.isArray(col.value) ? col.value.some(memberId => Utils.hasString(getMemberName(memberId), searchKey))
-                                                                                           : Utils.hasString(getMemberName(String(col.value)), searchKey));
-                            }))
+                            .filter(row => isRowDisplay(row))
+                            .sort((row1, row2) => rowSortHandler(row1, row2))
                             .map((row) => {
                               if (row.length < 1) {
                                 return (<FadeWrapper><CircularProgressV1 /></FadeWrapper>)

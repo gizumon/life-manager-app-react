@@ -13,7 +13,12 @@ export interface ICategory {
     name: string;
     type: string;
     isHide?: boolean;
-    setting?: IRatioSetting[];
+    setting?: ISetting;
+};
+
+
+export interface ISetting {
+    order?: number;
 };
 
 export interface IRatioSetting {
@@ -63,7 +68,7 @@ export interface IInput {
     validates: IValidate[];
     args?: any[];
     dataList?: IModel[];
-    order?: number; 
+    order?: number;
     isHideList: boolean;
     isHideInput: boolean;
 }
@@ -74,6 +79,12 @@ export interface IConfig {
     icon: string;
     description: string;
     inputs: IInput[];
+    setting: {
+        order: {
+            id: string;
+            type: 'asc' | 'desc' | 'custom';
+        }[]
+    };
 }
 
 export interface IPageConfig {

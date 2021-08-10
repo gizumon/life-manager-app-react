@@ -7,124 +7,79 @@ namespace CONST {
           id: 'none',
           name: '指定なし❔',
           type: 'pay',
-          setting: [
-            {
-                memberId: '1',
-                ratio: 1.0,
-            },
-            {
-                memberId: '2',
-                ratio: 1.0,
-            },
-          ],
+          setting: {
+            order: 100,
+          }
         },
         {
           id: 'foods',
           name: '飲食費🍔',
           type: 'pay',
-          setting: [
-            {
-                memberId: '1',
-                ratio: 1.0,
-            },
-            {
-                memberId: '2',
-                ratio: 1.0,
-            },
-          ],
+          setting: {},
         },
         {
           id: 'households',
           name: '日用品🧻',
           type: 'pay',
-          setting: [
-            {
-                memberId: '1',
-                ratio: 1.0,
-            },
-            {
-                memberId: '2',
-                ratio: 1.0,
-            },
-          ],
+          setting: {},
         },
         {
           id: 'hobbies',
           name: '趣味⚽',
           type: 'pay',
-          setting: [
-            {
-                memberId: '1',
-                ratio: 1.0,
-            },
-            {
-                memberId: '2',
-                ratio: 1.0,
-            },
-          ],
+          setting: {},
         },
         {
           id: 'furniture',
           name: '家具・家電🛋',
           type: 'pay',
-          setting: [
-            {
-                memberId: '1',
-                ratio: 1.0,
-            },
-            {
-                memberId: '2',
-                ratio: 1.0,
-            },
-          ],
+          setting: {},
         },
         {
           id: 'fixed-cost',
           name: '固定費🏠',
           type: 'pay',
-          setting: [
-            {
-                memberId: '1',
-                ratio: 1.0,
-            },
-            {
-                memberId: '2',
-                ratio: 1.0,
-            },
-          ],
+          setting: {},
         },
     ];
 
     export const buyCategories: ICategory[] = [
       {
         id: 'super',
-        name: 'スーパー🛒',
+        name: 'スーパー',
         type: 'tobuy',
         isHide: false,
+        setting: {
+          order: 1,
+        }
       },
       {
         id: 'drugstore',
-        name: '薬局💊',
+        name: '薬局',
         type: 'tobuy',
         isHide: false,
+        setting: {
+          order: 2,
+        }
       },
       {
         id: 'oneDollarShop',
-        name: '100均💴',
+        name: '100均',
         type: 'tobuy',
         isHide: false,
+        setting: {
+          order: 3,
+        }
       },
       {
         id: 'none',
-        name: 'その他❔',
+        name: 'その他',
         type: 'tobuy',
         isHide: false,
+        setting: {
+          order: 100,
+        }
       },
-      // {
-      //   id: 'furniture',
-      //   name: '家具・家電',
-      //   type: 'tobuy',
-      // },
     ]
 
     export const configs: IConfig[] = [
@@ -233,6 +188,12 @@ namespace CONST {
             isHideList: false,
           },
         ],
+        setting: {
+          order: [{
+            id: 'timestamp',
+            type: 'desc',
+          }]
+        }
       },
       {
         type: 'todo',
@@ -317,6 +278,15 @@ namespace CONST {
             isHideList: true,
           },
         ],
+        setting: {
+          order: [{
+            id: 'doDueDate',
+            type: 'asc',
+          },{
+            id: 'timestamp',
+            type: 'desc',
+          }]
+        }
       },
       {
         type: 'tobuy',
@@ -414,7 +384,16 @@ namespace CONST {
               maxNumOfBtnsInRow: 3,
             }],
           },
-        ]
+        ],
+        setting: {
+          order: [{
+            id: 'buyCategory',
+            type: 'custom',
+          },{
+            id: 'timestamp',
+            type: 'desc',
+          }]
+        }
       },
     ];
 

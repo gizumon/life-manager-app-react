@@ -55,6 +55,30 @@ namespace Utils {
     export function hasString(string: string, searchKey: string): boolean {
         return string.indexOf(searchKey) > -1;
     }
+
+    /**
+     * Asc number or string
+     * @param arg1 
+     * @param arg2 
+     * @returns 
+     */
+    export function asc(arg1: number | string, arg2: number | string): number {
+        return arg1 > arg2 ? 1
+             : arg1 < arg2 ? -1
+             : 0;
+    }
+
+    /**
+     * Desc number or string
+     * @param arg1 
+     * @param arg2 
+     * @returns 
+     */
+    export function desc(arg1: number | string, arg2: number | string): number {
+        return arg1 < arg2 ? 1
+             : arg1 > arg2 ? -1
+             : 0;
+    }
 }
 
 export default Utils;

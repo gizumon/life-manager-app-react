@@ -39,12 +39,15 @@ const useStyles = makeStyles({
     width: '100vw',
     bottom: '0px',
     zIndex: 1000,
-    background: theme.palette.grey[50],
-    '& .Mui-selected': {
-      color: theme.palette.secondary.light,
-    },
-    '& .Mui-disabled': {
-      color: theme.palette.grey[500],
+    background: theme.palette.secondary.main,
+    '& .MuiButtonBase-root': {
+      color: theme.palette.secondary.dark,
+      '&.Mui-selected': {
+        color: theme.palette.primary.main,
+      },
+      '&.Mui-disabled': {
+        color: theme.palette.grey[500],
+      } 
     }
   },
 });

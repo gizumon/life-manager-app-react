@@ -14,7 +14,7 @@ type IProps = {
 }
 
 // TODO: Need to fix the layout when there are over 4 btns cases
-const useStyles = makeStyles((_: Theme) =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       display: 'flex',
@@ -25,7 +25,8 @@ const useStyles = makeStyles((_: Theme) =>
     btnsGroup: {
       margin: 0,
       width: '100%',
-      borderTop: '1px solid rgb(17, 93, 86)',
+      borderTop: '1px solid #000',
+      borderColor: theme.palette.primary.dark,
       '&> .MuiButton-root': {
         borderRadius: '0px 0px 0px 0px',
       },
@@ -34,7 +35,7 @@ const useStyles = makeStyles((_: Theme) =>
       },
       '&:last-child': {
         borderRadius: '0px 0px 0px 4px',
-      }
+      },
     },
     btn: {
       flex: 1,
@@ -42,7 +43,8 @@ const useStyles = makeStyles((_: Theme) =>
       fontWeight: 700,
       height: '3rem',
       padding: '6px 4px',
-    //   backgroundColor: theme.palette.secondary.main,
+      color: theme.palette.text.hint,
+    //   backgroundColor: theme.palette.primary.main,
     },
   }),
 );
@@ -82,7 +84,7 @@ export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
       {
         btnsRows.map((btns, index) => {
           return (
-            <ButtonGroup key={index} className={classes.btnsGroup} variant="contained" color="secondary" aria-label="select-btns">
+            <ButtonGroup key={index} className={classes.btnsGroup} variant="contained" color="primary" aria-label="select-btns">
               {
                 btns.map((btn) => {
                   return (

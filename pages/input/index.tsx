@@ -74,6 +74,9 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: 450,
       margin: '25px 25px 65px 25px',
       // width: '100%',
+      '& .MuiTab-root': {
+        padding: '8px 12px',
+      },
       '& .MuiCardContent-root': {
         padding: '20px 16px 25px 16px',
       }
@@ -213,27 +216,28 @@ export default function Input() {
           value={tabIndex}
           onChange={onTabChange}
           aria-label="tabs"
+          indicatorColor="primary"
         >
           <Tab label={<><PaymentIcon /> Pay</>} {...getTabProps(tabMap.toIndex['pay'])} />
           <Tab label={<><AssignmentTurnedInIcon /> ToDo</>} {...getTabProps(tabMap.toIndex['todo'])} />
           <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
         </Tabs>
         <CardContent>
-            {
-              getConfig(selectedType as IConfigType)?.inputs.filter((row) => !row.isHideInput).map((input) => {
-                if (input.type === 'text') {
-                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
-                } else if (input.type === 'number') {
-                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number" />);
-                } else if (input.type === 'select') {
-                  return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
-                } else if (input.type === 'multi-check') {
-                  return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
-                } else if (input.type === 'date') {
-                  return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
-                }
-              })
-            }
+          {
+            getConfig(selectedType as IConfigType)?.inputs.filter((row) => !row.isHideInput).map((input) => {
+              if (input.type === 'text') {
+                return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+              } else if (input.type === 'number') {
+                return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number" />);
+              } else if (input.type === 'select') {
+                return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+              } else if (input.type === 'multi-check') {
+                return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+              } else if (input.type === 'date') {
+                return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+              }
+            })
+          }
         </CardContent>
         <CardActions disableSpacing className={classes.btns}>
           {
