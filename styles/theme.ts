@@ -17,12 +17,12 @@ const defaultTheme = createMuiTheme({
     warning: {
       main: '#fc2f60',
     },
-    info: {
-      // main: red.A400,
-    },
-    success: {
-      // main: blue.A400,
-    },
+    // info: {
+    //   main: red.A400,
+    // },
+    // success: {
+    //   main: blue.A400,
+    // },
     background: {
       default: '#f1f1f2',
       paper: '#ffffff',
