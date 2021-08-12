@@ -5,7 +5,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { IInput } from '../interfaces';
+import { IInput, ICategory } from '../interfaces';
 
 type IProps = {
     config: IInput;
@@ -30,16 +30,10 @@ export default function SelectV1({config, model, setProps}: IProps) {
   const handleChange = useCallback((event: React.ChangeEvent<{ value: unknown }>) => {
     // setState(event.target.value as string);
     setProps((prevVal: any) => {
-      console.log('handle change:', prevVal, event.target.value)
+      // console.log('handle change:', prevVal, event.target.value)
       return {...prevVal, [config.id]: event.target.value}
     });
   }, []);
-
-  // useEffect(() => {
-  //   setProps((prevVal: any) => {
-  //     return {...prevVal, [config.id]: state}
-  //   });
-  // }, [state]);
 
   return (
     <div>
@@ -57,13 +51,15 @@ export default function SelectV1({config, model, setProps}: IProps) {
             <em>---</em>
           </MenuItem>
           {
-              config && config.dataList?.map(data => {
-                return (
-                  <MenuItem key={data.id} value={data.id}>
-                      {data.name}
-                  </MenuItem>
-                );
-              })
+              config && (config.dataList || [])
+                .filter(data => data.hasOwnProperty('isHide') ? !(data as ICategory).isHide: true)
+                .map(data => {
+                  return (
+                    <MenuItem key={data.id} value={data.id}>
+                        {data.name}
+                    </MenuItem>
+                  );
+                })
           }
         </Select>
       </FormControl>

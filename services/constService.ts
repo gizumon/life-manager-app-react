@@ -4,42 +4,58 @@ namespace CONST {
     // Category for display list
     export const payCategories: ICategory[] = [
         {
-          id: 'none',
-          name: '指定なし❔',
+          id: 'nonePay',
+          name: 'その他',
           type: 'pay',
+          isHide: false,
           setting: {
-            order: 100,
+            order: 6,
           }
         },
         {
           id: 'foods',
           name: '飲食費🍔',
           type: 'pay',
-          setting: {},
+          isHide: false,
+          setting: {
+            order: 1,
+          },
         },
         {
           id: 'households',
           name: '日用品🧻',
           type: 'pay',
-          setting: {},
+          isHide: false,
+          setting: {
+            order: 2,
+          },
         },
         {
           id: 'hobbies',
           name: '趣味⚽',
           type: 'pay',
-          setting: {},
+          isHide: false,
+          setting: {
+            order: 3,
+          },
         },
         {
           id: 'furniture',
           name: '家具・家電🛋',
           type: 'pay',
-          setting: {},
+          isHide: false,
+          setting: {
+            order: 4,
+          },
         },
         {
-          id: 'fixed-cost',
+          id: 'fixedCost',
           name: '固定費🏠',
           type: 'pay',
-          setting: {},
+          isHide: false,
+          setting: {
+            order: 5,
+          },
         },
     ];
 
@@ -77,7 +93,7 @@ namespace CONST {
         type: 'tobuy',
         isHide: false,
         setting: {
-          order: 100,
+          order: 4,
         }
       },
     ]
@@ -140,7 +156,7 @@ namespace CONST {
             type: 'select',
             placeholder: '-- カテゴリ --',
             icon: 'mdi-help-box',
-            model: 'none',
+            model: 'nonePay',
             validates: [
               {
                 type: 'isInclude',

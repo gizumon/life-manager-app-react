@@ -4,6 +4,8 @@ import { IInput } from '../interfaces';
 import { Button, ButtonGroup } from '@material-ui/core';
 import { useToggle } from '../hooks/useToggle';
 import { useUpdateEffect } from '../hooks/useUpdateEffect';
+import { ICategory } from '../interfaces/index';
+import Utils from '../services/utilsService';
 
 type IProps = {
     config: IInput;
@@ -54,7 +56,8 @@ export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
   const defaultMaxNumOfBtnInRow = 3;
   const classes = useStyles();
   const [isClick, setToggle] = useToggle();
-  const dataList = config.dataList || [];
+  const dataList = config.dataList?.filter(data => data.hasOwnProperty('isHide') ? !(data as ICategory).isHide: true)
+                                   .sort((data1, data2) => data1.hasOwnProperty('setting') ? Utils.asc((data1 as ICategory).setting.order, (data2 as ICategory).setting.order) : 0) || [];
   const maxNumberOfBtnInRow = config.args && config.args[0] && typeof config.args[0]['maxNumberOfBtnInRow'] === 'number'
                             ? config.args[0]['maxNumberOfBtnInRow'] : defaultMaxNumOfBtnInRow;
   // const numOfRows = Math.floor((config.dataList?.length || 0) / maxNumberOfBtnInRow) + 1;

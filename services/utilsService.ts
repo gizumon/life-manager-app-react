@@ -79,6 +79,24 @@ namespace Utils {
              : arg1 > arg2 ? -1
              : 0;
     }
+
+    /**
+     * Move array fromIndex to toIndex
+     * @param array 
+     * @param fromIndex 
+     * @param toIndex 
+     * @returns 
+     */
+    export function arrayMove(array: any[], fromIndex: number, toIndex: number) {
+        const newArray = [...array];
+        const startIndex = fromIndex < 0 ? newArray.length + fromIndex : fromIndex;
+        if (startIndex >= 0 && startIndex < newArray.length) {
+            const endIndex = toIndex < 0 ? newArray.length + toIndex : toIndex;
+            const [item] = newArray.splice(fromIndex, 1);
+            newArray.splice(endIndex, 0, item);
+        }
+        return newArray;
+    }
 }
 
 export default Utils;

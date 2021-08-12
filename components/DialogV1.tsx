@@ -12,7 +12,6 @@ export interface ConfirmationDialogRawProps {
   classes?: string;
   id: string;
   title: string;
-  // keepMounted: boolean;
   value: string;
   open: boolean;
   content: any;
@@ -59,33 +58,29 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
     onClose(value);
   };
 
-  // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setValue((event.target as HTMLInputElement).value);
-  // };
-
   return (
-    <Dialog
-      className={classes || defaultClasses.root}
-      maxWidth="md"
-      onEntering={handleEntering}
-      aria-labelledby="dialog-title"
-      open={open}
-      {...other}
-    >
-      {
-        title && <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
-      }
-      <DialogContent dividers>
-        {content}
-      </DialogContent>
-      <DialogActions className={defaultClasses.btns}>
-        <Button autoFocus onClick={handleCancel} color="default">
-          {cancelBtnTitle}
-        </Button>
-        <Button onClick={handleOk} color="primary">
-          {okBtnTitle}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <Dialog
+        className={classes || defaultClasses.root}
+        maxWidth="md"
+        onEntering={handleEntering}
+        aria-labelledby="dialog-title"
+        open={open}
+        {...other}
+      >
+        {
+          title && <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
+        }
+        <DialogContent dividers>
+          {content}
+        </DialogContent>
+        <DialogActions className={defaultClasses.btns}>
+          <Button autoFocus onClick={handleCancel} color="default">
+            {cancelBtnTitle}
+          </Button>
+          <Button onClick={handleOk} color="primary">
+            {okBtnTitle}
+          </Button>
+        </DialogActions>
+      </Dialog>
   );
 }

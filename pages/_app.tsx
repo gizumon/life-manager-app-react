@@ -108,9 +108,9 @@ const Layout: FC = ({ children }) => {
     firebase.getMember(liff.userId as string).then(member => {
       const isExistMember = !!member;
       setState(isExistMember ? stateMap.isExistMember : stateMap.isNotExistMember);
-      if (isExistMember && firebase.activateGroup && member.groupId) {
-        firebase.activateGroup(member.groupId);
-      }
+      // if (isExistMember && firebase.activateGroup && member.groupId) {
+      //   firebase.activateGroup(member.groupId);
+      // }
     });
   }
 

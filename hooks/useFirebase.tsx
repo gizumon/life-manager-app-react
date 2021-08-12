@@ -5,15 +5,19 @@ import 'firebase/database';
 import { IConfig, ICategory, IMember, IGroup, IInputData, IConfigType } from '../interfaces/index';
 import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from '../services/utilsService';
+import * as _ from 'lodash';
 
+const templateGroupId = '${groupId}';
 export const refsMap = {
     isUseFactory: 'triggers/isUseFactory',
     configs: 'masterdata/configs',
+    customConfigs: `groups/${templateGroupId}/configs`, 
     categories: 'masterdata/categories',
+    customCategories: `groups/${templateGroupId}/categories`, 
     members: 'users',
     groups: 'groups',
     inputs: 'data/inputs'
-};
+} as const;
 
 let DB: firebase.database.Database | undefined;
 
@@ -68,6 +72,7 @@ type IDataStates = {
 type IActivateDataStates = {
   isGroupActivated: boolean;
   configs: IConfig[];
+  categories: ICategory[];
   groups: IGroup[];
   groupMembers: IMember[];
   inputs: {[key in IConfigType]: IInputData[]};
@@ -93,34 +98,38 @@ type IUseFirebaseReturn = IDataAndFlagStates & IActivateDataStates & {
   updateGroupMember?: (groupId: string, data: IMember) => Promise<firebase.database.Reference>;
   isExistGroup?: (groupId: string) => Promise<boolean>;
   isExistMember?: (lineId: string) => Promise<boolean>;
-  activateGroup?: (groupId: string) => void;
+  activateGroup?: (groupId: string) => Promise<void>;
   makePageConfigs?: (configs: IConfig[], categories: ICategory[], members: IMember[]) => IConfig[];
+  updateCustomCategories: (groupId: string, data: ICategory[]) => Promise<firebase.database.Reference>,
+  updateCustomConfigs: (groupId: string, data: IConfig[]) => Promise<firebase.database.Reference>,
 }
 
 export const useFirebase = (): IUseFirebaseReturn => {
   const firebaseApp = useContext(FirebaseContext);
   const [states, setStates] = useState<IDataAndFlagStates>({isRunInitialized: false, isInitialized: false, configs: [], categories: []});
-  const [activateState, setActivateState] = useState<IActivateDataStates>({isGroupActivated: false, groups: [], groupMembers: [], configs: [], inputs:  {pay: [], todo: [], tobuy:[]}});
+  const [activateState, setActivateState] = useState<IActivateDataStates>({isGroupActivated: false, groups: [], groupMembers: [], configs: [], categories: [], inputs:  {pay: [], todo: [], tobuy:[]}});
   DB = firebaseApp?.database();
 
-  const activateGroup = (groupId: string) => {
+  const activateGroup = async (groupId: string) => {
     if (!DB || !groupId || states.configs.length < 1) { return; }
-    DB.ref(refsMap.groups).child(groupId).once('value').then((groupSnap) => {
-      const group = groupSnap.val() as IGroup;
-      if (!group || !group.members) { return; }
-      const groupMembers = convertObjectToArray(group.members as {[key: string]: IMember}) as IMember[];
-      console.log('activate group: ', group, groupMembers);
-      
-      DB?.ref(refsMap.inputs).child(groupId).once('value').then((inputSnap) => {
-        const inputs = convertGroupInputsToArray(inputSnap.val() as {[key in IConfigType]: {[key: string]: IInputData}});
-        setActivateState({
-          isGroupActivated: true,
-          configs: makePageConfigs(states.configs, states.categories, groupMembers),
-          groups: [group],
-          groupMembers: groupMembers,
-          inputs: inputs || {pay: [], todo: [], tobuy:[]},
-        });
-      });
+    const group: IGroup = (await DB.ref(refsMap.groups).child(groupId).once('value'))?.val();
+
+    if (!group || !group.members) { return; }
+    const groupMembers = convertObjectToArray(group.members as {[key: string]: IMember}) as IMember[];
+    const customConfigs: IConfig[] = (await DB?.ref(refsMap.customConfigs.replace(templateGroupId, groupId)).once('value'))?.val() || [];
+    const customCategories: ICategory[] = (await DB?.ref(refsMap.customCategories.replace(templateGroupId, groupId)).once('value'))?.val() || [];
+    const inputs = convertGroupInputsToArray((await DB?.ref(refsMap.inputs).child(groupId).once('value')).val() as {[key in IConfigType]: {[key: string]: IInputData}});
+
+    const newConfigs = _.merge(states.configs, customConfigs);
+    const newCategories = _.merge(states.categories, customCategories);
+
+    setActivateState({
+      isGroupActivated: true,
+      configs: makePageConfigs(newConfigs, newCategories, groupMembers),
+      categories: newCategories,
+      groups: [group],
+      groupMembers: groupMembers,
+      inputs: inputs || {pay: [], todo: [], tobuy:[]},
     });
   }
 
@@ -141,7 +150,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
           isRunInitialized: true,
           isInitialized: true,
           configs: items.configs,
-          categories: items.categories,
+          categories: states.categories.length > 0 ? states.categories: items.categories,
         }
       });
     });
@@ -167,6 +176,8 @@ export const useFirebase = (): IUseFirebaseReturn => {
     isExistMember: isExistMember,
     activateGroup: activateGroup,
     makePageConfigs: makePageConfigs,
+    updateCustomCategories: updateCustomCategories,
+    updateCustomConfigs: updateCustomConfigs,
   };
 }
 
@@ -395,6 +406,42 @@ const convertGroupInputsToArray = (obj: {[key in IConfigType]: {[key: string]: I
     }
   });
   return data;
+}
+
+const updateCustomCategories = (groupId: string, data: ICategory[]) => {
+  return new Promise<firebase.database.Reference>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...');
+    }
+    if (!groupId || !data) {
+      return reject('lineId has not defined...');
+    }
+
+    DB?.ref(refsMap.customCategories.replace(templateGroupId, groupId)).set(data).then(val => {
+      return resolve(val);
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
+    });
+  });
+}
+
+const updateCustomConfigs = (groupId: string, data: IConfig[]) => {
+  return new Promise<firebase.database.Reference>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...');
+    }
+    if (!groupId || !data) {
+      return reject('lineId has not defined...');
+    }
+
+    DB?.ref(refsMap.customConfigs.replace(templateGroupId, groupId)).set(data).then(val => {
+      return resolve(val);
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
+    });
+  });
 }
 
 const dataFactory = () => {

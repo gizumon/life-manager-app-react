@@ -13,12 +13,12 @@ export interface ICategory {
     name: string;
     type: string;
     isHide?: boolean;
-    setting?: ISetting;
+    setting: ISetting;
 };
 
 
 export interface ISetting {
-    order?: number;
+    order: number;
 };
 
 export interface IRatioSetting {
@@ -67,7 +67,7 @@ export interface IInput {
     // model: IModel | IModel[] | any;
     validates: IValidate[];
     args?: any[];
-    dataList?: IModel[];
+    dataList?: (IMember | ICategory)[];
     order?: number;
     isHideList: boolean;
     isHideInput: boolean;
