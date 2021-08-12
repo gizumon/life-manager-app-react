@@ -34,7 +34,7 @@ export default function Progress(props: IProps) {
     return (
       <div className={classes.root} >
         {
-          <img src={props.imgUrl ? props.imgUrl : 'http://a.top4top.net/p_1990j031.gif'} alt="Loading"></img>
+          <img src={props.imgUrl ? props.imgUrl : './loading.gif'} alt="Loading"></img>
         }
         {
           <p className={classes.message}>{props.message ? props.message : 'Loading...'}</p>

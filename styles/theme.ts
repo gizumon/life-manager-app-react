@@ -1,9 +1,9 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 import { blue, red } from '@material-ui/core/colors';
 import { Theme } from '@material-ui/core';
 
 // Create a theme instance.
-const defaultTheme = createMuiTheme({
+const defaultTheme = createTheme({
   palette: {
     primary: {
       main: '#1995ad',
@@ -35,7 +35,7 @@ const defaultTheme = createMuiTheme({
   },
 });
 
-const redTheme = createMuiTheme({
+const redTheme = createTheme({
   palette: {
     primary: {
       main: '#FF4848',
@@ -62,7 +62,7 @@ const redTheme = createMuiTheme({
   },
 });
 
-const blueTheme = createMuiTheme({
+const blueTheme = createTheme({
   palette: {
     primary: {
       main: '#0A81AB',
@@ -90,7 +90,7 @@ const blueTheme = createMuiTheme({
   },
 });
 
-const retroTheme = createMuiTheme({
+const retroTheme = createTheme({
   palette: {
     primary: {
       main: '#F24C30',

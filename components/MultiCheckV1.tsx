@@ -9,6 +9,7 @@ import Chip from '@material-ui/core/Chip';
 
 import { IInput } from '../interfaces';
 import { Avatar } from '@material-ui/core';
+import { IMember } from '../interfaces/index';
 
 type IProps = {
     config: IInput;
@@ -97,9 +98,9 @@ export default function MultiCheckV1({config, model = [], setProps}: IProps) {
                   className={classes.chip}
                   // onDelete={handleDelete}
                   avatar={<Avatar src={
-                    config.dataList?.find((data) => {
-                      if (data.id === id) { return data.picture; }
-                    })?.picture}
+                    (config.dataList?.find((data: IMember) => {
+                      if (data.id === id ) { return !!data.picture; }
+                    }) as IMember)?.picture}
                   />}
                 />
               ))}
