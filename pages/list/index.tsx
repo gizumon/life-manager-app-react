@@ -17,9 +17,6 @@ import Progress from '../../components/AnimationProgressV1';
 import CircularProgressV1 from '../../components/CircularProgressV1';
 import { DialogV1 } from '../../components/DialogV1';
 import SearchBox from '../../components/SearchBoxV1';
-import { useSelector } from 'react-redux';
-import { StoreState } from '../../ducks/createStore';
-import { FirebaseState } from '../../ducks/firebase/slice';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -150,8 +147,7 @@ function getTabProps(index: number) {
 export default function ListPage() {
   const classes = useStyles();
   const router = useRouter();
-  const { configs, inputs, groupMembers, categories } = useSelector<StoreState, FirebaseState>(state => state.firebase);
-  const { activateGroup, deleteInput } = useFirebase();
+  const { configs, inputs, groupMembers, categories, activateGroup, isInitialized, deleteInput } = useFirebase();
 
   const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
@@ -163,6 +159,12 @@ export default function ListPage() {
   const [targetId, setTargetId] = React.useState<string>('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>(false);
   const [searchKey, setSearchKey] = React.useState<string>('');
+
+  useEffect(() => {
+    if (activateGroup && selectedId) {
+      activateGroup(selectedId);
+    }
+  }, [isInitialized]);
 
   useEffect(() => {
     if (configs.length > 0) {
