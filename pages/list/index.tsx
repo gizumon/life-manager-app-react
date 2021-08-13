@@ -17,6 +17,9 @@ import Progress from '../../components/AnimationProgressV1';
 import CircularProgressV1 from '../../components/CircularProgressV1';
 import { DialogV1 } from '../../components/DialogV1';
 import SearchBox from '../../components/SearchBoxV1';
+import { useSelector } from 'react-redux';
+import { StoreState } from '../../ducks/createStore';
+import { FirebaseState } from '../../ducks/firebase/slice';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -92,7 +95,7 @@ const useStyles = makeStyles({
   },
   avatarBlock: {
     display: 'flex',
-    '& .MuiAvatar-circle': {
+    '& .MuiAvatar-circular': {
       width: 20,
       height: 20,
     }
@@ -147,10 +150,9 @@ function getTabProps(index: number) {
 export default function ListPage() {
   const classes = useStyles();
   const router = useRouter();
-  // TODO: Should handle no inputs case 
-  const { configs, inputs, groupMembers, categories, activateGroup, isInitialized, deleteInput } = useFirebase();
+  const { configs, inputs, groupMembers, categories } = useSelector<StoreState, FirebaseState>(state => state.firebase);
+  const { activateGroup, deleteInput } = useFirebase();
 
-  // TODO: Should use session
   const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
 
@@ -161,12 +163,6 @@ export default function ListPage() {
   const [targetId, setTargetId] = React.useState<string>('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>(false);
   const [searchKey, setSearchKey] = React.useState<string>('');
-
-  useEffect(() => {
-    if (activateGroup && selectedId) {
-      activateGroup(selectedId);
-    }
-  }, [isInitialized]);
 
   useEffect(() => {
     if (configs.length > 0) {
@@ -343,9 +339,7 @@ export default function ListPage() {
                 return (
                   <ListItem key={data.id}>
                     <Grid item xs={3} md={1}>
-                      <ListItemText
-                        primary={data.name}
-                      />
+                      <ListItemText primary={data.name} />
                     </Grid>
                     <Grid item xs={1} md={1}>
                       <Divider orientation="vertical" />
