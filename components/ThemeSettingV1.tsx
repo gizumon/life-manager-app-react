@@ -6,7 +6,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { IThemeSetting, IThemeType } from '../interfaces/index';
-import { themeConfigs } from '../styles/theme';
+import { themeConfigs, getThemeSource } from '../styles/theme';
 
 type IProps = {
     setting: IThemeSetting;
@@ -21,13 +21,33 @@ const useStyles = makeStyles((theme: Theme) =>
       width: '95%',
     },
     colorBlocks: {
-
+      display: 'flex',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      width: '100%',
+    },
+    colorBlock: {
+      width: '20%',
+      paddingTop: '5%',
+      paddingBottom: '5%',
+      '& div': {
+        display: 'flex',
+        textAlign: 'center',
+        fontSize: '0.6rem',
+        fontWeight: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
+        '&:first-child': {
+          fontWeight: 700,
+        }
+      }
     }
   }),
 );
 
 export default function ThemeSetting({setting, setSetting, onUpdated}: IProps) {
   const classes = useStyles();
+  const theme = getThemeSource(setting.selectedTheme);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setSetting((state) => {
@@ -61,6 +81,22 @@ export default function ThemeSetting({setting, setSetting, onUpdated}: IProps) {
           }
         </Select>
       </FormControl>
+      <div className={classes.colorBlocks}>
+        {
+          Object.keys(theme).map((key: string) => {
+            const paletteOptions = theme[key as keyof typeof theme];
+            return Object.keys(paletteOptions as any).map((type) => {
+              const color: string = paletteOptions ? paletteOptions[type as keyof typeof paletteOptions] : '#ffffff';
+              return (
+                <div key={type} className={classes.colorBlock} style={{backgroundColor: color}}>
+                  <div style={{color: color, filter: 'invert(100%) grayscale(100%) contrast(100)'}}>{key}</div>
+                  <div style={{color: color, filter: 'invert(100%) grayscale(100%) contrast(100)'}}>{type}</div>
+                </div>
+              )
+            })
+          })
+        }
+      </div>
     </div>
   );
 }
