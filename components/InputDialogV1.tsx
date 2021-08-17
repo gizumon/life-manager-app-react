@@ -67,7 +67,6 @@ export function InputDialogV1(props: IProps) {
     setConfigs(defaultConfigs);
   }, [defaultConfigs, isOpen]);
 
-  const handleEntering = () => {};
   const handleCancel = () => onClose();
   const handleOk = () => onClose(configs);
   const handleOnChange = (index: number) => {
@@ -83,7 +82,6 @@ export function InputDialogV1(props: IProps) {
       <Dialog
         className={classes.root}
         maxWidth="md"
-        onEntering={handleEntering}
         aria-labelledby="dialog-title"
         open={isOpen}
         {...other}

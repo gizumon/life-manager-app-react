@@ -9,6 +9,7 @@ import EditIcon from '@material-ui/icons/Edit';
 
 import { ICategory } from '../interfaces/index';
 import Utils from '../services/utilsService';
+import * as _ from 'lodash';
 
 interface IListType {
   type: string;
@@ -67,21 +68,22 @@ export default function ManageList(props: IProps) {
     }
     setDataList((states) => {
       const newOrderedList = Utils.arrayMove(displayList, removedIndex, addedIndex);
+      const updateStates = _.cloneDeep(states);
       newOrderedList.forEach((data, index) => {
-        states.forEach(state => {
+        updateStates.forEach(state => {
           if (state.id === data.id) {
             state.setting.order = index;
           }
         });
       });
-      onUpdated && onUpdated(states);
-      return [...states]
+      onUpdated && onUpdated(updateStates);
+      return [...updateStates];
     })
   }
 
   return (
     <List dense className={classes.root} subheader={<ListSubheader>{listType.label}</ListSubheader>}>
-      <Container onDrop={onDropHandler} dragClass={classes.onDragging}>
+      <Container onDrop={onDropHandler} dragClass={classes.onDragging} lockAxis="y" >
         {
           displayList.map((newCategory) => (
             <Draggable key={newCategory.id}>
@@ -97,13 +99,14 @@ export default function ManageList(props: IProps) {
                   <Switch
                     edge="end"
                     onChange={() => setDataList((states) => {
-                      states.forEach(state => {
+                      const updateStates = _.cloneDeep(states);
+                      updateStates.forEach(state => {
                         if(state.id === newCategory.id) {
                           state.isHide = !state.isHide;
                         }
                       });
-                      onUpdated && onUpdated(states);
-                      return [...states];
+                      onUpdated && onUpdated(updateStates);
+                      return [...updateStates];
                     })}
                     checked={!newCategory.isHide}
                     size="small"

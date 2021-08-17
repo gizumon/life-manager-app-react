@@ -3,9 +3,14 @@ import { Accordion, AccordionDetails, AccordionSummary, Typography,
 import React, { useEffect, useState } from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useFirebase } from '../../hooks/useFirebase';
-import { ICategory } from '../../interfaces/index';
+import { ICategory, IThemeSetting } from '../../interfaces/index';
 import { InputDialogV1, IModalInputConfig, defaultConfig } from '../../components/InputDialogV1';
 import ManageList from '../../components/ManageListV1';
+import { useSelector } from 'react-redux';
+import { StoreState } from '../../ducks/createStore';
+import { FirebaseState } from '../../ducks/firebase/slice';
+import * as _ from 'lodash';
+import ThemeSetting from '../../components/ThemeSettingV1';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -61,13 +66,13 @@ const categoryTypeList = [
 
 export default function Manage() {
   const classes = useStyles();
-  const { activateGroup, isInitialized, categories, updateCustomCategories } = useFirebase();
+  const { updateCustomCategories, updateCustomThemeSetting } = useFirebase();
+  const { categories, groupTheme } = useSelector<StoreState, FirebaseState>(state => state.firebase);
   const [isOpenAddCategoryModal, setIsOpenAddCategoryModal] = useState<boolean>(false);
   const [addCategoryModalConfig, setAddCategoryModalConfig] = useState<IModalInputConfig>(defaultConfig);
+  const [themeSetting, setThemeSetting] = useState<IThemeSetting>(groupTheme || {selectedTheme: 'default'});
   const [newCategories, setNewCategories] = useState<ICategory[]>(categories);
   const selectedGroupId = sessionStorage.getItem('gid') || '';
-
-  useEffect(() => { (selectedGroupId && activateGroup) ? activateGroup(selectedGroupId) : undefined }, [isInitialized]);
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -94,25 +99,26 @@ export default function Manage() {
       const config = configs[0];
       setNewCategories((states) => {
         const isUpdate = config.args?.[1] || false;
+        const updateStates = _.cloneDeep(states);
         if (isUpdate) {
-          states.forEach(state => {
+          updateStates.forEach(state => {
             if (state.id === config.id) {
               state.name = config.value;
             }
           });
         } else {
-          states.push({
+          updateStates.push({
             id: config.id,
             name: config.value,
             type: config.args?.[0] || '',
             isHide: false,
             setting: {
-              order: states.filter(state => state.type === config.args?.[0]).length,
+              order: updateStates.filter(state => state.type === config.args?.[0]).length,
             }
-          } as ICategory)
+          } as ICategory);
         }
-        updateCustomCategories(selectedGroupId, states);
-        return [...states];
+        updateCustomCategories && updateCustomCategories(selectedGroupId, updateStates);
+        return [...updateStates];
       })
     }
     setIsOpenAddCategoryModal(false);
@@ -121,6 +127,30 @@ export default function Manage() {
   return (
     <>
       <div className={classes.root}>
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1c-content"
+            id="panel1c-header"
+          >
+            <div className={classes.column33}>
+              <Typography className={classes.heading}>テーマ設定</Typography>
+            </div>
+            <div className={classes.column50}>
+              <Typography className={classes.secondaryHeading}>Theme setting</Typography>
+            </div>
+          </AccordionSummary>
+          <AccordionDetails className={classes.details}>
+            <div className={classes.column100}>
+              <ThemeSetting setting={themeSetting} setSetting={setThemeSetting} />
+            </div>
+          </AccordionDetails>
+          <AccordionActions>
+            <Button size="small" color="primary" onClick={() => updateCustomThemeSetting && updateCustomThemeSetting(selectedGroupId, themeSetting)}>
+              Save
+            </Button>
+        </AccordionActions>
+        </Accordion>
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
@@ -139,26 +169,21 @@ export default function Manage() {
                 {
                   categoryTypeList.map((categoryType) => {
                     return (
-                      <ManageList
-                        key={categoryType.type}
-                        listType={categoryType}
-                        dataList={newCategories}
-                        setDataList={setNewCategories}
-                        onClickUpsertBtn={(id?: string) => onOpenAddCategory(categoryType.type, id)}
-                        onUpdated={(data: ICategory[]) => updateCustomCategories(selectedGroupId, data)}
-                      />
+                      <div key={categoryType.type}>
+                        <ManageList
+                          listType={categoryType}
+                          dataList={newCategories}
+                          setDataList={setNewCategories}
+                          onClickUpsertBtn={(id?: string) => onOpenAddCategory(categoryType.type, id)}
+                          onUpdated={(data: ICategory[]) => updateCustomCategories && updateCustomCategories(selectedGroupId, data)}
+                        />
+                        <Divider />
+                      </div>
                     )
                   })
                 }
             </div>
           </AccordionDetails>
-          <Divider />
-          <AccordionActions>
-            <Button size="small">Cancel</Button>
-            <Button size="small" color="primary">
-              Save
-            </Button>
-          </AccordionActions>
         </Accordion>
         <InputDialogV1 configs={[addCategoryModalConfig]} isOpen={isOpenAddCategoryModal} onClose={onCloseAddCategoryModal}/>
       </div>

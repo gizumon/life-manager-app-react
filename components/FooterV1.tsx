@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
@@ -6,7 +6,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import ListIcon from '@material-ui/icons/List';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { useRouter } from 'next/router';
-import theme from '../styles/theme';
 import Utils from '../services/utilsService';
 
 type INavIndex = 0 | 1 | 2;
@@ -33,7 +32,7 @@ const navMap: INavMap = {
   }
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   root: {
     position: 'fixed',
     width: '100vw',
@@ -50,7 +49,7 @@ const useStyles = makeStyles({
       } 
     }
   },
-});
+}));
 
 export default function FooterV1() {
   const router = useRouter()
@@ -63,7 +62,9 @@ export default function FooterV1() {
     router.push(Utils.makeUrl(navMap.toUrl[index], selectedType), undefined, {shallow: true});
   };
 
-  router.events.on('routeChangeComplete', () => setNavIndex(navMap.toIndex[router.pathname as IUrlType]));
+  useEffect(() => {
+    setNavIndex(navMap.toIndex[router.pathname as IUrlType]);
+  }, [router.pathname]);
 
   return (
     <BottomNavigation

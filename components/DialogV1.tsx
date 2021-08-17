@@ -48,7 +48,7 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
     setValue(valueProp);
   }, [valueProp, open]);
 
-  const handleEntering = () => {};
+  // const handleEntering = () => {};
 
   const handleCancel = () => {
     onClose();
@@ -62,7 +62,6 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
       <Dialog
         className={classes || defaultClasses.root}
         maxWidth="md"
-        onEntering={handleEntering}
         aria-labelledby="dialog-title"
         open={open}
         {...other}

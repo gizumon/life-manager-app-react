@@ -20,8 +20,11 @@ import Utils from '../../services/utilsService';
 import { useFirebase } from '../../hooks/useFirebase';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
+import { useSelector } from 'react-redux';
 // import { useUserState } from '../../ducks/user/selector';
 // import { useAuth } from '../../hooks/useAuthLiff';
+import { StoreState } from '../../ducks/createStore';
+import { FirebaseState } from '../../ducks/firebase/slice';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -97,16 +100,13 @@ function getTabProps(index: number) {
 export default function Input() {
   const classes = useStyles();
   const router = useRouter();
-  // const user = useUserState().user;
-  // console.log('!!!!user :', user);
-  const { configs, pushInput, activateGroup, isInitialized } = useFirebase();
+  const { isGroupActivated, pushInput } = useFirebase();
+  const { configs } = useSelector<StoreState, FirebaseState>(state => state.firebase);
 
   const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
 
   const [tabIndex, setTabIndex] = React.useState<ITabIndex>(tabMap.toIndex[selectedType as IConfigType] || tabMap.toIndex['pay']);
-  console.log('default tab index: ', tabIndex);
-  // const [selectedConfig, setSelectedConfig] = React.useState<IConfig>();
   const [formData, setFormData] = React.useState<IFormData>({});
   const [isOpenSuccessModal, setIsOpenSuccessModal] = React.useState<boolean>(false);
   const [isOpenErrorModal, setIsOpenErrorModal] = React.useState<boolean>(false);
@@ -184,7 +184,7 @@ export default function Input() {
   });
 
   useEffect(() => {
-    if (configs.length > 0) {
+    if (configs.length > 0 && isGroupActivated) {
       Object.keys(tabMap.toIndex).forEach((type: string) => validMap[type as IConfigType] = getConfig(type as IConfigType).inputs.map(input => input.id));
       Object.keys(tabMap.toIndex).forEach((type: string) => validatorMap[type as IConfigType] = new ValidationService(getConfig(type as IConfigType)));
       setFormData(makeDefaultFormData(configs));
@@ -192,18 +192,11 @@ export default function Input() {
     }
   }, [configs]);
 
-  useEffect(() => {
-    if (activateGroup) {
-      activateGroup(selectedId);
-    }
-  }, [isInitialized]);
-
   const isLoading = !configs || configs.length === 0 || !isPageInitialized;
-
   if (isLoading) {
     return (
       <FadeWrapper>
-        <Progress />
+        <Progress message="データを準備してます。。。" />
       </FadeWrapper>
     );
   }

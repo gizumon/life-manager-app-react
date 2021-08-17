@@ -1,22 +1,23 @@
 import React, { FC, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Head from 'next/head';
-import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import theme from '../styles/theme';
 import FooterV1 from '../components/FooterV1';
 import { AuthProvider, useAuth } from '../hooks/useAuthLiff';
 import { createStyles, Theme, CardMedia, Button } from '@material-ui/core';
-import createStore from '../ducks/createStore';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 // import { FirebaseService } from '../services/firebaseService';
 import { useRouter } from 'next/router';
-import userSlice from '../ducks/user/slice';
+import { setUser } from '../ducks/user/slice';
 import { UserState } from '../ducks/user/slice';
 import { useFirebase, FirebaseProvider } from '../hooks/useFirebase';
 import Progress from '../components/AnimationProgressV1';
 import FadeWrapper from '../components/FadeWrapper';
+import store, { StoreState } from '../ducks/createStore';
+import { FirebaseState } from '../ducks/firebase/slice';
+import { CustomThemeProvider } from '../components/CustomThemeProvider';
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
@@ -53,6 +54,7 @@ const Layout: FC = ({ children }) => {
   // const { isInitialized, isLoggedIn, login, liff } = useAuth();
   const liff = useAuth();
   const firebase = useFirebase();
+  const { isInitialized, isGroupActivated } = useSelector<StoreState, FirebaseState>(state => state.firebase);
   const dispatch = useDispatch();
   const [state, setState] = useState<number>(stateMap.isInitializing);
   const baseUri = process.env.ROOT_URL;
@@ -64,7 +66,7 @@ const Layout: FC = ({ children }) => {
     if (!groupId && !isLoginPage) {
       router.push(baseUri + '/login?redirectUri=' + redirectUri, undefined, {shallow: true});
     }
-  })
+  });
 
   if (!liff.isInitialized) {
     return (
@@ -95,7 +97,7 @@ const Layout: FC = ({ children }) => {
     );
   }
 
-  if (!firebase.isInitialized || !firebase.getMember || !firebase.activateGroup) {
+  if (!isInitialized || !firebase.getMember || !firebase.activateGroup) {
     return (
       <FadeWrapper>
         <Progress message="準備中。。。"/>
@@ -104,13 +106,22 @@ const Layout: FC = ({ children }) => {
   }
 
   // TODO: Can you login without activate group?
-  if (!firebase.isGroupActivated && state === stateMap.isInitializing) {
+  if (!isGroupActivated && state === stateMap.isInitializing) {
     firebase.getMember(liff.userId as string).then(member => {
       const isExistMember = !!member;
       setState(isExistMember ? stateMap.isExistMember : stateMap.isNotExistMember);
-      // if (isExistMember && firebase.activateGroup && member.groupId) {
-      //   firebase.activateGroup(member.groupId);
-      // }
+      if (isExistMember && firebase.activateGroup && member.groupId) {
+        if (member.groupId === sessionStorage.getItem('gid')) {
+          firebase.activateGroup(member.groupId);
+        } else {
+          if (process.env.NODE_ENV !== 'production') {
+            firebase.activateGroup(sessionStorage.getItem('gid') || member.groupId);
+          } else {
+            console.log('Remove session because member group id is different from own session gid', member.groupId, sessionStorage.getItem('gid'));
+            sessionStorage.removeItem('gid');
+          }
+        }
+      }
     });
   }
 
@@ -119,9 +130,13 @@ const Layout: FC = ({ children }) => {
   }
 
   if (state !== stateMap.isCompletedInitialize) {
-    dispatch(userSlice.actions.setUser(liff.user as UserState));
+    dispatch(setUser(liff.user as UserState));
     sessionStorage.setItem('uid', liff.userId || '');
     setState(stateMap.isCompletedInitialize);
+  }
+
+  if (!isGroupActivated) {
+    firebase.activateGroup(sessionStorage.getItem('gid') || '');
   }
 
   return (
@@ -132,7 +147,7 @@ const Layout: FC = ({ children }) => {
 export default function MyApp(props: any) {
   const { Component, pageProps } = props;
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector('#jss-server-side');
     if (jssStyles && jssStyles.parentElement) {
@@ -148,14 +163,14 @@ export default function MyApp(props: any) {
       </Head>
       <AuthProvider>
         <FirebaseProvider>
-          <Provider store={createStore()}>
+          <Provider store={store}>
             <Layout>
-              <ThemeProvider theme={theme}>
+              <CustomThemeProvider>
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline />
                 <Component {...pageProps} />
-                <FooterV1 />
-              </ThemeProvider>
+                <FooterV1 {...pageProps} />
+              </CustomThemeProvider>
             </Layout>
           </Provider>
         </FirebaseProvider>

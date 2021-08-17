@@ -2,10 +2,13 @@ import { createContext, FC, useContext, useEffect, useState } from "react"
 // import CONST from '../services/constService';
 import firebase from 'firebase/app';
 import 'firebase/database';
-import { IConfig, ICategory, IMember, IGroup, IInputData, IConfigType } from '../interfaces/index';
+import { IConfig, ICategory, IMember, IGroup, IInputData, IConfigType, IThemeSetting } from '../interfaces/index';
 import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from '../services/utilsService';
 import * as _ from 'lodash';
+import { useSelector, useDispatch } from 'react-redux';
+import { FirebaseState, setFirebase } from '../ducks/firebase/slice';
+import { StoreState } from '../ducks/createStore';
 
 const templateGroupId = '${groupId}';
 export const refsMap = {
@@ -18,6 +21,18 @@ export const refsMap = {
     groups: 'groups',
     inputs: 'data/inputs'
 } as const;
+type IRefsKeys = keyof typeof refsMap;
+
+export const shouldUpdateStateNamesMap: {[key in IRefsKeys]: string[]} = {
+  isUseFactory: ['configs', 'categories'],
+  configs: ['configs'],
+  customConfigs: ['configs'], 
+  categories: ['categories', 'configs'],
+  customCategories: ['categories', 'configs'], 
+  members: [],
+  groups: ['groups'],
+  inputs: ['inputs'],
+};
 
 let DB: firebase.database.Database | undefined;
 
@@ -46,9 +61,7 @@ export const FirebaseProvider: FC = ({ children }) => {
   }, []);
 
   return (
-    <FirebaseContext.Provider
-      value={app}
-    >
+    <FirebaseContext.Provider value={app}>
       {children}
     </FirebaseContext.Provider>
   );
@@ -75,6 +88,7 @@ type IActivateDataStates = {
   categories: ICategory[];
   groups: IGroup[];
   groupMembers: IMember[];
+  groupTheme?: IThemeSetting;
   inputs: {[key in IConfigType]: IInputData[]};
 }
 
@@ -83,7 +97,9 @@ type IDataAndFlagStates = IDataStates & {
   isInitialized: boolean;
 }
 
-type IUseFirebaseReturn = IDataAndFlagStates & IActivateDataStates & {
+export type IFirebaseDataStates = IDataAndFlagStates & IActivateDataStates; 
+
+export type IUseFirebaseReturn = IFirebaseDataStates & {
   firebase?: typeof firebase;
   db?: firebase.database.Database;
   getData?: (refPath: string) => Promise<any[]>;
@@ -100,59 +116,65 @@ type IUseFirebaseReturn = IDataAndFlagStates & IActivateDataStates & {
   isExistMember?: (lineId: string) => Promise<boolean>;
   activateGroup?: (groupId: string) => Promise<void>;
   makePageConfigs?: (configs: IConfig[], categories: ICategory[], members: IMember[]) => IConfig[];
-  updateCustomCategories: (groupId: string, data: ICategory[]) => Promise<firebase.database.Reference>,
-  updateCustomConfigs: (groupId: string, data: IConfig[]) => Promise<firebase.database.Reference>,
+  updateCustomCategories?: (groupId: string, data: ICategory[]) => Promise<firebase.database.Reference>,
+  updateCustomConfigs?: (groupId: string, data: IConfig[]) => Promise<firebase.database.Reference>,
+  updateCustomThemeSetting?: (groupId: string, data: IThemeSetting) => Promise<firebase.database.Reference>,
 }
 
 export const useFirebase = (): IUseFirebaseReturn => {
+  const dispatch = useDispatch();
   const firebaseApp = useContext(FirebaseContext);
-  const [states, setStates] = useState<IDataAndFlagStates>({isRunInitialized: false, isInitialized: false, configs: [], categories: []});
-  const [activateState, setActivateState] = useState<IActivateDataStates>({isGroupActivated: false, groups: [], groupMembers: [], configs: [], categories: [], inputs:  {pay: [], todo: [], tobuy:[]}});
+  const states = useSelector<StoreState, FirebaseState>(state => state.firebase);
   DB = firebaseApp?.database();
 
   const activateGroup = async (groupId: string) => {
-    if (!DB || !groupId || states.configs.length < 1) { return; }
+    if (!DB || !groupId || states.configs.length < 1 || states.isGroupActivated) { return; }
     const group: IGroup = (await DB.ref(refsMap.groups).child(groupId).once('value'))?.val();
 
     if (!group || !group.members) { return; }
     const groupMembers = convertObjectToArray(group.members as {[key: string]: IMember}) as IMember[];
+    const groupTheme = group.themeSetting;
     const customConfigs: IConfig[] = (await DB?.ref(refsMap.customConfigs.replace(templateGroupId, groupId)).once('value'))?.val() || [];
     const customCategories: ICategory[] = (await DB?.ref(refsMap.customCategories.replace(templateGroupId, groupId)).once('value'))?.val() || [];
     const inputs = convertGroupInputsToArray((await DB?.ref(refsMap.inputs).child(groupId).once('value')).val() as {[key in IConfigType]: {[key: string]: IInputData}});
 
-    const newConfigs = _.merge(states.configs, customConfigs);
-    const newCategories = _.merge(states.categories, customCategories);
-
-    setActivateState({
+    const newConfigs = customConfigs.length > 0 ? customConfigs.map((config, index) => _.merge({}, states.configs[index], config)) : states.configs;
+    const newCategories = customCategories.length > 0 ? customCategories.map((category, index) => _.merge({}, states.categories[index], category)) : states.categories;
+    dispatch(setFirebase({
+      ...states,
+      isRunInitialized: true,
+      isInitialized: true,
       isGroupActivated: true,
       configs: makePageConfigs(newConfigs, newCategories, groupMembers),
       categories: newCategories,
       groups: [group],
       groupMembers: groupMembers,
+      groupTheme: groupTheme,
       inputs: inputs || {pay: [], todo: [], tobuy:[]},
-    });
+    }));
+  }
+
+  const triggerOnActivate = () => {
+    dispatch(setFirebase({ ...states, isGroupActivated: false }));    
+  }
+
+  const runActivateWrapper = <T, K extends {} >(promiseFn: any): (args: T) => K => {
+    return (...args) => {
+      return promiseFn(...args).then(() => triggerOnActivate());
+    };
   }
 
   if (firebaseApp && DB && !states.isRunInitialized) {
-    console.log('isRunInitializedはfalseのはず', states);
     dataFactory();
-    setStates((data) => {
-      return { ...data, isRunInitialized: true }
-    });
+    dispatch(setFirebase({...states, isRunInitialized: true}));
     asyncSetProperties().then((items: IFirebaseData) => {
-      // const members = convertObjectToArray(items.members) as IMember[];
-      // const groups = convertObjectToArray(items.groups) as IGroup[];
-      // const inputs = convertInputsToArray(items.inputs) as {[key in string]: {[key in IConfigType]: IInputData[]}};
-      setStates((data) => {
-        console.log('こっちも走っちゃった。。。', items, data);
-        return {
-          ...data,
-          isRunInitialized: true,
-          isInitialized: true,
-          configs: items.configs,
-          categories: states.categories.length > 0 ? states.categories: items.categories,
-        }
-      });
+      dispatch(setFirebase({
+        ...states,
+        isRunInitialized: true,
+        isInitialized: true,
+        configs: items.configs,
+        categories: states.categories.length > 0 ? states.categories: items.categories,
+      }));
     });
   }
 
@@ -160,24 +182,22 @@ export const useFirebase = (): IUseFirebaseReturn => {
     firebase: firebaseApp,
     db: DB,
     ...states,
-    ...activateState,
-    // configs: activateState.configs.length > 0 ? activateState.configs : states.configs,
     getData: getData,
     setData: setData,
     pushData: pushData,
-    pushInput: pushInput,
-    deleteInput: deleteInput,
-    // pushMember: pushMember,
+    pushInput: runActivateWrapper(pushInput),
+    deleteInput: runActivateWrapper(deleteInput),
     getMember: getMember,
     updateMember: updateMember,
     pushGroup: pushGroup,
-    updateGroupMember: updateGroupMember,
+    updateGroupMember: runActivateWrapper(updateGroupMember),
     isExistGroup: isExistGroup,
     isExistMember: isExistMember,
     activateGroup: activateGroup,
     makePageConfigs: makePageConfigs,
-    updateCustomCategories: updateCustomCategories,
-    updateCustomConfigs: updateCustomConfigs,
+    updateCustomCategories: runActivateWrapper(updateCustomCategories),
+    updateCustomConfigs: runActivateWrapper(updateCustomConfigs),
+    updateCustomThemeSetting: runActivateWrapper(updateCustomThemeSetting),
   };
 }
 
@@ -342,11 +362,12 @@ const isExistMember = (lineId: string) => {
 }
 
 const makePageConfigs = (configs: IConfig[], categories: ICategory[] = [], members: IMember[] = []): IConfig[] =>  {
+  const newConfigs = configs.map((config) => _.cloneDeep(config));
   const setTodayList = ['doDueDate', 'buyDueDate'];
   const setMembersList = ['payedFor', 'payedBy'];
   const setMembersWithAllList = ['doBy', 'buyBy'];
   const setMemberIdList = ['payedFor'];
-  configs.forEach((config) => {
+  newConfigs.forEach((config) => {
     config.inputs.forEach((input) => {
       input.dataList = setMembersList.includes(input.id) ? members
                      : setMembersWithAllList.includes(input.id) ? members.concat({id: 'ALL', name: '全員'})
@@ -365,7 +386,7 @@ const makePageConfigs = (configs: IConfig[], categories: ICategory[] = [], membe
       });
     });
   });
-  return configs;
+  return newConfigs;
 }
 
 const convertObjectToArray = (obj: {[key: string]: IMember | IGroup}): (IMember | IGroup)[] => {
@@ -444,6 +465,24 @@ const updateCustomConfigs = (groupId: string, data: IConfig[]) => {
   });
 }
 
+const updateCustomThemeSetting = (groupId: string, data: IConfig[]) => {
+  return new Promise<firebase.database.Reference>((resolve, reject) => {
+    if (!DB) {
+      return reject('DB has not defined...');
+    }
+    if (!groupId || !data) {
+      return reject('lineId has not defined...');
+    }
+
+    DB?.ref(refsMap.groups).child(groupId).child('themeSetting').update(data).then(val => {
+      return resolve(val);
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
+    });
+  });
+}
+
 const dataFactory = () => {
   DB?.ref(refsMap.isUseFactory).once('value').then((snapshot: firebase.database.DataSnapshot) => {
       const isUseFactory = snapshot.val();
@@ -451,3 +490,25 @@ const dataFactory = () => {
       FirebaseFactory.prepareAll(DB as firebase.database.Database);
   });
 }
+
+// const setListener = (groupId: string): {[key in IRefsKeys]: firebase.database.Reference } => {
+//   const refs: {[key: string]: firebase.database.Reference } = {};
+//   Object.keys(refsMap).forEach(key => {
+//     if (!DB) { return; }
+//     const refKey = key as IRefsKeys;
+//     refs[refKey] = DB.ref(refsMap[refKey].replace(templateGroupId, groupId));
+//     refs[refKey].on('value', (snapShot) => {
+//       // update data
+//       snapShot.val();
+//     });
+//   });
+//   return refs as {[key in IRefsKeys]: firebase.database.Reference };
+// }
+
+// const onUpdateData = (key: IRefsKeys, data: IFirebaseData[keyof IFirebaseData]) => {
+//   const updateData: {[key in keyof IFirebaseDataStates]: any }  = {};
+//   const states = useSelector<StoreState, FirebaseState>(state => state.firebase);
+//   shouldUpdateStateNamesMap[key].forEach((name) => {
+//     updateData[name] = data;
+//   })
+// }

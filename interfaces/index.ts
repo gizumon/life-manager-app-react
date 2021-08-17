@@ -3,6 +3,7 @@
 // example, to import the interface below do:
 //
 // import { User } from 'path/to/interfaces';
+import { PaletteOptions } from '@material-ui/core/styles/createPalette';
 
 /**
  * Category
@@ -25,6 +26,18 @@ export interface IRatioSetting {
     memberId: String;
     ratio: Number;
 };
+
+export type IThemeType = 'default' | 'toy' | 'cool' | 'retro' | 'custom';
+export type IThemeConfig = {
+    id: IThemeType;
+    label: string;
+    palettesOptions: PaletteOptions;
+};
+
+export interface IThemeSetting {
+    selectedTheme: IThemeType;
+    custom?: PaletteOptions;
+}
 
 /**
  * Config
@@ -67,7 +80,7 @@ export interface IInput {
     // model: IModel | IModel[] | any;
     validates: IValidate[];
     args?: any[];
-    dataList?: (IMember | ICategory)[];
+    dataList: (IMember | ICategory)[];
     order?: number;
     isHideList: boolean;
     isHideInput: boolean;
@@ -99,7 +112,9 @@ export interface IPageConfig {
  */
  export interface IGroup {
     id?: string;
+    categories?: ICategory[];
     members?: {[key: string]: IMember};
+    themeSetting?: IThemeSetting;
     timestamp?: any;
 }
 

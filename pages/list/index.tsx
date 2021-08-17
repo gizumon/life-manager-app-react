@@ -10,13 +10,15 @@ import { IConfigType, IInputData, IInput, IConfig } from '../../interfaces';
 import { useRouter } from 'next/router';
 import Utils from '../../services/utilsService';
 import { useFirebase } from '../../hooks/useFirebase';
-import theme from '../../styles/theme';
 import { ICategory } from '../../interfaces/index';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
 import CircularProgressV1 from '../../components/CircularProgressV1';
 import { DialogV1 } from '../../components/DialogV1';
 import SearchBox from '../../components/SearchBoxV1';
+import { useSelector } from 'react-redux';
+import { StoreState } from '../../ducks/createStore';
+import { FirebaseState } from '../../ducks/firebase/slice';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -63,7 +65,7 @@ const tabMap: ITabMap = {
   },
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   card: {
     width: 350,
     margin: '25px 0px 65px 0px',
@@ -131,7 +133,7 @@ const useStyles = makeStyles({
       height: '16px',
     },
   },
-});
+}));
 
 const displayPictures: (keyof IInputData)[] = [
   'payedFor', 'payedBy', 'buyBy', 'doBy'
@@ -147,7 +149,8 @@ function getTabProps(index: number) {
 export default function ListPage() {
   const classes = useStyles();
   const router = useRouter();
-  const { configs, inputs, groupMembers, categories, activateGroup, isInitialized, deleteInput } = useFirebase();
+  const { configs, inputs, groupMembers, categories } = useSelector<StoreState, FirebaseState>(state => state.firebase);
+  const { activateGroup, deleteInput } = useFirebase();
 
   const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
@@ -159,12 +162,6 @@ export default function ListPage() {
   const [targetId, setTargetId] = React.useState<string>('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>(false);
   const [searchKey, setSearchKey] = React.useState<string>('');
-
-  useEffect(() => {
-    if (activateGroup && selectedId) {
-      activateGroup(selectedId);
-    }
-  }, [isInitialized]);
 
   useEffect(() => {
     if (configs.length > 0) {
