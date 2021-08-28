@@ -10,14 +10,19 @@ const useStyles = makeStyles((_: Theme) =>
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      width: '100%',
+      width: '100vw',
       height: 'calc(100vh - 2rem)',
+      '& img': {
+        maxWidth: '40%',
+        maxHeight: '100%',
+      },
     },
     message: {
       height: '2rem',
       fontWeight: 600,
-      fontFamily: 'Roboto',
+      fontFamily: 'Georgia',
       color: 'darkgrey',
+      marginTop: '-15px',
     },
   }),
 );
