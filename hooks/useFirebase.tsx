@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
 import { FirebaseState, setFirebase } from '../ducks/firebase/slice';
 import { StoreState } from '../ducks/createStore';
+import getConfig from 'next/config';
 
 const templateGroupId = '${groupId}';
 export const refsMap = {
@@ -38,6 +39,7 @@ let DB: firebase.database.Database | undefined;
 
 const FirebaseContext = createContext<typeof firebase | undefined>(undefined);
 export const FirebaseProvider: FC = ({ children }) => {
+  const { publicRuntimeConfig } = getConfig();
   const [app, setApp] = useState<typeof firebase>();
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export const FirebaseProvider: FC = ({ children }) => {
     const func = async () => {
       const firebaseApp = (await import('firebase/app')).default;
       if (firebase.apps.length < 1) {
-        await firebaseApp.initializeApp(process.env.FIREBASE as Object);
+        await firebaseApp.initializeApp(publicRuntimeConfig.FIREBASE as Object);
       } else {
         firebase.app();
       }

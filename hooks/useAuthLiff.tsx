@@ -2,20 +2,24 @@ import { createContext, FC, useContext, useEffect, useState } from "react"
 import Liff from '@line/liff'
 import { UserState } from '../ducks/user/slice';
 import { IMember } from "../interfaces";
+import getConfig from 'next/config';
 
 const AuthContext = createContext<typeof Liff | undefined>(undefined);
 
 export const AuthProvider: FC = ({ children }) => {
-
+  console.log('Env: ', getConfig())
+  const { publicRuntimeConfig } = getConfig();
+  const liffId = publicRuntimeConfig.LIFF_ID;
   const [liff, setLiff] = useState<typeof Liff>();
 
   useEffect(() => {
     let unmounted = false;
     const func = async () => {
+      console.log("ENV: ", liffId);
       const liff = (await import('@line/liff')).default;
       console.log('import liff');
       // TODO: Use process env
-      await liff.init({ liffId: process.env.LIFF_ID || '1655623367-dEnwWVRZ' });
+      await liff.init({ liffId: liffId || ""});
       if (!unmounted) {
         setLiff(liff);
       }
@@ -26,7 +30,6 @@ export const AuthProvider: FC = ({ children }) => {
     }
     return cleanup;
   }, []);
-
 
   return (
     <AuthContext.Provider
@@ -78,7 +81,7 @@ export const useAuth = (): UseAuthReturn => {
         }]);
       } else {
         console.error('Error in send messages', liff);
-        alert('メッセージ送信に失敗しました。');
+        alert(message);
       }
     },
   };

@@ -1,11 +1,83 @@
 # Life-manager-app
 
-## Environment
-* Node v12.20.1
-* Yarn 1.22.10
-* Line frontend framework
+This application will support your life with your partner on the LINE platform.  
+Currently, there are three features in this application mainly.
 
----
+- PAY
+  - Manage how much you and your partner pay.
+  - Reduce the amount of real-world money transactions by managing payments with data.
+- ToBuy
+  - Manage a shopping list shared by you and your partner.
+- ToDo
+  - Manage a task list shared by you and your partner.
+
+<br>
+
+![app-demo](./docs/app-demo.gif)
+
+<br>
+
+## Environment
+
+__Run Environment (Reference)__
+
+- Node v12.20.1
+- Yarn 1.22.10
+
+__Libraries__
+
+- Next.js v10.2.0
+- React.js v17.0.2
+- [Line frontend framework (LIFF)](https://developers.line.biz/ja/reference/liff/)
+- [Firebase Realtime database](https://firebase.google.com/docs/database?hl=ja)
+
+<br>
+
+## How to run in local environment
+
+1. Install node dependencies
+
+```bash
+npm install
+```
+
+2. Run on docker-compose environment
+
+```
+docker-compose up
+```
+
+<br>
+
+## How to deploy
+
+Set variables.
+
+|Name|Explanation|Other|
+|---|---|---|
+|FIREBASE_API_KEY|[Firebase API key](https://firebase.google.com/docs/projects/api-keys?hl=ja)||
+|LIFF_ID|[Liff ID](https://developers.line.biz/ja/reference/liff/#initialize-liff-app)||
+|NODE_ENV|"production"||
+|NPM_CONFIG_PRODUCTION|false||
+
+```bash
+next start -p $PORT
+```
+
+<br>
+
+## Idea
+
+* [ ] Add priority for ToDo/ToBuy list and pop up notify if the priority is high
+* [ ] Notify LINE group
+* [ ] Custom theme edited from UI
+* [ ] Sort feature
+* [ ] Edit record feature
+* [ ] Move type with Swipe
+
+<br>
+
+<details><summary>Other</summary>
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
@@ -41,3 +113,5 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+</details>

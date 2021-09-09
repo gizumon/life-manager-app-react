@@ -1,3 +1,7 @@
+/**
+ * Deprecated: Replaced to useFirebese.tsx
+ */
+
 import CONST from './constService';
 import firebase from 'firebase/app';
 import 'firebase/database';

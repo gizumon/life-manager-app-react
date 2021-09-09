@@ -11,6 +11,7 @@ import { useState } from 'react';
 import TapAndPlayIcon from '@material-ui/icons/TapAndPlay';
 import SpeakerPhoneIcon from '@material-ui/icons/SpeakerPhone';
 import ModalV1 from '../components/ModalV1';
+import getConfig from 'next/config';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -60,6 +61,7 @@ const stateMap = {
  * @returns 
  */
 export default function Login() {
+  const { publicRuntimeConfig } = getConfig();
   const router = useRouter();
   const { user, sendText } = useAuth();
   const { isInitialized, pushGroup, updateGroupMember, isExistGroup, updateMember, getMember } = useFirebase();
@@ -71,7 +73,7 @@ export default function Login() {
   const classes = useStyles();
   const redirectUri = router.query['redirectUri'] as string
                    || Utils.getQueryParam(router.asPath, 'redirectUri')
-                   || process.env.ROOT_URL + '/input?type=pay';
+                   || publicRuntimeConfig.ROOT_URL + '/input?type=pay';
   const groupId = sessionStorage.getItem('gid')
 
   const onChangeHandler = (event: any) => setCode(event.target.value);

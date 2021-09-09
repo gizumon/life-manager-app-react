@@ -18,6 +18,7 @@ import FadeWrapper from '../components/FadeWrapper';
 import store, { StoreState } from '../ducks/createStore';
 import { FirebaseState } from '../ducks/firebase/slice';
 import { CustomThemeProvider } from '../components/CustomThemeProvider';
+import getConfig from 'next/config';
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
@@ -51,13 +52,14 @@ const stateMap = {
 const Layout: FC = ({ children }) => {
   const classes = useStyles();
   const router = useRouter();
+  const { publicRuntimeConfig } = getConfig();
   // const { isInitialized, isLoggedIn, login, liff } = useAuth();
   const liff = useAuth();
   const firebase = useFirebase();
   const { isInitialized, isGroupActivated } = useSelector<StoreState, FirebaseState>(state => state.firebase);
   const dispatch = useDispatch();
   const [state, setState] = useState<number>(stateMap.isInitializing);
-  const baseUri = process.env.ROOT_URL;
+  const baseUri = publicRuntimeConfig.ROOT_URL;
   const redirectUri = baseUri + router.asPath;
   const isLoginPage = router.asPath.indexOf('/login') > -1;
 
@@ -114,7 +116,7 @@ const Layout: FC = ({ children }) => {
         if (member.groupId === sessionStorage.getItem('gid')) {
           firebase.activateGroup(member.groupId);
         } else {
-          if (process.env.NODE_ENV !== 'production') {
+          if (publicRuntimeConfig.NODE_ENV !== 'production') {
             firebase.activateGroup(sessionStorage.getItem('gid') || member.groupId);
           } else {
             console.log('Remove session because member group id is different from own session gid', member.groupId, sessionStorage.getItem('gid'));

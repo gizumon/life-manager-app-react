@@ -6,6 +6,8 @@ services:
       dockerfile: docker/Dockerfile
     volumes:
       - ./:/usr/src/app
+    env_file:
+      - .env.local
     command: sh -c "yarn dev"
     ports:
       - "3000:3000"
