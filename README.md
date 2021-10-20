@@ -33,6 +33,10 @@ __Libraries__
 
 <br>
 
+__theme__
+
+- Theme color: #1995ad
+
 ## How to run in local environment
 
 1. Install node dependencies
@@ -50,6 +54,18 @@ docker-compose up
 <br>
 
 ## How to deploy
+
+### Deploy command
+
+```bash
+git push origin main
+```
+
+Run deploy heroku triggered by push main branch
+
+<br>
+
+### Server setting
 
 Set variables.
 
