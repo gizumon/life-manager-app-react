@@ -8,7 +8,6 @@ import { AuthProvider, useAuth } from '../hooks/useAuthLiff';
 import { createStyles, Theme, CardMedia, Button } from '@material-ui/core';
 import { Provider, useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
-// import { FirebaseService } from '../services/firebaseService';
 import { useRouter } from 'next/router';
 import { setUser } from '../ducks/user/slice';
 import { UserState } from '../ducks/user/slice';

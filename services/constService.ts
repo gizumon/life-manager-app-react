@@ -1,5 +1,23 @@
 import { IConfig, ICategory } from '../interfaces/index';
 
+interface IFirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  databaseURL: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  measurementId: string;
+
+}
+interface IConst {
+  payCategories: ICategory[],
+  buyCategories: ICategory[],
+  configs: IConfig[],
+  firebaseConfig: IFirebaseConfig
+}
+
 namespace CONST {
     // Category for display list
     export const payCategories: ICategory[] = [
@@ -433,4 +451,4 @@ namespace CONST {
 
 }
   
-export default CONST
+export default CONST as IConst
