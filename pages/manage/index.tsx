@@ -3,7 +3,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Typography,
 import React, { useEffect, useState } from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useFirebase } from '../../hooks/useFirebase';
-import { ICategory, IThemeSetting } from '../../interfaces/index';
+import { ICategory, IThemeSetting, IAccountSetting } from '../../interfaces/index';
 import { InputDialogV1, IModalInputConfig, defaultConfig } from '../../components/InputDialogV1';
 import ManageList from '../../components/ManageListV1';
 import { useSelector } from 'react-redux';
@@ -11,6 +11,8 @@ import { StoreState } from '../../ducks/createStore';
 import { FirebaseState } from '../../ducks/firebase/slice';
 import * as _ from 'lodash';
 import ThemeSetting from '../../components/ThemeSettingV1';
+import AccountSetting from '../../components/AccountSettingV1';
+import ModalV1 from '../../components/ModalV1';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,8 +35,8 @@ const useStyles = makeStyles((theme: Theme) =>
     details: {
       alignItems: 'center',
     },
-    column33: {
-      flexBasis: '33.33%',
+    column40: {
+      flexBasis: '40%',
     },
     column50: {
       flexBasis: '50%',
@@ -66,13 +68,18 @@ const categoryTypeList = [
 
 export default function Manage() {
   const classes = useStyles();
-  const { updateCustomCategories, updateCustomThemeSetting } = useFirebase();
-  const { categories, groupTheme } = useSelector<StoreState, FirebaseState>(state => state.firebase);
+  const selectedUserId = sessionStorage.getItem('uid') || '';
+  const selectedGroupId = sessionStorage.getItem('gid') || '';
+  const { updateCustomCategories, updateCustomThemeSetting, updateGroupMember } = useFirebase();
+  const { categories, groupTheme, groupMembers } = useSelector<StoreState, FirebaseState>(state => state.firebase);
+  const defaultMember = groupMembers.find((m) => m.lineId === selectedUserId)
   const [isOpenAddCategoryModal, setIsOpenAddCategoryModal] = useState<boolean>(false);
+  const [isOpenSuccessModal, setIsOpenSuccessModal] = useState<boolean>(false);
+  const [errMessage, setErrMessage] = useState<string>('');
   const [addCategoryModalConfig, setAddCategoryModalConfig] = useState<IModalInputConfig>(defaultConfig);
   const [themeSetting, setThemeSetting] = useState<IThemeSetting>(groupTheme || {selectedTheme: 'default'});
+  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({ name: (defaultMember?.name || ''), lineId: selectedUserId});
   const [newCategories, setNewCategories] = useState<ICategory[]>(categories);
-  const selectedGroupId = sessionStorage.getItem('gid') || '';
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -117,23 +124,65 @@ export default function Manage() {
             }
           } as ICategory);
         }
-        updateCustomCategories && updateCustomCategories(selectedGroupId, updateStates);
+        updateCustomCategories && updateCustomCategories(selectedGroupId, updateStates)
         return [...updateStates];
       })
     }
     setIsOpenAddCategoryModal(false);
-  } 
+  }
+
+  const onAccountClickBtn = () => {
+    navigator.clipboard && navigator.clipboard.writeText(selectedGroupId);
+  }
+  const saveAccount = () => {
+    // if (selectedGroupId !== accountSetting.groupId) {
+    //   removeGroupMember(selectedGroupId, accountSetting)
+    // }
+    console.log('on account update click', accountSetting);
+    if (!accountSetting.name || !accountSetting.lineId) {
+      return setErrMessage(!accountSetting.name ? 'Nameを入力してください' : 'エラーが発生しました');
+    }
+    return updateGroupMember && updateGroupMember(selectedGroupId, accountSetting).then(() => setIsOpenSuccessModal(true))
+  }
+
+  const saveTheme = () => updateCustomThemeSetting && updateCustomThemeSetting(selectedGroupId, themeSetting).then(() => setIsOpenSuccessModal(true))
 
   return (
     <>
       <div className={classes.root}>
+        {/* Account setting */}
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1c-content"
             id="panel1c-header"
           >
-            <div className={classes.column33}>
+            <div className={classes.column40}>
+              <Typography className={classes.heading}>アカウント設定</Typography>
+            </div>
+            <div className={classes.column50}>
+              <Typography className={classes.secondaryHeading}>Account setting</Typography>
+            </div>
+          </AccordionSummary>
+          <AccordionDetails className={classes.details}>
+            <div className={classes.column100}>
+              <AccountSetting setting={accountSetting} setSetting={setAccountSetting} onClickButton={onAccountClickBtn}/>
+            </div>
+          </AccordionDetails>
+          <AccordionActions>
+            <Button size="small" color="primary" onClick={saveAccount}>
+              Save
+            </Button>
+          </AccordionActions>
+        </Accordion>
+        {/* Theme setting */}
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1c-content"
+            id="panel1c-header"
+          >
+            <div className={classes.column40}>
               <Typography className={classes.heading}>テーマ設定</Typography>
             </div>
             <div className={classes.column50}>
@@ -146,22 +195,23 @@ export default function Manage() {
             </div>
           </AccordionDetails>
           <AccordionActions>
-            <Button size="small" color="primary" onClick={() => updateCustomThemeSetting && updateCustomThemeSetting(selectedGroupId, themeSetting)}>
+            <Button size="small" color="primary" onClick={saveTheme}>
               Save
             </Button>
         </AccordionActions>
         </Accordion>
+        {/* Category manage */}
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1c-content"
             id="panel1c-header"
           >
-            <div className={classes.column33}>
+            <div className={classes.column40}>
               <Typography className={classes.heading}>カテゴリ管理</Typography>
             </div>
             <div className={classes.column50}>
-              <Typography className={classes.secondaryHeading}>Manage category data</Typography>
+              <Typography className={classes.secondaryHeading}>Category edit</Typography>
             </div>
           </AccordionSummary>
           <AccordionDetails className={classes.details}>
@@ -186,6 +236,8 @@ export default function Manage() {
           </AccordionDetails>
         </Accordion>
         <InputDialogV1 configs={[addCategoryModalConfig]} isOpen={isOpenAddCategoryModal} onClose={onCloseAddCategoryModal}/>
+        <ModalV1 open={isOpenSuccessModal} body={'更新しました😉'} onClose={() => setIsOpenSuccessModal(false)}/>
+        <ModalV1 open={errMessage !== ''} body={errMessage} onClose={() => setErrMessage('')} />
       </div>
     </>
   );

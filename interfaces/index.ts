@@ -39,6 +39,12 @@ export interface IThemeSetting {
     custom?: PaletteOptions;
 }
 
+export interface IAccountSetting {
+    lineId: string;
+    name: string;
+    // groupId: string;
+}
+
 /**
  * Config
  */
