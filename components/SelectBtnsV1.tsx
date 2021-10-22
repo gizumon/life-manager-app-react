@@ -5,7 +5,7 @@ import { Button, ButtonGroup } from '@material-ui/core';
 import { useToggle } from '../hooks/useToggle';
 import { useUpdateEffect } from '../hooks/useUpdateEffect';
 import { ICategory } from '../interfaces/index';
-import Utils from '../services/utilsService';
+import Utils from '../services/utils';
 
 type IProps = {
     config: IInput;

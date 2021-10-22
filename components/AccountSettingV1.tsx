@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
-import { IAccountSetting, IThemeSetting, IThemeType } from '../interfaces/index';
+import { IAccountSetting } from '../interfaces/index';
 import TextField from '@material-ui/core/TextField';
 import { Button } from '@material-ui/core';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';

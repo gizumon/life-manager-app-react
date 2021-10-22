@@ -1,5 +1,5 @@
 import firebase from 'firebase/app';
-import CONST from '../../services/constService';
+import CONST from '../../services/constants';
 
 const data = {
     masterdata: {

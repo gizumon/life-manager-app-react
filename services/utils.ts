@@ -97,6 +97,12 @@ namespace Utils {
         }
         return newArray;
     }
+
+    /**
+     * Get ISO timestamp
+     * @returns string
+     */
+    export function getTimeStamp(): string { return new Date().toISOString(); }
 }
 
 export default Utils;

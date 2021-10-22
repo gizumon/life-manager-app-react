@@ -4,7 +4,7 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import { IConfig, ICategory, IMember, IGroup, IInputData, IConfigType, IThemeSetting } from '../interfaces/index';
 import FirebaseFactory from '../test/factory/firebaseFactory';
-import Utils from '../services/utilsService';
+import Utils from '../services/utils';
 import * as _ from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
 import { FirebaseState, setFirebase } from '../ducks/firebase/slice';

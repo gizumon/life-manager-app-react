@@ -16,7 +16,7 @@ import DateV1 from '../../components/DateV1';
 import SelectBtnsV1 from '../../components/SelectBtnsV1';
 import ModalV1 from '../../components/ModalV1';
 import { ValidationService } from '../../services/validationService';
-import Utils from '../../services/utilsService';
+import Utils from '../../services/utils';
 import { useFirebase } from '../../hooks/useFirebase';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';

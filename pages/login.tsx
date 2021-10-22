@@ -3,7 +3,7 @@ import Progress from '../components/AnimationProgressV1';
 import { useAuth, makeMemberFromUser } from '../hooks/useAuthLiff';
 import { useFirebase } from '../hooks/useFirebase';
 import { useRouter } from 'next/router';
-import Utils from '../services/utilsService';
+import Utils from '../services/utils';
 import Card from '@material-ui/core/Card';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Button, CardContent, Divider, IconButton, TextField } from '@material-ui/core';

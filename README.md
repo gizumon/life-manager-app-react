@@ -73,6 +73,8 @@ Set variables.
 |---|---|---|
 |FIREBASE_API_KEY|[Firebase API key](https://firebase.google.com/docs/projects/api-keys?hl=ja)||
 |LIFF_ID|[Liff ID](https://developers.line.biz/ja/reference/liff/#initialize-liff-app)||
+|CHANNEL_ACCESS_TOKEN|[Line chanel access token](https://developers.line.biz/ja/docs/messaging-api/channel-access-tokens/)||
+|CHANNEL_SECRET|[Line chanel secret](https://developers.line.biz/ja/glossary/#channel-secret)||
 |NODE_ENV|"production"||
 |NPM_CONFIG_PRODUCTION|false||
 

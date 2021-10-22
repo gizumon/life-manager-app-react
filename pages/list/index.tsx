@@ -8,7 +8,7 @@ import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { IConfigType, IInputData, IInput, IConfig } from '../../interfaces';
 import { useRouter } from 'next/router';
-import Utils from '../../services/utilsService';
+import Utils from '../../services/utils';
 import { useFirebase } from '../../hooks/useFirebase';
 import { ICategory } from '../../interfaces/index';
 import FadeWrapper from '../../components/FadeWrapper';

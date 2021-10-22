@@ -6,7 +6,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import ListIcon from '@material-ui/icons/List';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { useRouter } from 'next/router';
-import Utils from '../services/utilsService';
+import Utils from '../services/utils';
 
 type INavIndex = 0 | 1 | 2;
 type IUrlType = '/input' | '/list' | '/manage';
