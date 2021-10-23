@@ -1,14 +1,14 @@
-import { Accordion, AccordionDetails, AccordionSummary, Typography,
-         Divider, AccordionActions, Button, makeStyles, createStyles, Theme } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+import {Accordion, AccordionDetails, AccordionSummary, Typography,
+  Divider, AccordionActions, Button, makeStyles, createStyles, Theme} from '@material-ui/core';
+import React, {useEffect, useState} from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { useFirebase } from '../../hooks/useFirebase';
-import { ICategory, IThemeSetting, IAccountSetting } from '../../interfaces/index';
-import { InputDialogV1, IModalInputConfig, defaultConfig } from '../../components/InputDialogV1';
+import {useFirebase} from '../../hooks/useFirebase';
+import {ICategory, IThemeSetting, IAccountSetting} from '../../interfaces/index';
+import {InputDialogV1, IModalInputConfig, defaultConfig} from '../../components/InputDialogV1';
 import ManageList from '../../components/ManageListV1';
-import { useSelector } from 'react-redux';
-import { StoreState } from '../../ducks/createStore';
-import { FirebaseState } from '../../ducks/firebase/slice';
+import {useSelector} from 'react-redux';
+import {StoreState} from '../../ducks/createStore';
+import {FirebaseState} from '../../ducks/firebase/slice';
 import * as _ from 'lodash';
 import ThemeSetting from '../../components/ThemeSettingV1';
 import AccountSetting from '../../components/AccountSettingV1';
@@ -52,8 +52,8 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(1, 2),
     },
     link: {
-      color: theme.palette.primary.main,
-      textDecoration: 'none',
+      'color': theme.palette.primary.main,
+      'textDecoration': 'none',
       '&:hover': {
         textDecoration: 'underline',
       },
@@ -62,23 +62,23 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const categoryTypeList = [
-  { type: 'pay', label: 'Pay' },
-  { type: 'tobuy', label: 'ToBuy' }
+  {type: 'pay', label: 'Pay'},
+  {type: 'tobuy', label: 'ToBuy'},
 ];
 
 export default function Manage() {
   const classes = useStyles();
   const selectedUserId = sessionStorage.getItem('uid') || '';
   const selectedGroupId = sessionStorage.getItem('gid') || '';
-  const { updateCustomCategories, updateCustomThemeSetting, updateGroupMember } = useFirebase();
-  const { categories, groupTheme, groupMembers } = useSelector<StoreState, FirebaseState>(state => state.firebase);
-  const defaultMember = groupMembers.find((m) => m.lineId === selectedUserId)
+  const {updateCustomCategories, updateCustomThemeSetting, updateGroupMember} = useFirebase();
+  const {categories, groupTheme, groupMembers} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
+  const defaultMember = groupMembers.find((m) => m.lineId === selectedUserId);
   const [isOpenAddCategoryModal, setIsOpenAddCategoryModal] = useState<boolean>(false);
   const [isOpenSuccessModal, setIsOpenSuccessModal] = useState<boolean>(false);
   const [errMessage, setErrMessage] = useState<string>('');
   const [addCategoryModalConfig, setAddCategoryModalConfig] = useState<IModalInputConfig>(defaultConfig);
   const [themeSetting, setThemeSetting] = useState<IThemeSetting>(groupTheme || {selectedTheme: 'default'});
-  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({ name: (defaultMember?.name || ''), lineId: selectedUserId});
+  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({name: (defaultMember?.name || ''), lineId: selectedUserId});
   const [newCategories, setNewCategories] = useState<ICategory[]>(categories);
 
   useEffect(() => {
@@ -93,13 +93,13 @@ export default function Manage() {
       id: id || `custom-category-${categoryType}-${String(newCategories.length)}`,
       label: 'カテゴリ名',
       type: 'text',
-      value: newCategories.find(cat => cat.id === id)?.name || '',
+      value: newCategories.find((cat) => cat.id === id)?.name || '',
       placeholder: 'カテゴリ名を入力してください',
       isRequired: true,
       args: [categoryType, isUpdate],
     });
     setIsOpenAddCategoryModal(true);
-  }
+  };
 
   const onCloseAddCategoryModal = (configs?: IModalInputConfig[]) => {
     if (configs && configs.length === 1) {
@@ -108,7 +108,7 @@ export default function Manage() {
         const isUpdate = config.args?.[1] || false;
         const updateStates = _.cloneDeep(states);
         if (isUpdate) {
-          updateStates.forEach(state => {
+          updateStates.forEach((state) => {
             if (state.id === config.id) {
               state.name = config.value;
             }
@@ -120,20 +120,20 @@ export default function Manage() {
             type: config.args?.[0] || '',
             isHide: false,
             setting: {
-              order: updateStates.filter(state => state.type === config.args?.[0]).length,
-            }
+              order: updateStates.filter((state) => state.type === config.args?.[0]).length,
+            },
           } as ICategory);
         }
-        updateCustomCategories && updateCustomCategories(selectedGroupId, updateStates)
+        updateCustomCategories && updateCustomCategories(selectedGroupId, updateStates);
         return [...updateStates];
-      })
+      });
     }
     setIsOpenAddCategoryModal(false);
-  }
+  };
 
   const onAccountClickBtn = () => {
     navigator.clipboard && navigator.clipboard.writeText(selectedGroupId);
-  }
+  };
   const saveAccount = () => {
     // if (selectedGroupId !== accountSetting.groupId) {
     //   removeGroupMember(selectedGroupId, accountSetting)
@@ -142,10 +142,10 @@ export default function Manage() {
     if (!accountSetting.name || !accountSetting.lineId) {
       return setErrMessage(!accountSetting.name ? 'Nameを入力してください' : 'エラーが発生しました');
     }
-    return updateGroupMember && updateGroupMember(selectedGroupId, accountSetting).then(() => setIsOpenSuccessModal(true))
-  }
+    return updateGroupMember && updateGroupMember(selectedGroupId, accountSetting).then(() => setIsOpenSuccessModal(true));
+  };
 
-  const saveTheme = () => updateCustomThemeSetting && updateCustomThemeSetting(selectedGroupId, themeSetting).then(() => setIsOpenSuccessModal(true))
+  const saveTheme = () => updateCustomThemeSetting && updateCustomThemeSetting(selectedGroupId, themeSetting).then(() => setIsOpenSuccessModal(true));
 
   return (
     <>
@@ -198,7 +198,7 @@ export default function Manage() {
             <Button size="small" color="primary" onClick={saveTheme}>
               Save
             </Button>
-        </AccordionActions>
+          </AccordionActions>
         </Accordion>
         {/* Category manage */}
         <Accordion>
@@ -216,22 +216,22 @@ export default function Manage() {
           </AccordionSummary>
           <AccordionDetails className={classes.details}>
             <div className={classes.column100}>
-                {
-                  categoryTypeList.map((categoryType) => {
-                    return (
-                      <div key={categoryType.type}>
-                        <ManageList
-                          listType={categoryType}
-                          dataList={newCategories}
-                          setDataList={setNewCategories}
-                          onClickUpsertBtn={(id?: string) => onOpenAddCategory(categoryType.type, id)}
-                          onUpdated={(data: ICategory[]) => updateCustomCategories && updateCustomCategories(selectedGroupId, data)}
-                        />
-                        <Divider />
-                      </div>
-                    )
-                  })
-                }
+              {
+                categoryTypeList.map((categoryType) => {
+                  return (
+                    <div key={categoryType.type}>
+                      <ManageList
+                        listType={categoryType}
+                        dataList={newCategories}
+                        setDataList={setNewCategories}
+                        onClickUpsertBtn={(id?: string) => onOpenAddCategory(categoryType.type, id)}
+                        onUpdated={(data: ICategory[]) => updateCustomCategories && updateCustomCategories(selectedGroupId, data)}
+                      />
+                      <Divider />
+                    </div>
+                  );
+                })
+              }
             </div>
           </AccordionDetails>
         </Accordion>

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import React, {useState} from 'react';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
@@ -24,20 +24,20 @@ const useStyles = makeStyles((theme: Theme) =>
       transitionDuration: '0.3s',
     },
     isClose: {
-      width: '30px',
-      borderRadius: '50%',
-      float: 'right',
-      transitionProperty: 'width, border-radius',
-      transitionDelay: '0s, 0.2s',
-      transitionDuration: '0.2s, 0.2s',
+      'width': '30px',
+      'borderRadius': '50%',
+      'float': 'right',
+      'transitionProperty': 'width, border-radius',
+      'transitionDelay': '0s, 0.2s',
+      'transitionDuration': '0.2s, 0.2s',
       '& .MuiInputBase-root': {
         marginRight: 0,
       },
     },
     input: {
-      marginRight: theme.spacing(1),
-      flex: 1,
-      fontSize: '0.8rem',
+      'marginRight': theme.spacing(1),
+      'flex': 1,
+      'fontSize': '0.8rem',
       '& .MuiInputBase-input': {
         textIndent: '5px',
       },
@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-export default function SearchBox({ value, setValue }: IProps) {
+export default function SearchBox({value, setValue}: IProps) {
   console.log(value, setValue);
   const classes = useStyles();
   const [isClose, setIsOpen] = useState<boolean>(true);
@@ -60,14 +60,14 @@ export default function SearchBox({ value, setValue }: IProps) {
   const onClickHandler = () => {
     setValue('');
     setIsOpen(!isClose);
-  }
+  };
 
   return (
     <Paper component="form" className={isClose ? classes.root + ' ' + classes.isClose : classes.root}>
       <InputBase
         className={classes.input}
         placeholder="キーワード検索"
-        inputProps={{ 'aria-label': 'Filtered by keyword' }}
+        inputProps={{'aria-label': 'Filtered by keyword'}}
         onChange={onChangeHandler}
         value={value}
       />

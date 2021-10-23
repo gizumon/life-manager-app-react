@@ -1,11 +1,11 @@
-import React, { useCallback } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import React, {useCallback} from 'react';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { IInput, ICategory } from '../interfaces';
+import {IInput, ICategory} from '../interfaces';
 
 type IProps = {
     config: IInput;
@@ -31,7 +31,7 @@ export default function SelectV1({config, model, setProps}: IProps) {
     // setState(event.target.value as string);
     setProps((prevVal: any) => {
       // console.log('handle change:', prevVal, event.target.value)
-      return {...prevVal, [config.id]: event.target.value}
+      return {...prevVal, [config.id]: event.target.value};
     });
   }, []);
 
@@ -51,12 +51,12 @@ export default function SelectV1({config, model, setProps}: IProps) {
             <em>---</em>
           </MenuItem>
           {
-              config && (config.dataList || [])
-                .filter(data => data.hasOwnProperty('isHide') ? !(data as ICategory).isHide: true)
-                .map(data => {
+            config && (config.dataList || [])
+                .filter((data) => data.hasOwnProperty('isHide') ? !(data as ICategory).isHide: true)
+                .map((data) => {
                   return (
                     <MenuItem key={data.id} value={data.id}>
-                        {data.name}
+                      {data.name}
                     </MenuItem>
                   );
                 })

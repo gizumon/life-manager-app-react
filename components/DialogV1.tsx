@@ -6,7 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 // import { FC } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core';
+import {createStyles, makeStyles, Theme} from '@material-ui/core';
 
 export interface ConfirmationDialogRawProps {
   classes?: string;
@@ -36,12 +36,12 @@ const useStyles = makeStyles((_: Theme) =>
     },
     btns: {
       padding: '2px',
-    }
+    },
   }),
 );
 
 export function DialogV1(props: ConfirmationDialogRawProps) {
-  const { classes, onClose, value: valueProp, open, content, cancelBtnTitle = 'cancel', okBtnTitle = 'OK', title, ...other } = props;
+  const {classes, onClose, value: valueProp, open, content, cancelBtnTitle = 'cancel', okBtnTitle = 'OK', title, ...other} = props;
   const [value, setValue] = React.useState(valueProp);
   const defaultClasses = useStyles();
   React.useEffect(() => {
@@ -59,27 +59,27 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
   };
 
   return (
-      <Dialog
-        className={classes || defaultClasses.root}
-        maxWidth="md"
-        aria-labelledby="dialog-title"
-        open={open}
-        {...other}
-      >
-        {
-          title && <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
-        }
-        <DialogContent dividers>
-          {content}
-        </DialogContent>
-        <DialogActions className={defaultClasses.btns}>
-          <Button autoFocus onClick={handleCancel} color="default">
-            {cancelBtnTitle}
-          </Button>
-          <Button onClick={handleOk} color="primary">
-            {okBtnTitle}
-          </Button>
-        </DialogActions>
-      </Dialog>
+    <Dialog
+      className={classes || defaultClasses.root}
+      maxWidth="md"
+      aria-labelledby="dialog-title"
+      open={open}
+      {...other}
+    >
+      {
+        title && <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
+      }
+      <DialogContent dividers>
+        {content}
+      </DialogContent>
+      <DialogActions className={defaultClasses.btns}>
+        <Button autoFocus onClick={handleCancel} color="default">
+          {cancelBtnTitle}
+        </Button>
+        <Button onClick={handleOk} color="primary">
+          {okBtnTitle}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

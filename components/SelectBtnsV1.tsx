@@ -1,10 +1,10 @@
 import React from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { IInput } from '../interfaces';
-import { Button, ButtonGroup } from '@material-ui/core';
-import { useToggle } from '../hooks/useToggle';
-import { useUpdateEffect } from '../hooks/useUpdateEffect';
-import { ICategory } from '../interfaces/index';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
+import {IInput} from '../interfaces';
+import {Button, ButtonGroup} from '@material-ui/core';
+import {useToggle} from '../hooks/useToggle';
+import {useUpdateEffect} from '../hooks/useUpdateEffect';
+import {ICategory} from '../interfaces/index';
 import Utils from '../services/utils';
 
 type IProps = {
@@ -25,10 +25,10 @@ const useStyles = makeStyles((theme: Theme) =>
       width: '100%',
     },
     btnsGroup: {
-      margin: 0,
-      width: '100%',
-      borderTop: '1px solid #000',
-      borderColor: theme.palette.primary.dark,
+      'margin': 0,
+      'width': '100%',
+      'borderTop': '1px solid #000',
+      'borderColor': theme.palette.primary.dark,
       '&> .MuiButton-root': {
         borderRadius: '0px 0px 0px 0px',
       },
@@ -56,10 +56,10 @@ export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
   const defaultMaxNumOfBtnInRow = 3;
   const classes = useStyles();
   const [isClick, setToggle] = useToggle();
-  const dataList = config.dataList?.filter(data => data.hasOwnProperty('isHide') ? !(data as ICategory).isHide: true)
-                                   .sort((data1, data2) => data1.hasOwnProperty('setting') ? Utils.asc((data1 as ICategory).setting.order, (data2 as ICategory).setting.order) : 0) || [];
-  const maxNumberOfBtnInRow = config.args && config.args[0] && typeof config.args[0]['maxNumberOfBtnInRow'] === 'number'
-                            ? config.args[0]['maxNumberOfBtnInRow'] : defaultMaxNumOfBtnInRow;
+  const dataList = config.dataList?.filter((data) => data.hasOwnProperty('isHide') ? !(data as ICategory).isHide: true)
+      .sort((data1, data2) => data1.hasOwnProperty('setting') ? Utils.asc((data1 as ICategory).setting.order, (data2 as ICategory).setting.order) : 0) || [];
+  const maxNumberOfBtnInRow = config.args && config.args[0] && typeof config.args[0]['maxNumberOfBtnInRow'] === 'number' ?
+                            config.args[0]['maxNumberOfBtnInRow'] : defaultMaxNumOfBtnInRow;
   // const numOfRows = Math.floor((config.dataList?.length || 0) / maxNumberOfBtnInRow) + 1;
 
   const btnsRows = [];
@@ -70,8 +70,8 @@ export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
 
   const onClickHandler = (id: string = '') => {
     return () => {
-      setProps((prevVal: any, ) => {
-        return {...prevVal, [config.id]: id}
+      setProps((prevVal: any ) => {
+        return {...prevVal, [config.id]: id};
       });
       setToggle();
     };
@@ -101,7 +101,7 @@ export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
                 })
               }
             </ButtonGroup>
-          )
+          );
         })
       }
     </div>

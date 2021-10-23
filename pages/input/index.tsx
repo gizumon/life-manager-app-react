@@ -1,30 +1,30 @@
-import React, { useCallback, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import createTrigger from "react-use-trigger";
+import React, {useCallback, useEffect} from 'react';
+import {useRouter} from 'next/router';
+import {makeStyles, Theme, createStyles} from '@material-ui/core/styles';
+import createTrigger from 'react-use-trigger';
 
-import { Card, CardContent, CardActions, Tabs, Tab, Box } from '@material-ui/core';
+import {Card, CardContent, CardActions, Tabs, Tab, Box} from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 
-import { IConfig, IConfigType, IFormData } from '../../interfaces';
+import {IConfig, IConfigType, IFormData} from '../../interfaces';
 import InputV1 from '../../components/InputV1';
 import SelectV1 from '../../components/SelectV1';
 import MultiCheckV1 from '../../components/MultiCheckV1';
 import DateV1 from '../../components/DateV1';
 import SelectBtnsV1 from '../../components/SelectBtnsV1';
 import ModalV1 from '../../components/ModalV1';
-import { ValidationService } from '../../services/validationService';
+import {ValidationService} from '../../services/validationService';
 import Utils from '../../services/utils';
-import { useFirebase } from '../../hooks/useFirebase';
+import {useFirebase} from '../../hooks/useFirebase';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 // import { useUserState } from '../../ducks/user/selector';
 // import { useAuth } from '../../hooks/useAuthLiff';
-import { StoreState } from '../../ducks/createStore';
-import { FirebaseState } from '../../ducks/firebase/slice';
+import {StoreState} from '../../ducks/createStore';
+import {FirebaseState} from '../../ducks/firebase/slice';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -49,7 +49,7 @@ const tabMap: ITabMap = {
   toType: {
     0: 'pay',
     1: 'todo',
-    2: 'tobuy',  
+    2: 'tobuy',
   },
   toIndex: {
     pay: 0,
@@ -61,7 +61,7 @@ const tabMap: ITabMap = {
     todo: 'ToDoリスト',
     tobuy: '買い物リスト',
   },
-}
+};
 
 const validMap: IValidMap = {};
 const validatorMap: IValidatorMap = {};
@@ -73,16 +73,16 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: theme.palette.background.paper,
     },
     card: {
-      minWidth: 350,
-      maxWidth: 450,
-      margin: '25px 25px 65px 25px',
+      'minWidth': 350,
+      'maxWidth': 450,
+      'margin': '25px 25px 65px 25px',
       // width: '100%',
       '& .MuiTab-root': {
         padding: '8px 12px',
       },
       '& .MuiCardContent-root': {
         padding: '20px 16px 25px 16px',
-      }
+      },
     },
     btns: {
       padding: '0px',
@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function getTabProps(index: number) {
   return {
-    id: `vertical-tab-${index}`,
+    'id': `vertical-tab-${index}`,
     'aria-controls': `vertical-tabpanel-${index}`,
   };
 }
@@ -100,8 +100,8 @@ function getTabProps(index: number) {
 export default function Input() {
   const classes = useStyles();
   const router = useRouter();
-  const { isGroupActivated, pushInput } = useFirebase();
-  const { configs } = useSelector<StoreState, FirebaseState>(state => state.firebase);
+  const {isGroupActivated, pushInput} = useFirebase();
+  const {configs} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
 
   const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
@@ -122,10 +122,10 @@ export default function Input() {
   }, []);
 
   const processData = (data: IFormData = {}): IFormData => {
-    let processedData: IFormData = {};
+    const processedData: IFormData = {};
     validMap[selectedType as IConfigType]?.forEach((id) => {
       if (data.hasOwnProperty(id)) {
-        processedData[id] = typeof data[id] === 'undefined' ? "" : data[id];
+        processedData[id] = typeof data[id] === 'undefined' ? '' : data[id];
       }
     });
     return processedData;
@@ -133,7 +133,7 @@ export default function Input() {
 
   const makeDefaultFormData = (list: IConfig[]): IFormData => {
     const data: IFormData = {};
-    list.forEach(config => config.inputs.forEach((input) => data[input.id] = input.model));
+    list.forEach((config) => config.inputs.forEach((input) => data[input.id] = input.model));
     return data;
   };
 
@@ -142,14 +142,14 @@ export default function Input() {
   };
 
   const onSuccessModalClose = useCallback(() => {
-      setIsOpenSuccessModal(false);
-      setModalBody({success: '', error: ''});
-      setFormData(makeDefaultFormData(configs));
+    setIsOpenSuccessModal(false);
+    setModalBody({success: '', error: ''});
+    setFormData(makeDefaultFormData(configs));
   }, [configs]);
 
   const onErrorModalClose = useCallback(() => {
-      setIsOpenErrorModal(false);
-      setModalBody({success: '', error: ''});
+    setIsOpenErrorModal(false);
+    setModalBody({success: '', error: ''});
   }, []);
 
   // onClick submit button
@@ -185,7 +185,7 @@ export default function Input() {
 
   useEffect(() => {
     if (configs.length > 0 && isGroupActivated) {
-      Object.keys(tabMap.toIndex).forEach((type: string) => validMap[type as IConfigType] = getConfig(type as IConfigType).inputs.map(input => input.id));
+      Object.keys(tabMap.toIndex).forEach((type: string) => validMap[type as IConfigType] = getConfig(type as IConfigType).inputs.map((input) => input.id));
       Object.keys(tabMap.toIndex).forEach((type: string) => validatorMap[type as IConfigType] = new ValidationService(getConfig(type as IConfigType)));
       setFormData(makeDefaultFormData(configs));
       setIsPageInitialized(true);

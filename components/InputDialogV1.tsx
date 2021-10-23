@@ -4,7 +4,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
-import { createStyles, makeStyles, Theme } from '@material-ui/core';
+import {createStyles, makeStyles, Theme} from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
 
 export interface IModalInputConfig {
@@ -34,7 +34,7 @@ export const defaultConfig = {
   value: '',
   placeholder: '',
   isRequired: false,
-}
+};
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
@@ -55,12 +55,12 @@ const useStyles = makeStyles((_: Theme) =>
     },
     textField: {
 
-    }
+    },
   }),
 );
 
 export function InputDialogV1(props: IProps) {
-  const { title, configs: defaultConfigs, isOpen, cancelBtnTitle = 'cancel', okBtnTitle = 'OK', onClose, ...other } = props;
+  const {title, configs: defaultConfigs, isOpen, cancelBtnTitle = 'cancel', okBtnTitle = 'OK', onClose, ...other} = props;
   const [configs, setConfigs] = React.useState<IModalInputConfig[]>(defaultConfigs);
   const classes = useStyles();
   React.useEffect(() => {
@@ -75,46 +75,46 @@ export function InputDialogV1(props: IProps) {
         prevConfigs[index].value = event.target.value;
         return [...prevConfigs];
       });
-    }
-  }
+    };
+  };
 
   return (
-      <Dialog
-        className={classes.root}
-        maxWidth="md"
-        aria-labelledby="dialog-title"
-        open={isOpen}
-        {...other}
-      >
+    <Dialog
+      className={classes.root}
+      maxWidth="md"
+      aria-labelledby="dialog-title"
+      open={isOpen}
+      {...other}
+    >
+      {
+        title && <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
+      }
+      <DialogContent dividers>
         {
-          title && <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
+          configs.map((config, index) => (
+            <TextField
+              key={config.id}
+              label={config.label}
+              id={config.id}
+              className={classes.textField}
+              placeholder={config.placeholder}
+              margin="dense"
+              onChange={handleOnChange(index)}
+              type={config.type}
+              required={config.isRequired}
+              value={config.value}
+            />
+          ))
         }
-        <DialogContent dividers>
-          {
-            configs.map((config, index) => (
-              <TextField
-                key={config.id}
-                label={config.label}
-                id={config.id}
-                className={classes.textField}
-                placeholder={config.placeholder}
-                margin="dense"
-                onChange={handleOnChange(index)}
-                type={config.type}
-                required={config.isRequired}
-                value={config.value}
-              />
-            ))
-          }
-        </DialogContent>
-        <DialogActions className={classes.btns}>
-          <Button autoFocus onClick={handleCancel} color="default">
-            {cancelBtnTitle}
-          </Button>
-          <Button onClick={handleOk} color="primary">
-            {okBtnTitle}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      </DialogContent>
+      <DialogActions className={classes.btns}>
+        <Button autoFocus onClick={handleCancel} color="default">
+          {cancelBtnTitle}
+        </Button>
+        <Button onClick={handleOk} color="primary">
+          {okBtnTitle}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

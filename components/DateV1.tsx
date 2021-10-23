@@ -1,6 +1,6 @@
 import React from 'react';
-import { IInput } from '../interfaces';
-import { makeStyles } from '@material-ui/core/styles';
+import {IInput} from '../interfaces';
+import {makeStyles} from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Utils from '../services/utils';
 
@@ -31,7 +31,7 @@ export default function DateV1({config, model, setProps}: IProps) {
   const onChangeHandler = (event: any) => {
     // setState(event.target.value);
     setProps((prevVal: any) => {
-      return {...prevVal, [config.id]: Utils.formatDate(new Date(event.target.value))}
+      return {...prevVal, [config.id]: Utils.formatDate(new Date(event.target.value))};
     });
   };
 

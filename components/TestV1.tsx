@@ -7,12 +7,12 @@ type IProps = {
 }
 
 export default function ChildTestV1(props: IProps) {
-    console.log('Child component', props);
-    return (
-        <div>
-            <button onClick={props.onClick}>
+  console.log('Child component', props);
+  return (
+    <div>
+      <button onClick={props.onClick}>
                 Child id: {props.id}, state: {props.state}
-            </button>
-        </div>
-    );
+      </button>
+    </div>
+  );
 }

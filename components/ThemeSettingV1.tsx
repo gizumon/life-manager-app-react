@@ -1,12 +1,12 @@
 import React from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { IThemeSetting, IThemeType } from '../interfaces/index';
-import { themeConfigs, getThemeSource } from '../styles/theme';
+import {IThemeSetting, IThemeType} from '../interfaces/index';
+import {themeConfigs, getThemeSource} from '../styles/theme';
 
 type IProps = {
     setting: IThemeSetting;
@@ -27,21 +27,21 @@ const useStyles = makeStyles((theme: Theme) =>
       width: '100%',
     },
     colorBlock: {
-      width: '20%',
-      paddingTop: '5%',
-      paddingBottom: '5%',
+      'width': '20%',
+      'paddingTop': '5%',
+      'paddingBottom': '5%',
       '& div': {
-        display: 'flex',
-        textAlign: 'center',
-        fontSize: '0.6rem',
-        fontWeight: 300,
-        justifyContent: 'center',
-        alignItems: 'center',
+        'display': 'flex',
+        'textAlign': 'center',
+        'fontSize': '0.6rem',
+        'fontWeight': 300,
+        'justifyContent': 'center',
+        'alignItems': 'center',
         '&:first-child': {
           fontWeight: 700,
-        }
-      }
-    }
+        },
+      },
+    },
   }),
 );
 
@@ -73,7 +73,7 @@ export default function ThemeSetting({setting, setSetting, onUpdated}: IProps) {
             <em>---</em>
           </MenuItem>
           {
-            themeConfigs.map(config => (
+            themeConfigs.map((config) => (
               <MenuItem key={config.id} value={config.id}>
                 {config.label}
               </MenuItem>
@@ -92,8 +92,8 @@ export default function ThemeSetting({setting, setSetting, onUpdated}: IProps) {
                   <div style={{color: color, filter: 'invert(100%) grayscale(100%) contrast(100)'}}>{key}</div>
                   <div style={{color: color, filter: 'invert(100%) grayscale(100%) contrast(100)'}}>{type}</div>
                 </div>
-              )
-            })
+              );
+            });
           })
         }
       </div>

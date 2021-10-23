@@ -1,22 +1,22 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, {FC, useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import Head from 'next/head';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import FooterV1 from '../components/FooterV1';
-import { AuthProvider, useAuth } from '../hooks/useAuthLiff';
-import { createStyles, Theme, CardMedia, Button } from '@material-ui/core';
-import { Provider, useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import { useRouter } from 'next/router';
-import { setUser } from '../ducks/user/slice';
-import { UserState } from '../ducks/user/slice';
-import { useFirebase, FirebaseProvider } from '../hooks/useFirebase';
+import {AuthProvider, useAuth} from '../hooks/useAuthLiff';
+import {createStyles, Theme, CardMedia, Button} from '@material-ui/core';
+import {Provider, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
+import {useRouter} from 'next/router';
+import {setUser} from '../ducks/user/slice';
+import {UserState} from '../ducks/user/slice';
+import {useFirebase, FirebaseProvider} from '../hooks/useFirebase';
 import Progress from '../components/AnimationProgressV1';
 import FadeWrapper from '../components/FadeWrapper';
-import store, { StoreState } from '../ducks/createStore';
-import { FirebaseState } from '../ducks/firebase/slice';
-import { CustomThemeProvider } from '../components/CustomThemeProvider';
+import store, {StoreState} from '../ducks/createStore';
+import {FirebaseState} from '../ducks/firebase/slice';
+import {CustomThemeProvider} from '../components/CustomThemeProvider';
 import getConfig from 'next/config';
 
 const useStyles = makeStyles((_: Theme) =>
@@ -32,12 +32,12 @@ const useStyles = makeStyles((_: Theme) =>
       justifyContent: 'center',
       alignItems: 'center',
       height: '100vh',
-      width: '100vw'
+      width: '100vw',
     },
     btn: {
       backgroundColor: '#00B900',
       color: 'white',
-    }
+    },
   }),
 );
 
@@ -46,16 +46,16 @@ const stateMap = {
   isNotExistMember: 1,
   isExistMember: 2,
   isCompletedInitialize: 3,
-}
+};
 
-const Layout: FC = ({ children }) => {
+const Layout: FC = ({children}) => {
   const classes = useStyles();
   const router = useRouter();
-  const { publicRuntimeConfig } = getConfig();
+  const {publicRuntimeConfig} = getConfig();
   // const { isInitialized, isLoggedIn, login, liff } = useAuth();
   const liff = useAuth();
   const firebase = useFirebase();
-  const { isInitialized, isGroupActivated } = useSelector<StoreState, FirebaseState>(state => state.firebase);
+  const {isInitialized, isGroupActivated} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
   const dispatch = useDispatch();
   const [state, setState] = useState<number>(stateMap.isInitializing);
   const baseUri = publicRuntimeConfig.ROOT_URL;
@@ -108,7 +108,7 @@ const Layout: FC = ({ children }) => {
 
   // TODO: Can you login without activate group?
   if (!isGroupActivated && state === stateMap.isInitializing) {
-    firebase.getMember(liff.userId as string).then(member => {
+    firebase.getMember(liff.userId as string).then((member) => {
       const isExistMember = !!member;
       setState(isExistMember ? stateMap.isExistMember : stateMap.isNotExistMember);
       if (isExistMember && firebase.activateGroup && member.groupId) {
@@ -142,11 +142,11 @@ const Layout: FC = ({ children }) => {
 
   return (
     <>{children}</>
-  )
-}
+  );
+};
 
 export default function MyApp(props: any) {
-  const { Component, pageProps } = props;
+  const {Component, pageProps} = props;
 
   useEffect(() => {
     // Remove the server-side injected CSS.

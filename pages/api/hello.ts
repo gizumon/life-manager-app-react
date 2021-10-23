@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { IResponseData } from '../../interfaces/responses';
+import {NextApiRequest, NextApiResponse} from 'next';
+import {IResponseData} from '../../interfaces/responses';
 
 const apiName = 'hello';
 
@@ -17,7 +17,7 @@ export default (req: NextApiRequest, res: NextApiResponse) => {
     case 'DELETE':
       return wrapHandler(req, res, deleteHandler);
   }
-}
+};
 
 const wrapHandler = (req: NextApiRequest, res: NextApiResponse, handler: IHandler, preProcess?: () => void, postProcess?: () => void) => {
   console.log(`[INFO] Start ${apiName} API:`, req.url, req);
@@ -25,32 +25,32 @@ const wrapHandler = (req: NextApiRequest, res: NextApiResponse, handler: IHandle
   handler(req, res);
   postProcess && postProcess();
   console.log(`[INFO] End ${apiName} API:`, req.url, req);
-}
+};
 
 const getHandler = (req: NextApiRequest, res: NextApiResponse) => {
-  const data: IResponseData = { name: `${apiName}: GET` }
+  const data: IResponseData = {name: `${apiName}: GET`};
 
   res.statusCode = 200;
   res.json(data);
-}
+};
 
 const postHandler = (req: NextApiRequest, res: NextApiResponse) => {
-  const data: IResponseData = { name: `${apiName}: POST` }
+  const data: IResponseData = {name: `${apiName}: POST`};
 
   res.statusCode = 200;
   res.json(data);
-}
+};
 
 const putHandler = (req: NextApiRequest, res: NextApiResponse) => {
-  const data: IResponseData = { name: `${apiName}: PUT` }
+  const data: IResponseData = {name: `${apiName}: PUT`};
 
   res.statusCode = 200;
   res.json(data);
-}
+};
 
 const deleteHandler = (req: NextApiRequest, res: NextApiResponse) => {
-  const data: IResponseData = { name: `${apiName}: DELETE` }
+  const data: IResponseData = {name: `${apiName}: DELETE`};
 
   res.statusCode = 200;
   res.json(data);
-}
+};

@@ -1,24 +1,24 @@
-import React, { useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-         Paper, Avatar, Link, Grid, List, ListItem, ListItemText, Divider } from '@material-ui/core';
-import { Card, CardContent, Tabs, Tab, Box, Chip } from '@material-ui/core';
+import React, {useEffect} from 'react';
+import {makeStyles} from '@material-ui/core/styles';
+import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Avatar, Link, Grid, List, ListItem, ListItemText, Divider} from '@material-ui/core';
+import {Card, CardContent, Tabs, Tab, Box, Chip} from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import { IConfigType, IInputData, IInput, IConfig } from '../../interfaces';
-import { useRouter } from 'next/router';
+import {IConfigType, IInputData, IInput, IConfig} from '../../interfaces';
+import {useRouter} from 'next/router';
 import Utils from '../../services/utils';
-import { useFirebase } from '../../hooks/useFirebase';
-import { ICategory } from '../../interfaces/index';
+import {useFirebase} from '../../hooks/useFirebase';
+import {ICategory} from '../../interfaces/index';
 import FadeWrapper from '../../components/FadeWrapper';
 import Progress from '../../components/AnimationProgressV1';
 import CircularProgressV1 from '../../components/CircularProgressV1';
-import { DialogV1 } from '../../components/DialogV1';
+import {DialogV1} from '../../components/DialogV1';
 import SearchBox from '../../components/SearchBoxV1';
-import { useSelector } from 'react-redux';
-import { StoreState } from '../../ducks/createStore';
-import { FirebaseState } from '../../ducks/firebase/slice';
+import {useSelector} from 'react-redux';
+import {StoreState} from '../../ducks/createStore';
+import {FirebaseState} from '../../ducks/firebase/slice';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -51,7 +51,7 @@ const tabMap: ITabMap = {
   toType: {
     0: 'pay',
     1: 'todo',
-    2: 'tobuy',  
+    2: 'tobuy',
   },
   toIndex: {
     pay: 0,
@@ -63,12 +63,12 @@ const tabMap: ITabMap = {
     todo: 'ToDoリスト',
     tobuy: '買い物リスト',
   },
-}
+};
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   card: {
-    width: 350,
-    margin: '25px 0px 65px 0px',
+    'width': 350,
+    'margin': '25px 0px 65px 0px',
     '& .MuiTab-root': {
       padding: '8px 12px',
     },
@@ -77,8 +77,8 @@ const useStyles = makeStyles(theme => ({
     maxHeight: 320,
   },
   table: {
-    minWidth: 300,
-    whiteSpace: 'nowrap',
+    'minWidth': 300,
+    'whiteSpace': 'nowrap',
     '&> thead > tr > th': {
       backgroundColor: theme.palette.primary.main,
       color: '#fff',
@@ -90,14 +90,14 @@ const useStyles = makeStyles(theme => ({
       textOverflow: 'ellipsis',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
-    }
+    },
   },
   avatarBlock: {
-    display: 'flex',
+    'display': 'flex',
     '& .MuiAvatar-circular': {
       width: 20,
       height: 20,
-    }
+    },
   },
   chips: {
     marginBottom: '5px',
@@ -107,27 +107,27 @@ const useStyles = makeStyles(theme => ({
     opacity: 0.9,
   },
   messageBox: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-    borderTop: 'solid 5px #000',
-    borderColor: theme.palette.warning.main,
-    fontSize: '1rem',
-    fontWeight: 700,
-    boxShadow: '0 3px 5px rgb(0 0 0 / 22%)',
+    'display': 'flex',
+    'alignItems': 'center',
+    'justifyContent': 'center',
+    'padding': 20,
+    'borderTop': 'solid 5px #000',
+    'borderColor': theme.palette.warning.main,
+    'fontSize': '1rem',
+    'fontWeight': 700,
+    'boxShadow': '0 3px 5px rgb(0 0 0 / 22%)',
     '&> a': {
       marginRight: '7px',
       fontSize: '1.2rem',
       fontWeight: 900,
-    }
+    },
   },
   dialog: {
     '& .MuiListItem-root': {
       '& span': {
         overflowX: 'scroll',
         whiteSpace: 'nowrap',
-      }
+      },
     },
     '& .MuiDivider-vertical': {
       height: '16px',
@@ -136,12 +136,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const displayPictures: (keyof IInputData)[] = [
-  'payedFor', 'payedBy', 'buyBy', 'doBy'
-];
+  'payedFor', 'payedBy', 'buyBy', 'doBy',
+]
 
 function getTabProps(index: number) {
   return {
-    id: `vertical-tab-${index}`,
+    'id': `vertical-tab-${index}`,
     'aria-controls': `vertical-tabpanel-${index}`,
   };
 }
@@ -149,8 +149,8 @@ function getTabProps(index: number) {
 export default function ListPage() {
   const classes = useStyles();
   const router = useRouter();
-  const { configs, inputs, groupMembers, categories } = useSelector<StoreState, FirebaseState>(state => state.firebase);
-  const { activateGroup, deleteInput } = useFirebase();
+  const {configs, inputs, groupMembers, categories} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
+  const {activateGroup, deleteInput} = useFirebase();
 
   const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
@@ -179,8 +179,8 @@ export default function ListPage() {
         }
       });
       const sortedMap = Utils.sortObject(map, (key1: string, key2: string): number => {
-        const order1 = inputConfigs.find(input => input.id === key1[0])?.order || 100;
-        const order2 = inputConfigs.find(input => input.id === key2[0])?.order || 100;
+        const order1 = inputConfigs.find((input) => input.id === key1[0])?.order || 100;
+        const order2 = inputConfigs.find((input) => input.id === key2[0])?.order || 100;
         return order1 < order2 ? -1 : order1 > order2 ? 1 : 0;
       });
       setDisplayMap(sortedMap);
@@ -189,7 +189,7 @@ export default function ListPage() {
       Object.keys(inputs).forEach((type) => {
         inputs[type as IConfigType].forEach((data) => {
           const list: IDisplayData[] = [];
-          Object.keys(data).forEach(key => {
+          Object.keys(data).forEach((key) => {
             const isValid = !!sortedMap[key];
             if (isValid) {
               list.push({
@@ -223,9 +223,9 @@ export default function ListPage() {
   };
 
   const onRowClickHandler: React.MouseEventHandler<HTMLTableRowElement> = (e) => {
-    setTargetId(e.currentTarget.getAttribute('data-id') || '')
+    setTargetId(e.currentTarget.getAttribute('data-id') || '');
     setIsDeleteModalOpen(true);
-  }
+  };
 
   const getConfig = (type: IConfigType): IConfig => {
     return configs[tabMap.toIndex[type]];
@@ -246,7 +246,7 @@ export default function ListPage() {
         shouldReceive: 0,
         shouldPay: 0,
         diff: 0,
-        hasReimbursement: false
+        hasReimbursement: false,
       };
       inputs['pay'].forEach((row) => {
         const payed = row.payedBy === calcObj.id;
@@ -266,17 +266,17 @@ export default function ListPage() {
   };
 
   const getMemberName = (memberId: string): string => {
-    return groupMembers.find(member => member.id === memberId)?.name || '';
-  }
+    return groupMembers.find((member) => member.id === memberId)?.name || '';
+  };
 
   const isRowDisplay = (row: IDisplayData[] = []) => {
-    return row.some(col => {
+    return row.some((col) => {
       const value = convertDisplayValue(col.id, col.value);
-      return typeof value === 'string' ? Utils.hasString(value, searchKey)
-                                      : (Array.isArray(col.value) ? col.value.some(memberId => Utils.hasString(getMemberName(memberId), searchKey))
-                                                                  : Utils.hasString(getMemberName(String(col.value)), searchKey));
-    })
-  }
+      return typeof value === 'string' ? Utils.hasString(value, searchKey) :
+                                      (Array.isArray(col.value) ? col.value.some((memberId) => Utils.hasString(getMemberName(memberId), searchKey)) :
+                                                                  Utils.hasString(getMemberName(String(col.value)), searchKey));
+    });
+  };
 
   const rowSortHandler = (row1: IDisplayData[], row2: IDisplayData[]): number => {
     let result = 0;
@@ -284,15 +284,15 @@ export default function ListPage() {
       asc: (arg1: string | number, arg2: string | number) => Utils.asc(arg1, arg2),
       desc: (arg1: string | number, arg2: string | number) => Utils.desc(arg1, arg2),
       custom: (arg1: number, arg2: number) => (arg1 - arg2),
-    }
+    };
 
-    for (let setting of getConfig(selectedType as IConfigType).setting.order) {
+    for (const setting of getConfig(selectedType as IConfigType).setting.order) {
       if (setting.id === 'datetime') {
         result = 0;
       } else {
-        const arg1 = setting.type === 'custom' ? categories.find(category => category.id === row1.find(col => col.id === setting.id)?.value)?.setting?.order : row1.find(col => col.id === setting.id)?.value;
-        const arg2 = setting.type === 'custom' ? categories.find(category => category.id === row2.find(col => col.id === setting.id)?.value)?.setting?.order : row2.find(col => col.id === setting.id)?.value;
-        result = orderFuncMap[setting.type](arg1, arg2);  
+        const arg1 = setting.type === 'custom' ? categories.find((category) => category.id === row1.find((col) => col.id === setting.id)?.value)?.setting?.order : row1.find((col) => col.id === setting.id)?.value;
+        const arg2 = setting.type === 'custom' ? categories.find((category) => category.id === row2.find((col) => col.id === setting.id)?.value)?.setting?.order : row2.find((col) => col.id === setting.id)?.value;
+        result = orderFuncMap[setting.type](arg1, arg2);
       }
       if (result !== 0) break;
     }
@@ -316,12 +316,12 @@ export default function ListPage() {
   };
 
   const convertMemberIcon = (id: string): string[] => {
-    return id === 'ALL' ? ['全員']
-         : groupMembers.find(member => member.id === id) ? [ groupMembers.find(member => member.id === id)?.picture as string ]
-         : ['Unknown'];
-  }
+    return id === 'ALL' ? ['全員'] :
+         groupMembers.find((member) => member.id === id) ? [groupMembers.find((member) => member.id === id)?.picture as string] :
+         ['Unknown'];
+  };
   // const convertMembersName = (ids: string[]): string => ids.map(id => convertMemberName(id)).join(', ');
-  const convertMemberIcons = (ids: string[]): string[] => (ids && ids.length > 0) ? ids.map(id => convertMemberIcon(id)[0]) : ids;
+  const convertMemberIcons = (ids: string[]): string[] => (ids && ids.length > 0) ? ids.map((id) => convertMemberIcon(id)[0]) : ids;
   const convertPayedCategoryName = (id: string): string => categories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
   const convertBuyCategoryName = (id: string): string => categories.find((cat: ICategory) => cat.id === id)?.name || 'Unknown';
   const convertDatetime = (timestamp: number): string => new Date(timestamp).toISOString();
@@ -329,11 +329,11 @@ export default function ListPage() {
 
   const modalContent = (dataList: IDisplayData[]) => {
     return (
-        <div className={classes.dialog}>
-          <List dense>
-            <Grid item xs={12} md={6}>
+      <div className={classes.dialog}>
+        <List dense>
+          <Grid item xs={12} md={6}>
             {
-              dataList.map(data => {
+              dataList.map((data) => {
                 const value = convertDisplayValue(data.id, data.value);
                 return (
                   <ListItem key={data.id}>
@@ -350,7 +350,7 @@ export default function ListPage() {
                             <div className={classes.avatarBlock}>
                               {
                                 value.map((pic, index) => <Avatar key={index} src={pic} />)
-                              } 
+                              }
                             </div>
                           ) : value
                         }
@@ -360,10 +360,10 @@ export default function ListPage() {
                 );
               })
             }
-            </Grid>
-          </List>
-        </div>
-    )
+          </Grid>
+        </List>
+      </div>
+    );
   };
 
   const isLoading = !isPageInitialized || configs.length < 1 || groupMembers.length < 1;
@@ -398,7 +398,7 @@ export default function ListPage() {
                 isPay && (
                   <div>
                     {
-                      getCalculations().filter(obj => !obj.hasReimbursement).map(obj => {
+                      getCalculations().filter((obj) => !obj.hasReimbursement).map((obj) => {
                         return (
                           <Chip
                             key={obj.id}
@@ -407,11 +407,11 @@ export default function ListPage() {
                             label={`${obj.name} が ${Math.floor(obj.diff).toLocaleString()}円 立替中🙇‍♂️`}
                             // deleteIcon={<ExpandMoreIcon style={{ color: 'gray' }}/>}
                             // onDelete={() => {console.log('click')}}
-                          />)
+                          />);
                       })
                     }
                   </div>
-                ) 
+                )
               }
             </>
             <>
@@ -431,7 +431,7 @@ export default function ListPage() {
                     <TableHead>
                       <TableRow>
                         {
-                          Object.keys(displayMap).map(key => <TableCell key={key}>{displayMap[key]}</TableCell>)
+                          Object.keys(displayMap).map((key) => <TableCell key={key}>{displayMap[key]}</TableCell>)
                         }
                       </TableRow>
                     </TableHead>
@@ -439,41 +439,41 @@ export default function ListPage() {
                       <>
                         {
                           getDisplayDataList(selectedType as IConfigType)
-                            .slice().reverse()
-                            .filter(row => isRowDisplay(row))
-                            .sort((row1, row2) => rowSortHandler(row1, row2))
-                            .map((row) => {
-                              if (row.length < 1) {
-                                return (<FadeWrapper><CircularProgressV1 /></FadeWrapper>)
-                              }
-                              return (
-                                <TableRow key={row[0].dataId} hover onClick={onRowClickHandler} data-id={row[0].dataId}>
-                                  {
-                                    Object.keys(displayMap).map(key => {
-                                      const col = row.find(data => data.id === key);
-                                      const value = col ? convertDisplayValue(col.id, col.value) : '';
-                                      if (displayPictures.includes(col?.id as keyof IInputData)) {
-                                        return (
+                              .slice().reverse()
+                              .filter((row) => isRowDisplay(row))
+                              .sort((row1, row2) => rowSortHandler(row1, row2))
+                              .map((row) => {
+                                if (row.length < 1) {
+                                  return (<FadeWrapper><CircularProgressV1 /></FadeWrapper>);
+                                }
+                                return (
+                                  <TableRow key={row[0].dataId} hover onClick={onRowClickHandler} data-id={row[0].dataId}>
+                                    {
+                                      Object.keys(displayMap).map((key) => {
+                                        const col = row.find((data) => data.id === key);
+                                        const value = col ? convertDisplayValue(col.id, col.value) : '';
+                                        if (displayPictures.includes(col?.id as keyof IInputData)) {
+                                          return (
                                             <TableCell key={key} align="left">
                                               <div className={classes.avatarBlock}>{
-                                              (value as string[]).map((pic, index) => {
-                                                return (
+                                                (value as string[]).map((pic, index) => {
+                                                  return (
                                                     <Avatar key={index} src={pic} />
-                                                );
-                                              })}
+                                                  );
+                                                })}
                                               </div>
                                             </TableCell>
-                                        )
-                                      }
-                                      return (
-                                        <TableCell key={key} align="left">{value}</TableCell>
-                                      );
-                                    })
-                                  }
-                                </TableRow>
-                              );
-                            }
-                          )
+                                          );
+                                        }
+                                        return (
+                                          <TableCell key={key} align="left">{value}</TableCell>
+                                        );
+                                      })
+                                    }
+                                  </TableRow>
+                                );
+                              },
+                              )
                         }
                       </>
                     </TableBody>
@@ -483,7 +483,7 @@ export default function ListPage() {
             </>
           </CardContent>
         </Card>
-        <DialogV1 id={targetId} value={targetId} title="Remove?" open={isDeleteModalOpen} content={modalContent(getDisplayDataList(selectedType as IConfigType)?.find(row => row[0]?.dataId === targetId) || [])} onClose={onCloseHandler}/>
+        <DialogV1 id={targetId} value={targetId} title="Remove?" open={isDeleteModalOpen} content={modalContent(getDisplayDataList(selectedType as IConfigType)?.find((row) => row[0]?.dataId === targetId) || [])} onClose={onCloseHandler}/>
       </Box>
     </>
   );

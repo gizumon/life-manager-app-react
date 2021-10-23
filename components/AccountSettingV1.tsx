@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import React, {useEffect, useState} from 'react';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 
-import { IAccountSetting } from '../interfaces/index';
+import {IAccountSetting} from '../interfaces/index';
 import TextField from '@material-ui/core/TextField';
-import { Button } from '@material-ui/core';
+import {Button} from '@material-ui/core';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 
 type IProps = {
@@ -27,8 +27,8 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     btn: {
       marginLeft: theme.spacing(1),
-      minWidth: '80%'
-    }
+      minWidth: '80%',
+    },
   }),
 );
 
@@ -45,13 +45,15 @@ export default function AccountSetting({setting, setSetting, onUpdated, onClickB
   };
 
   const handleClick = () => {
-    if (isClicked) { return false; }
-    setIsClicked(true)
-    onClickButton && onClickButton()
-  }
+    if (isClicked) {
+      return false;
+    }
+    setIsClicked(true);
+    onClickButton && onClickButton();
+  };
 
   useEffect(() => {
-    isClicked && setTimeout(() => setIsClicked(false), 3000)
+    isClicked && setTimeout(() => setIsClicked(false), 3000);
   }, [isClicked]);
 
   return (

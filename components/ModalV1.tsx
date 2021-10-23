@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import React, {Fragment} from 'react';
+import {makeStyles, Theme, createStyles} from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 
 export interface IProps {

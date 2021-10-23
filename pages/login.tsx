@@ -1,13 +1,13 @@
 import FadeWrapper from '../components/FadeWrapper';
 import Progress from '../components/AnimationProgressV1';
-import { useAuth, makeMemberFromUser } from '../hooks/useAuthLiff';
-import { useFirebase } from '../hooks/useFirebase';
-import { useRouter } from 'next/router';
+import {useAuth, makeMemberFromUser} from '../hooks/useAuthLiff';
+import {useFirebase} from '../hooks/useFirebase';
+import {useRouter} from 'next/router';
 import Utils from '../services/utils';
 import Card from '@material-ui/core/Card';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Button, CardContent, Divider, IconButton, TextField } from '@material-ui/core';
-import { useState } from 'react';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
+import {Button, CardContent, Divider, IconButton, TextField} from '@material-ui/core';
+import {useState} from 'react';
 import TapAndPlayIcon from '@material-ui/icons/TapAndPlay';
 import SpeakerPhoneIcon from '@material-ui/icons/SpeakerPhone';
 import ModalV1 from '../components/ModalV1';
@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: Theme) =>
     inputBtn: {
       marginTop: '4px',
       marginBottom: '4px',
-    }
+    },
   }),
 );
 
@@ -52,36 +52,36 @@ const stateMap = {
  * 1. ログインのuserId情報からmember情報を取得
  * 2. memberを取得できた場合、memberのgroupIdを使って、リダイレクト
  * 3. memberを取得できなかった場合、新規ユーザー追加のフローへ
- * 
+ *
  * 新規ユーザー追加のフロー
  * 1. groupのコードを発行または入力させる画面を表示
  * 2. groupのコードを発行するユーザーは、コード発行。
  * 3. groupのコードを入力するユーザーは、コードを発行したユーザーのコードを入力。
  * 4. その後、groupIdとログイン情報をmembersへ追加し、リダイレクト
- * @returns 
+ * @returns
  */
 export default function Login() {
-  const { publicRuntimeConfig } = getConfig();
+  const {publicRuntimeConfig} = getConfig();
   const router = useRouter();
-  const { user, sendText } = useAuth();
-  const { isInitialized, pushGroup, updateGroupMember, isExistGroup, updateMember, getMember } = useFirebase();
-  const [ code, setCode ] = useState<string>();
+  const {user, sendText} = useAuth();
+  const {isInitialized, pushGroup, updateGroupMember, isExistGroup, updateMember, getMember} = useFirebase();
+  const [code, setCode] = useState<string>();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
   const [state, setState] = useState<number>(stateMap.isInitializing);
   const [onCloseFn, setOnCloseFn] = useState<() => void>(() => {});
   const classes = useStyles();
-  const redirectUri = router.query['redirectUri'] as string
-                   || Utils.getQueryParam(router.asPath, 'redirectUri')
-                   || publicRuntimeConfig.ROOT_URL + '/input?type=pay';
-  const groupId = sessionStorage.getItem('gid')
+  const redirectUri = router.query['redirectUri'] as string ||
+                   Utils.getQueryParam(router.asPath, 'redirectUri') ||
+                   publicRuntimeConfig.ROOT_URL + '/input?type=pay';
+  const groupId = sessionStorage.getItem('gid');
 
   const onChangeHandler = (event: any) => setCode(event.target.value);
   const onCloseModalHandler = () => {
     setIsOpenModal(false);
     setModalMessage('');
     onCloseFn();
-  }
+  };
 
   const modalOn = (message: string, fn: () => void = () => {}) => {
     setModalMessage(message);
@@ -102,17 +102,17 @@ export default function Login() {
   const generateCode = () => {
     if (user && updateMember && pushGroup && updateGroupMember) {
       const newMember = makeMemberFromUser(user);
-      pushGroup().then(ref => {
+      pushGroup().then((ref) => {
         if (ref.key === null) {
           console.error('push group does not success', ref);
-          modalOn('Groupの作成に失敗しました。。')
+          modalOn('Groupの作成に失敗しました。。');
           return;
         }
         newMember.groupId = ref.key;
         updateGroupMember(newMember.groupId, newMember);
         updateMember(user.userId, newMember).then((_) => {
           // TODO: should ¥n
-          const message = `ペアリングしたいユーザーへ下記のコードを共有ください。　ペアリングコード：「${newMember.groupId}」`; 
+          const message = `ペアリングしたいユーザーへ下記のコードを共有ください。　ペアリングコード：「${newMember.groupId}」`;
           try {
             // TODO: Should avoid error
             (sendText as (message: string) => void)(message);
@@ -129,33 +129,33 @@ export default function Login() {
     } else {
       console.warn('firebase need to initialize...');
     }
-  }
+  };
 
   const applyCode = () => {
     if (!code) {
       return modalOn('ペアリングコードが入力されていません');
     }
     if (user && updateGroupMember && updateMember && isExistGroup) {
-      isExistGroup(code)?.then(isExist => {
+      isExistGroup(code)?.then((isExist) => {
         if (!isExist) {
           return modalOn(`入力されたペアリングコードは正しくないみたいです。。`);
         }
         const newMember = makeMemberFromUser(user);
         newMember.groupId = code;
-        updateGroupMember(newMember.groupId as string, newMember).then(_ => {
+        updateGroupMember(newMember.groupId as string, newMember).then((_) => {
           updateMember(user.userId, newMember).then((_) => {
             redirectWithLogin(redirectUri, newMember.groupId);
           });
         });
       });
     }
-  }
+  };
 
   // user is exist in auth, but not in member.
   if (user && isInitialized) {
     // no request when already check user open
     if (getMember && state === stateMap.isInitializing) {
-      getMember(user.userId).then(member => {
+      getMember(user.userId).then((member) => {
         if (member) {
           redirectWithLogin(redirectUri, member.groupId);
         }
@@ -184,7 +184,7 @@ export default function Login() {
               <Divider className={classes.divider} orientation="horizontal" />
               <span>ペアリングコードを持っていない場合：</span>
               <div className={classes.block}>
-                <Button  variant="contained" color="primary" onClick={generateCode} endIcon={<SpeakerPhoneIcon />}>ペアリングコード発行</Button>
+                <Button variant="contained" color="primary" onClick={generateCode} endIcon={<SpeakerPhoneIcon />}>ペアリングコード発行</Button>
               </div>
             </CardContent>
           </Card>
@@ -194,9 +194,9 @@ export default function Login() {
     }
   }
 
-  const message = state === stateMap.isInitializing ? "ログイン中。。。"
-                : state === stateMap.isFoundUser ? "ユーザー確認中。。。"
-                : "ユーザーが見つかりませんでした。。。";
+  const message = state === stateMap.isInitializing ? 'ログイン中。。。' :
+                state === stateMap.isFoundUser ? 'ユーザー確認中。。。' :
+                'ユーザーが見つかりませんでした。。。';
   return <FadeWrapper><Progress message={message}/></FadeWrapper>;
 }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
+import {createStyles, makeStyles, useTheme, Theme} from '@material-ui/core/styles';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -7,9 +7,9 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 
-import { IInput } from '../interfaces';
-import { Avatar } from '@material-ui/core';
-import { IMember } from '../interfaces/index';
+import {IInput} from '../interfaces';
+import {Avatar} from '@material-ui/core';
+import {IMember} from '../interfaces/index';
 
 type IProps = {
     config: IInput;
@@ -20,8 +20,8 @@ type IProps = {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     formControl: {
-        margin: theme.spacing(1),
-        width: '95%',
+      margin: theme.spacing(1),
+      width: '95%',
     },
     chips: {
       display: 'flex',
@@ -60,7 +60,7 @@ export default function MultiCheckV1({config, model = [], setProps}: IProps) {
     const options = event.target;
     // setIds(options.value as string[]);
     setProps((prevVal: any) => {
-      return {...prevVal, [config.id]: options.value}
+      return {...prevVal, [config.id]: options.value};
     });
   };
 
@@ -89,19 +89,21 @@ export default function MultiCheckV1({config, model = [], setProps}: IProps) {
             <div className={classes.chips}>
               {(selected as string[]).map((id) => (
                 <Chip key={id} label={
-                    config.dataList?.find((data) => {
-                      if (data.id === id) {
-                        return data.name;
-                      }
-                    })?.name
-                  }
-                  className={classes.chip}
-                  // onDelete={handleDelete}
-                  avatar={<Avatar src={
-                    (config.dataList?.find((data: IMember) => {
-                      if (data.id === id ) { return !!data.picture; }
-                    }) as IMember)?.picture}
-                  />}
+                  config.dataList?.find((data) => {
+                    if (data.id === id) {
+                      return data.name;
+                    }
+                  })?.name
+                }
+                className={classes.chip}
+                // onDelete={handleDelete}
+                avatar={<Avatar src={
+                  (config.dataList?.find((data: IMember) => {
+                    if (data.id === id ) {
+                      return !!data.picture;
+                    }
+                  }) as IMember)?.picture}
+                />}
                 />
               ))}
             </div>
