@@ -19,7 +19,7 @@ import {ValidationService} from '../../services/validationService';
 import Utils from '../../services/utils';
 import {useFirebase} from '../../hooks/useFirebase';
 import FadeWrapper from '../../components/FadeWrapper';
-import Progress from '../../components/AnimationProgressV1';
+import Progress from '../../components/common/AnimationProgressV1';
 import {useSelector} from 'react-redux';
 // import { useUserState } from '../../ducks/user/selector';
 // import { useAuth } from '../../hooks/useAuthLiff';

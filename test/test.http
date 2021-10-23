@@ -1,0 +1,6 @@
+@ROOT_URL = "https://localhost"
+POST https://localhost/api/input
+
+{
+  "test": "test"
+}

@@ -12,7 +12,7 @@ import Utils from '../../services/utils';
 import {useFirebase} from '../../hooks/useFirebase';
 import {ICategory} from '../../interfaces/index';
 import FadeWrapper from '../../components/FadeWrapper';
-import Progress from '../../components/AnimationProgressV1';
+import Progress from '../../components/common/AnimationProgressV1';
 import CircularProgressV1 from '../../components/CircularProgressV1';
 import {DialogV1} from '../../components/DialogV1';
 import SearchBox from '../../components/SearchBoxV1';
@@ -137,7 +137,7 @@ const useStyles = makeStyles((theme) => ({
 
 const displayPictures: (keyof IInputData)[] = [
   'payedFor', 'payedBy', 'buyBy', 'doBy',
-]
+];
 
 function getTabProps(index: number) {
   return {

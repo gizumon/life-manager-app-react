@@ -36,15 +36,13 @@ type IProps = {
 export default function Progress(props: IProps) {
   console.log('Child component', props);
   const classes = useStyles();
+  // const loadingGifPath = '/resources/assets/img/loading.gif';
+  const loadingGifPath = './loading.gif';
 
   return (
     <div className={classes.root} >
-      {
-        <Image src={props.imgUrl ? props.imgUrl : './loading.gif'} alt='Loading...'/>
-      }
-      {
-        <p className={classes.message}>{props.message ? props.message : 'Loading...'}</p>
-      }
+      <img src={props.imgUrl || loadingGifPath} alt="Loading" />
+      <p className={classes.message}>{props.message ? props.message : 'Loading...'}</p>
     </div>
   );
 }

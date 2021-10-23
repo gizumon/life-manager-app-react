@@ -12,7 +12,7 @@ import {useRouter} from 'next/router';
 import {setUser} from '../ducks/user/slice';
 import {UserState} from '../ducks/user/slice';
 import {useFirebase, FirebaseProvider} from '../hooks/useFirebase';
-import Progress from '../components/AnimationProgressV1';
+import Progress from '../components/common/AnimationProgressV1';
 import FadeWrapper from '../components/FadeWrapper';
 import store, {StoreState} from '../ducks/createStore';
 import {FirebaseState} from '../ducks/firebase/slice';

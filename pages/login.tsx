@@ -1,5 +1,5 @@
 import FadeWrapper from '../components/FadeWrapper';
-import Progress from '../components/AnimationProgressV1';
+import Progress from '../components/common/AnimationProgressV1';
 import {useAuth, makeMemberFromUser} from '../hooks/useAuthLiff';
 import {useFirebase} from '../hooks/useFirebase';
 import {useRouter} from 'next/router';
