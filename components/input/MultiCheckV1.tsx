@@ -7,9 +7,9 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 
-import {IInput} from '../interfaces';
+import {IInput} from '../../interfaces';
 import {Avatar} from '@material-ui/core';
-import {IMember} from '../interfaces/index';
+import {IMember} from '../../interfaces/index';
 
 type IProps = {
     config: IInput;

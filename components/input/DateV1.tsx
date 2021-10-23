@@ -1,8 +1,8 @@
 import React from 'react';
-import {IInput} from '../interfaces';
+import {IInput} from '../../interfaces';
 import {makeStyles} from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Utils from '../services/utils';
+import Utils from '../../services/utils';
 
 type IProps = {
     config: IInput;

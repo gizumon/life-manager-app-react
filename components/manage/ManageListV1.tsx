@@ -7,8 +7,8 @@ import DragHandleIcon from '@material-ui/icons/DragHandle';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 
-import {ICategory} from '../interfaces/index';
-import Utils from '../services/utils';
+import {ICategory} from '../../interfaces/index';
+import Utils from '../../services/utils';
 import * as _ from 'lodash';
 
 interface IListType {

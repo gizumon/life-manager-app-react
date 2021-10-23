@@ -1,9 +1,9 @@
 import {Theme} from '@material-ui/core';
 import {FC, useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {StoreState} from '../ducks/createStore';
-import {FirebaseState} from '../ducks/firebase/slice';
-import {getTheme} from '../styles/theme';
+import {StoreState} from '../../ducks/createStore';
+import {FirebaseState} from '../../ducks/firebase/slice';
+import {getTheme} from '../../styles/theme';
 import {ThemeProvider} from '@material-ui/core/styles';
 
 // const ThemeContext = createContext<Theme>(getTheme());

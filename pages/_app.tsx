@@ -13,10 +13,10 @@ import {setUser} from '../ducks/user/slice';
 import {UserState} from '../ducks/user/slice';
 import {useFirebase, FirebaseProvider} from '../hooks/useFirebase';
 import Progress from '../components/common/AnimationProgressV1';
-import FadeWrapper from '../components/FadeWrapper';
+import FadeWrapper from '../components/common/FadeWrapper';
 import store, {StoreState} from '../ducks/createStore';
 import {FirebaseState} from '../ducks/firebase/slice';
-import {CustomThemeProvider} from '../components/CustomThemeProvider';
+import {CustomThemeProvider} from '../components/provider/CustomThemeProvider';
 import getConfig from 'next/config';
 
 const useStyles = makeStyles((_: Theme) =>

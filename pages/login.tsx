@@ -1,4 +1,4 @@
-import FadeWrapper from '../components/FadeWrapper';
+import FadeWrapper from '../components/common/FadeWrapper';
 import Progress from '../components/common/AnimationProgressV1';
 import {useAuth, makeMemberFromUser} from '../hooks/useAuthLiff';
 import {useFirebase} from '../hooks/useFirebase';
@@ -10,7 +10,7 @@ import {Button, CardContent, Divider, IconButton, TextField} from '@material-ui/
 import {useState} from 'react';
 import TapAndPlayIcon from '@material-ui/icons/TapAndPlay';
 import SpeakerPhoneIcon from '@material-ui/icons/SpeakerPhone';
-import ModalV1 from '../components/ModalV1';
+import ModalV1 from '../components/common/ModalV1';
 import getConfig from 'next/config';
 
 const useStyles = makeStyles((theme: Theme) =>

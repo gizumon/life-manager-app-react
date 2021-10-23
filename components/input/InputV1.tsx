@@ -1,5 +1,5 @@
 import React from 'react';
-import {IInput} from '../interfaces';
+import {IInput} from '../../interfaces';
 import TextField from '@material-ui/core/TextField';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 

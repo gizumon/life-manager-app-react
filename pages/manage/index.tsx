@@ -4,15 +4,15 @@ import React, {useEffect, useState} from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {useFirebase} from '../../hooks/useFirebase';
 import {ICategory, IThemeSetting, IAccountSetting} from '../../interfaces/index';
-import {InputDialogV1, IModalInputConfig, defaultConfig} from '../../components/InputDialogV1';
-import ManageList from '../../components/ManageListV1';
+import {InputDialogV1, IModalInputConfig, defaultConfig} from '../../components/list/InputDialogV1';
+import ManageList from '../../components/manage/ManageListV1';
 import {useSelector} from 'react-redux';
 import {StoreState} from '../../ducks/createStore';
 import {FirebaseState} from '../../ducks/firebase/slice';
 import * as _ from 'lodash';
-import ThemeSetting from '../../components/ThemeSettingV1';
-import AccountSetting from '../../components/AccountSettingV1';
-import ModalV1 from '../../components/ModalV1';
+import ThemeSetting from '../../components/manage/ThemeSettingV1';
+import AccountSetting from '../../components/manage/AccountSettingV1';
+import ModalV1 from '../../components/common/ModalV1';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

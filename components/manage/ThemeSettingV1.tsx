@@ -5,8 +5,8 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import {IThemeSetting, IThemeType} from '../interfaces/index';
-import {themeConfigs, getThemeSource} from '../styles/theme';
+import {IThemeSetting, IThemeType} from '../../interfaces/index';
+import {themeConfigs, getThemeSource} from '../../styles/theme';
 
 type IProps = {
     setting: IThemeSetting;
