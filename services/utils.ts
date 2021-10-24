@@ -22,7 +22,7 @@ namespace Utils {
         // return matchArr && matchArr.length > 1 ? matchArr[1] : '';
         const arr = url.split(`${key}=`);
         if (!arr || arr.length <= 1) { return ''; }
-        return arr[1].replace(/&(.*)/, '') 
+        return arr[1].replace(/&(.*)/, '');
     }
 
     /**
@@ -102,7 +102,18 @@ namespace Utils {
      * Get ISO timestamp
      * @returns string
      */
-    export function getTimeStamp(): string { return new Date().toISOString(); }
+    export function getDateTime(): string { return new Date().toISOString(); }
+    // export function getTimeStrFromTimeStamp(): string {}
+
+    interface IBaseObjArray {
+        id: string;
+    }
+    export function convertObjectToArray<T>(obj: {[key in string]: T}): T[] {
+        return Object.keys(obj).map((key) => {
+            obj[key]['id'] = key;
+            return obj[key] as T;
+        });
+    };
 }
 
 export default Utils;

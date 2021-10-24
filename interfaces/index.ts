@@ -162,3 +162,53 @@ export interface IToDo {
 }
 
 export type IInputData = IPay & IToBuy & IToDo;
+
+
+type ILineID = string;
+type IGroupID = string;
+type IIndex = number;
+type IDataID = string;
+export interface FirebaseData {
+    data: {
+        inputs: {
+            [key in IGroupID]: {
+                pay: {
+                    [key in IDataID]: IPay;
+                };
+                tobuy: {
+                    [key in IDataID]: IToBuy;
+                };
+                todo: {
+                    [key in IDataID]: IToDo;
+                };
+            };
+        };
+    };
+    groups: {
+        [key in ILineID]: {
+            categories: {
+                [key in IIndex]: ICategory;
+            };
+            members: {
+                [key in IIndex]: IMember;
+            };
+            themeSetting: {
+                selectedTheme: IThemeType;
+            };
+        };
+    };
+    masterdata: {
+        categories: {
+            [key in IIndex]: ICategory;
+        };
+        configs: {
+            [key in IIndex]: IConfig;
+        };
+    };
+    triggers: {
+        isUseFactory: boolean;
+    };
+    users: {
+        [key in ILineID]: IMember;
+    };
+}

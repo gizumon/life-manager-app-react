@@ -15,7 +15,8 @@ interface IConst {
   payCategories: ICategory[],
   buyCategories: ICategory[],
   configs: IConfig[],
-  firebaseConfig: IFirebaseConfig
+  firebaseConfig: IFirebaseConfig,
+  getCategoryNameById: (id: string) => string,
 }
 
 namespace CONST {
@@ -114,7 +115,7 @@ namespace CONST {
           order: 4,
         }
       },
-    ]
+    ];
 
     export const configs: IConfig[] = [
       {
@@ -449,6 +450,10 @@ namespace CONST {
       measurementId: "G-KC6X7VM4SE"
     };
 
+    export function getCategoryNameById(id: string) {
+      const category: ICategory = [].concat(buyCategories, payCategories).find((cat) => cat.id === id);
+      return category.name;
+    }
 }
   
-export default CONST as IConst
+export default CONST as IConst;

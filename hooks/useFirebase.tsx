@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useEffect, useState } from "react"
+import { createContext, FC, useContext, useEffect, useState } from "react";
 // import CONST from '../services/constService';
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -54,11 +54,11 @@ export const FirebaseProvider: FC = ({ children }) => {
       if (!unmounted) {
         setApp(firebaseApp);
       }
-    }
+    };
     func();
     const cleanup = () => {
       unmounted = true;
-    }
+    };
     return cleanup;
   }, []);
 
@@ -67,7 +67,7 @@ export const FirebaseProvider: FC = ({ children }) => {
       {children}
     </FirebaseContext.Provider>
   );
-}
+};
 
 type IFirebaseData = {
   configs: IConfig[];
@@ -154,17 +154,17 @@ export const useFirebase = (): IUseFirebaseReturn => {
       groupTheme: groupTheme,
       inputs: inputs || {pay: [], todo: [], tobuy:[]},
     }));
-  }
+  };
 
   const triggerOnActivate = () => {
     dispatch(setFirebase({ ...states, isGroupActivated: false }));    
-  }
+  };
 
   const runActivateWrapper = <T, K extends {} >(promiseFn: any): (args: T) => K => {
     return (...args) => {
       return promiseFn(...args).then(() => triggerOnActivate());
     };
-  }
+  };
 
   if (firebaseApp && DB && !states.isRunInitialized) {
     dataFactory();
@@ -201,7 +201,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
     updateCustomConfigs: runActivateWrapper(updateCustomConfigs),
     updateCustomThemeSetting: runActivateWrapper(updateCustomThemeSetting),
   };
-}
+};
 
 const asyncSetProperties = (): Promise<IFirebaseData> => {
   return new Promise(async (resolve, reject) => {
@@ -212,24 +212,24 @@ const asyncSetProperties = (): Promise<IFirebaseData> => {
     }
     resolve(obj as IFirebaseData);
   });
-}
+};
 
 const getData = async (refPath: string): Promise<any[]> => {
   return await DB?.ref(refPath).once('value').then((snapshot) => snapshot.val());
-}
+};
 
 const setData = async (refPath: string, data: any): Promise<void> => {
   return await DB?.ref(refPath).set(data).then((value) => value).catch(err => { console.warn(err); return err; });
-}
+};
 
 const pushData = async (refPath: string, data: any): Promise<void> => {
   return await DB?.ref(refPath).push(data).then((value) => value).catch(err => { console.warn(err); return err; });
-}
+};
 
 const pushInput = (groupId: string, type: string, data: any): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...')
+      return reject('DB has not defined...');
     }
     if (!groupId || !type) {
       return reject(`groupId or type is missing. groupId: ${groupId}: type: ${type}`);
@@ -244,12 +244,12 @@ const pushInput = (groupId: string, type: string, data: any): Promise<firebase.d
       return reject(err);
     });
   });
-}
+};
 
 const deleteInput = (groupId: string, type: IConfigType, id: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...')
+      return reject('DB has not defined...');
     }
     if (!type || !groupId || !id) {
       return reject(`type or groupId or record id is missing. groupId: ${groupId}, type: ${type}, id: ${id}`);
@@ -260,12 +260,12 @@ const deleteInput = (groupId: string, type: IConfigType, id: string): Promise<vo
       return !err ? resolve() : reject(); 
     });
   });
-}
+};
 
 const getMember = (lineId: string): Promise<IMember> => {
   return new Promise<IMember>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...')
+      return reject('DB has not defined...');
     }
     if(!lineId) {
       return reject(`id is missing.`);
@@ -276,7 +276,7 @@ const getMember = (lineId: string): Promise<IMember> => {
       return reject(e);
     });
   });
-}
+};
 
 const updateMember = (lineId: string, data: IMember): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
@@ -292,7 +292,7 @@ const updateMember = (lineId: string, data: IMember): Promise<firebase.database.
       return reject(err);
     });
   });
-}
+};
 
 const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
@@ -307,7 +307,7 @@ const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
       return reject(err);
     });
   });
-}
+};
 
 const updateGroupMember = (groupId: string, data: IMember) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
@@ -325,7 +325,7 @@ const updateGroupMember = (groupId: string, data: IMember) => {
       return reject(err);
     });
   });
-}
+};
 
 const isExistGroup = (groupId: string = '') => {
   return new Promise<boolean>((resolve, reject) => {
@@ -343,7 +343,7 @@ const isExistGroup = (groupId: string = '') => {
       return reject(err);
     });
   });
-}
+};
 
 const isExistMember = (lineId: string) => {
   return new Promise<boolean>((resolve, reject) => {
@@ -361,7 +361,7 @@ const isExistMember = (lineId: string) => {
       return reject(err);
     });
   });
-}
+};
 
 const makePageConfigs = (configs: IConfig[], categories: ICategory[] = [], members: IMember[] = []): IConfig[] =>  {
   const newConfigs = configs.map((config) => _.cloneDeep(config));
@@ -389,7 +389,7 @@ const makePageConfigs = (configs: IConfig[], categories: ICategory[] = [], membe
     });
   });
   return newConfigs;
-}
+};
 
 const convertObjectToArray = (obj: {[key: string]: IMember | IGroup}): (IMember | IGroup)[] => {
   if (!obj) return [];
@@ -398,7 +398,7 @@ const convertObjectToArray = (obj: {[key: string]: IMember | IGroup}): (IMember 
     data[key].id = key;
     return data[key];
   });
-}
+};
 
 // const convertInputsToArray = (obj: {[key: string]: {[key in IConfigType]: {[key: string]: IInputData}}}): {[key in string]: {[key in IConfigType]: IInputData[]}} => {
 //   if (!obj) return {};
@@ -429,7 +429,7 @@ const convertGroupInputsToArray = (obj: {[key in IConfigType]: {[key: string]: I
     }
   });
   return data;
-}
+};
 
 const updateCustomCategories = (groupId: string, data: ICategory[]) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
@@ -447,7 +447,7 @@ const updateCustomCategories = (groupId: string, data: ICategory[]) => {
       return reject(err);
     });
   });
-}
+};
 
 const updateCustomConfigs = (groupId: string, data: IConfig[]) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
@@ -465,7 +465,7 @@ const updateCustomConfigs = (groupId: string, data: IConfig[]) => {
       return reject(err);
     });
   });
-}
+};
 
 const updateCustomThemeSetting = (groupId: string, data: IConfig[]) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
@@ -483,7 +483,7 @@ const updateCustomThemeSetting = (groupId: string, data: IConfig[]) => {
       return reject(err);
     });
   });
-}
+};
 
 const dataFactory = () => {
   DB?.ref(refsMap.isUseFactory).once('value').then((snapshot: firebase.database.DataSnapshot) => {
@@ -491,7 +491,7 @@ const dataFactory = () => {
       if (!isUseFactory) { return; }
       FirebaseFactory.prepareAll(DB as firebase.database.Database);
   });
-}
+};
 
 // const setListener = (groupId: string): {[key in IRefsKeys]: firebase.database.Reference } => {
 //   const refs: {[key: string]: firebase.database.Reference } = {};
