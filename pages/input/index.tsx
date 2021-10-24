@@ -10,10 +10,10 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 
 import {IConfig, IConfigType, IFormData} from '../../interfaces';
 import InputV1 from '../../components/input/InputV1';
-import SelectV1 from '../../components/SelectV1';
+import SelectV1 from '../../components/input/SelectV1';
 import MultiCheckV1 from '../../components/input/MultiCheckV1';
 import DateV1 from '../../components/input/DateV1';
-import SelectBtnsV1 from '../../components/SelectBtnsV1';
+import SelectBtnsV1 from '../../components/input/SelectBtnsV1';
 import ModalV1 from '../../components/common/ModalV1';
 import {ValidationService} from '../../services/validationService';
 import Utils from '../../services/utils';

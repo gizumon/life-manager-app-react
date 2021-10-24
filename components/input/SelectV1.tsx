@@ -5,7 +5,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import {IInput, ICategory} from '../interfaces';
+import {IInput, ICategory} from '../../interfaces';
 
 type IProps = {
     config: IInput;
