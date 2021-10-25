@@ -10,7 +10,11 @@ export interface IBaseArgs {
 export interface IPayArgs extends Partial<IPay>, IBaseArgs { }
 export interface IToBuyArgs extends Partial<IToBuy>, IBaseArgs { }
 export interface IToDoArgs extends Partial<IToDo>, IBaseArgs { }
-export type IArgs = IPayArgs & IToBuyArgs & IToDoArgs;
+export interface IOtherArgs extends IBaseArgs {
+  words?: string[];
+}
+export type IArgs = IPayArgs & IToBuyArgs & IToDoArgs & IOtherArgs;
+
 
 type ICmdKey = 'help' | 'pay' | 'todo' | 'tobuy' | 'other';
 type IActionKey = 'add' | 'list' | 'delete';
@@ -55,7 +59,7 @@ namespace Chatbot {
       case isToDoCmd(text):
         return separateTobuyArgs(words);
       default:
-        return separateTobuyArgs(words);
+        return separateOtherArgs(words);
     }
   };
   
@@ -79,6 +83,16 @@ namespace Chatbot {
           return args.item = `${args.item} ${word}`.trim();
       }
     });
+    return args;
+  };
+
+  const separateOtherArgs = (words: string[]): IOtherArgs => {
+    const cmd = 'other';
+    const args: IOtherArgs = {
+      cmd: cmd,
+      action: '',
+      words,
+    };
     return args;
   };
 
@@ -138,7 +152,7 @@ namespace Chatbot {
     return result;
   };
   
-  const isIncludesArr = (text: string, arr: string[]): boolean => {
+  export const isIncludesArr = (text: string, arr: string[]): boolean => {
     return arr.some((word) => text.indexOf(word) > -1);
   };  
 }

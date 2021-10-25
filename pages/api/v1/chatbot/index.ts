@@ -2,7 +2,7 @@ import {NextApiRequest, NextApiResponse} from 'next';
 import * as line from '@line/bot-sdk';
 import {IResponseData} from '../../../../interfaces/responses';
 import Utils from '../../../../services/utils';
-import Chatbot, {IToBuyArgs} from '../../../../services/chatbot';
+import Chatbot, {IToBuyArgs, IOtherArgs} from '../../../../services/chatbot';
 import {FirebaseService} from '../../../../services/firebase';
 import { IToBuy } from '../../../../interfaces/index';
 import CONST from '../../../../services/constants';
@@ -73,25 +73,21 @@ const handleMessage = async (event: line.MessageEvent): Promise<line.Message> =>
   const args = Chatbot.parseText(text);
   args.lid = event.source.userId;
 
-  const items = await handleToBuy(args);
+  let replyText = '';
+  switch (args.id) {
+    case 'tobuy':
+      replyText = await handleToBuy(args);
+    default:
+      replyText = await handleOther(args);
+  }
 
-  return makeMsgObj(items);
-};
-
-const makeMsgObj = (items: IToBuy[], content = ''): line.Message => {
-  items.forEach((item, i) => {
-    if (i === 0 || items[i].buyCategory !== items[i - 1].buyCategory) {
-      content += `🐾 ${CONST.getCategoryNameById(item.buyCategory)}\n`;
-    }
-    content += `  ・${item.item}\n`;
-  });
   return {
     type: 'text',
-    text: '🐶お買い物リスト🐶\n\n' + content,
+    text: replyText,
   };
 };
 
-const handleToBuy = async (args: IToBuyArgs): Promise<IToBuy[]> => {
+const handleToBuy = async (args: IToBuyArgs): Promise<string> => {
   if (args.action === 'list') {
     const gid = await firebase.getGroupIdByUserId(args.lid);
     const items = gid ? await firebase.getToBuyInputs(gid) : [];
@@ -102,6 +98,26 @@ const handleToBuy = async (args: IToBuyArgs): Promise<IToBuy[]> => {
       return catA.setting.order - catB.setting.order;
     });
 
-    return items;
+    let content = '🐶お買い物リスト🐶\n\n';
+    if (!items.length) {
+      'お買い物リストが登録されてないみたいです🐾\n良かったら、Tobuyから登録してね！';
+    }
+    items.forEach((item, i) => {
+      if (i === 0 || items[i].buyCategory !== items[i - 1].buyCategory) {
+        content += `🐾 ${CONST.getCategoryNameById(item.buyCategory)}\n`;
+      }
+      content += `  ・${item.item}\n`;
+    });
+
+    return content;
   }
+};
+
+const handleOther = async (args: IOtherArgs): Promise<string> => {
+  const hellos = ['こんにちわ', 'おはよう', 'こんばんは', 'おやすみ', 'こんばんわ'];
+  const isHellos = args.words.some(word => Chatbot.isIncludesArr(word, hellos));
+  if (isHellos) {
+    return 'こんにちわん🐶\n今日も元気に頑張ってね！';
+  }
+  return 'まだ言葉を覚え中なので、上手くお返事ができないかもです。。🐶\n「お買い物」と言ってくれたら、買い物リストは表示できるよ🐾';
 };
