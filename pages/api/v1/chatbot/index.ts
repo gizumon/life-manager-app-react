@@ -115,7 +115,8 @@ const handleToBuy = async (args: IToBuyArgs): Promise<string> => {
 
 const handleOther = async (args: IOtherArgs): Promise<string> => {
   const hellos = ['こんにちわ', 'おはよう', 'こんばんは', 'おやすみ', 'こんばんわ'];
-  const isHellos = args.words.some(word => Chatbot.isIncludesArr(word, hellos));
+  const words = args.words || [];
+  const isHellos = words.some(word => Chatbot.isIncludesArr(word, hellos));
   if (isHellos) {
     return 'こんにちわん🐶\n今日も元気に頑張ってね！';
   }
