@@ -12,20 +12,21 @@ export interface IToBuyArgs extends Partial<IToBuy>, IBaseArgs { }
 export interface IToDoArgs extends Partial<IToDo>, IBaseArgs { }
 export type IArgs = IPayArgs & IToBuyArgs & IToDoArgs;
 
-type ICmdKey = 'help' | 'pay' | 'todo' | 'tobuy';
+type ICmdKey = 'help' | 'pay' | 'todo' | 'tobuy' | 'other';
 type IActionKey = 'add' | 'list' | 'delete';
 
 // cmd keys
 const cmdHelpKeys = ['❓', 'help', 'Help', 'Help', 'へるぷ', 'ヘルプ', '使い方'];
 const cmdPayKeys = ['💸', 'pay', 'PAY', 'Pay', '支払', '払った', '¥'];
-const cmdTodoKeys = ['✅', 'todo', 'TODO', 'ToDo', 'やる事', 'タスク', '✓'];
-const cmdTobuyKeys = ['🛒', 'tobuy', 'TOBUY', 'ToBuy', 'Tobuy', '買い物', 'かいもの'];
+const cmdTodoKeys = ['✅', 'do', 'todo', 'TODO', 'ToDo', 'やる事', 'タスク', '✓'];
+const cmdTobuyKeys = ['🛒', 'buy', 'tobuy', 'TOBUY', 'ToBuy', 'Tobuy', '買い物', 'かいもの'];
 
 const cmdKeys: {[key in ICmdKey]: string[]} = {
   help: cmdHelpKeys,
   pay: cmdPayKeys,
   todo: cmdTodoKeys,
   tobuy: cmdTobuyKeys,
+  other: [], // chatbot
 };
 
 // action keys
@@ -80,7 +81,7 @@ namespace Chatbot {
     });
     return args;
   };
-  
+
   const isPayCmd = (text: string): boolean => {
     return getCmdKey(text) === 'pay';
   };
@@ -128,7 +129,7 @@ namespace Chatbot {
   const searchKeyFromWordList = (text: string, arr: {[key in string]: string[]}) => {
     let result = '';
     Object.keys(arr).some((key: string) => {
-      const hasKey = arr[key as string].some((word) => word.indexOf(text) > -1);
+      const hasKey = arr[key as string].some((word) => text.indexOf(word) > -1);
       if (hasKey) {
         result = key;
         return true;
@@ -138,7 +139,7 @@ namespace Chatbot {
   };
   
   const isIncludesArr = (text: string, arr: string[]): boolean => {
-    return arr.some((word) => word.indexOf(text) > -1);
+    return arr.some((word) => text.indexOf(word) > -1);
   };  
 }
 

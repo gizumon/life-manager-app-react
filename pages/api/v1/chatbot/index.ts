@@ -22,7 +22,7 @@ export default function ChatbotApi(req: NextApiRequest, res: NextApiResponse) {
   console.log(`call ${apiName} api start:`, req.url, req);
   switch (req.method) {
     case 'POST':
-      return wrapHandler(req, res, postHandler, );
+      return wrapHandler(req, res, postHandler, preProcess, postProcess);
   }
 };
 
@@ -37,6 +37,8 @@ const wrapHandler = (req: NextApiRequest, res: NextApiResponse, handler: IHandle
 const preProcess = () => {
   line.middleware(lineConfig as line.MiddlewareConfig);
 };
+
+const postProcess = () => {};
 
 const postHandler = (req: NextApiRequest, res: NextApiResponse) => {
   let resBody;
@@ -72,18 +74,26 @@ const handleMessage = async (event: line.MessageEvent): Promise<line.Message> =>
   args.lid = event.source.userId;
 
   const items = await handleToBuy(args);
-  console.log('tobuy data: ', items);
-  const content = items.map((item) => `${CONST.getCategoryNameById(item.buyCategory)}: ${item.item}`).join('\n');
 
-  return makeMsgObj('お買い物リスト🛒\n' + content);
+  return makeMsgObj(items);
 };
 
-const makeMsgObj = (text: string): line.Message => ({type: 'text', text});
+const makeMsgObj = (items: IToBuy[], content = ''): line.Message => {
+  items.forEach((item, i) => {
+    if (i === 0 || items[i].buyCategory !== items[i - 1].buyCategory) {
+      content += `🐾 ${CONST.getCategoryNameById(item.buyCategory)}\n`;
+    }
+    content += `  ・${item.item}\n`;
+  });
+  return {
+    type: 'text',
+    text: '🐶お買い物リスト🐶\n\n' + content,
+  };
+};
 
 const handleToBuy = async (args: IToBuyArgs): Promise<IToBuy[]> => {
   if (args.action === 'list') {
     const gid = await firebase.getGroupIdByUserId(args.lid);
-    console.log('lid: ', args.lid, 'gid: ', gid);
     const items = gid ? await firebase.getToBuyInputs(gid) : [];
 
     items.sort((a, b) => {
