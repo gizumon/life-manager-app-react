@@ -23,6 +23,18 @@ module.exports = {
                : isProd ? '' // should define in environment process
                : ''
              ),
+    CHANNEL_ACCESS_TOKEN: process.env.CHANNEL_ACCESS_TOKEN
+          || (
+              isDev ? ''
+              : isProd ? '' // should define in environment process
+              : ''
+            ),
+    CHANNEL_SECRET: process.env.CHANNEL_SECRET
+          || (
+                isDev ? ''
+                : isProd ? '' // should define in environment process
+                : ''
+              ),
     FIREBASE_API_KEY: process.env.FIREBASE_API_KEY
                    || (
                         isDev ? ''
@@ -49,4 +61,4 @@ module.exports = {
         measurementId: "G-KC6X7VM4SE"
       } : {}
   },
-}
+};
