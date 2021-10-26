@@ -7,6 +7,7 @@ import 'firebase/database';
 import { IConfig, ICategory, IMember, IFormData, IConfigType, FirebaseData, IToBuy } from '../interfaces/index';
 import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from './utils';
+import getConfig from 'next/config';
 
 const refsMap = {
     isUseFactory: 'triggers/isUseFactory',
@@ -16,6 +17,8 @@ const refsMap = {
     groups: 'groups',
     inputs: 'data/inputs'
 };
+
+const { publicRuntimeConfig } = getConfig();
 
 export class FirebaseService {
     public app;
@@ -29,7 +32,7 @@ export class FirebaseService {
     constructor() {
         this.app = firebase;
         !firebase.apps.length
-          ? firebase.initializeApp(CONST.firebaseConfig)
+          ? firebase.initializeApp(publicRuntimeConfig.FIREBASE)
           : firebase.app();
 
         // init database
