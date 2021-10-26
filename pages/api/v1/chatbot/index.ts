@@ -113,7 +113,8 @@ const handleToBuy = async (args: IToBuyArgs): Promise<string> => {
              'お買い物リストから削除します！\n' +
              'ex) 買い物 削除 きのこ\n\n' +
              '※[カテゴリ]に指定できるアイテムは"tobuy help カテゴリ"とチャットに入力ください🙇‍♂🐾';
-    case 'list' || '': // default
+    case '': // default
+    case 'list': // default
       const searchKey = !!args.buyCategory ? args.buyCategory : (args.item || '');
       const items = gid ? await firebase.getToBuyInputs(gid) : [];
 
