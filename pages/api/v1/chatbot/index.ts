@@ -74,9 +74,10 @@ const handleMessage = async (event: line.MessageEvent): Promise<line.Message> =>
   args.lid = event.source.userId;
 
   let replyText = '';
-  switch (args.id) {
+  switch (args.cmd) {
     case 'tobuy':
       replyText = await handleToBuy(args);
+      break;
     default:
       replyText = await handleOther(args);
   }

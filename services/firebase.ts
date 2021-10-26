@@ -83,7 +83,6 @@ export class FirebaseService {
 
     public async getToBuyInputs(gid: string): Promise<IToBuy[]> {
         const inputs = await this.getInputs();
-        console.log('input data: ', inputs);
         return (!inputs[gid] || !inputs[gid].tobuy) ? [] : Utils.convertObjectToArray<IToBuy>(inputs[gid].tobuy);
     };
 
@@ -97,7 +96,6 @@ export class FirebaseService {
             }
             this.db?.ref(refsMap.members).child(lid).once('value').then((snapshot) => {
                 const m = snapshot.val() as IMember;
-                console.log('get group id by user id', m);
                 return resolve(m ? m.groupId : '');
             }).catch(e => {
                 return reject(e);
