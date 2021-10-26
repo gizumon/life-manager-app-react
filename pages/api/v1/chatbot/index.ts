@@ -27,7 +27,7 @@ export default function ChatbotApi(req: NextApiRequest, res: NextApiResponse) {
 };
 
 const wrapHandler = (req: NextApiRequest, res: NextApiResponse, handler: IHandler, preProcess?: () => void, postProcess?: () => void) => {
-  console.log(`[INFO] Start ${apiName} API:`, Utils.getDateTime(), req.url, req.body, req.headers);
+  console.log(`[INFO] Start ${apiName} API:`, Utils.getDateTime(), req.url, req.body);
   preProcess && preProcess();
   handler(req, res);
   postProcess && postProcess();
@@ -69,6 +69,7 @@ const handleEvent = async (event: line.WebhookEvent): Promise<IResponseData> => 
 const handleMessage = async (event: line.MessageEvent): Promise<line.Message> => {
   const message = event.message as line.TextEventMessage;
   const text = message.text;
+  console.log('[INFO] Received message: ', text);
 
   const args = Chatbot.parseText(text);
   args.lid = event.source.userId;
@@ -89,28 +90,67 @@ const handleMessage = async (event: line.MessageEvent): Promise<line.Message> =>
 };
 
 const handleToBuy = async (args: IToBuyArgs): Promise<string> => {
-  if (args.action === 'list') {
-    const gid = await firebase.getGroupIdByUserId(args.lid);
-    const items = gid ? await firebase.getToBuyInputs(gid) : [];
+  const gid = await firebase.getGroupIdByUserId(args.lid);
+  const categories = await firebase.getCustomCategories(gid);
+  const buyCategories = categories.filter((cat) => cat.type === 'tobuy');
 
-    items.sort((a, b) => {
-      const catA = CONST.buyCategories.find((cat) => cat.id === a.buyCategory);
-      const catB = CONST.buyCategories.find((cat) => cat.id === b.buyCategory);
-      return catA.setting.order - catB.setting.order;
-    });
-
-    let content = '🐶お買い物リスト🐶\n\n';
-    if (!items.length) {
-      'お買い物リストが登録されてないみたいです🐾\n良かったら、Tobuyから登録してね！';
-    }
-    items.forEach((item, i) => {
-      if (i === 0 || items[i].buyCategory !== items[i - 1].buyCategory) {
-        content += `🐾 ${CONST.getCategoryNameById(item.buyCategory)}\n`;
+  switch (args.action) {
+    case 'help':
+      if (args.item === 'カテゴリ' || args.item === 'かてごり') {
+        return '🐶ヘルプ(ToBuy > カテゴリ)🐶\n\n' +
+               'カテゴリに指定できるのは、こちらです！\n' + 
+               `${buyCategories.map((c) => `・${c.name} (${c.id})`).join('\n')}`;
       }
-      content += `  ・${item.item}\n`;
-    });
+      return '🐶ヘルプ(ToBuy)🐶\n\n' +
+             'こちらは機能の一覧です！\n\n' +
+             '🗒 一覧 🗒\n' +
+             'お買い物リストを表示します！\n' +
+             'ex) 買い物 一覧 スーパー\n\n' +
+             '🎁 追加 🎁  ※開発中🔧\n' +
+             'お買い物リストに追加します！\n' +
+             'ex) 買い物 追加 スーパー きのこ\n\n' +
+             '🙅‍♂️ 削除 🙅‍♂️  ※開発中🔧\n' +
+             'お買い物リストから削除します！\n' +
+             'ex) 買い物 削除 きのこ\n\n' +
+             '※[カテゴリ]に指定できるアイテムは"tobuy help カテゴリ"とチャットに入力ください🙇‍♂🐾';
+    case 'list':
+      const searchKey = !!args.buyCategory ? args.buyCategory : (args.item || '');
+      const items = gid ? await firebase.getToBuyInputs(gid) : [];
 
-    return content;
+      items.sort((a, b) => {
+        const catA = buyCategories.find((cat) => cat.id === a.buyCategory);
+        const catB = buyCategories.find((cat) => cat.id === b.buyCategory);
+        return catA.setting.order - catB.setting.order;
+      });
+
+      let content = '🐶お買い物リスト🐶\n\n';
+      if (!items.length) {
+        return `${content}お買い物リストが登録されてないみたいです🐾\nTobuyから登録してね！`;
+      }
+      const searchedItems = items.filter((item) => {
+        if (!searchKey) return true;
+        return Object.keys(item).some((key) => {
+          if (key === 'buyCategory') {
+            const cat = buyCategories.find((c) => c.id === item[key]);
+            return (Utils.hasString(cat.id, searchKey) || Utils.hasString(cat.name, searchKey));
+          }
+          return Utils.hasString(String(item[key]), searchKey);
+        });
+      });
+      console.log('[INFO] Search key: ', searchKey, searchedItems.length);
+      if (!searchedItems.length) {
+        return `${content}検索結果がありませんでした。。🐾\n違う言葉か検索ワードなしで、また試してみてね！`;
+      }
+      searchedItems.forEach((item, i) => {
+        if (i === 0 || items[i].buyCategory !== items[i - 1].buyCategory) {
+          content += `🐾 ${CONST.getCategoryNameById(item.buyCategory)}\n`;
+        }
+        content += `  ・${item.item}\n`;
+      });
+
+      return content;
+    default:
+      return `${Chatbot.getActionName(args.action)}はまだお勉強中です。。。🐾`;
   }
 };
 

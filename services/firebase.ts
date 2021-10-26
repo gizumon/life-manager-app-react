@@ -9,10 +9,12 @@ import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from './utils';
 import getConfig from 'next/config';
 
+const templateGroupId = '${groupId}';
 const refsMap = {
     isUseFactory: 'triggers/isUseFactory',
     configs: 'masterdata/configs',
     categories: 'masterdata/categories',
+    customCategories: `groups/${templateGroupId}/categories`, 
     members: 'users',
     groups: 'groups',
     inputs: 'data/inputs'
@@ -26,12 +28,12 @@ export class FirebaseService {
     public isInitialized = false;
     public configs: IConfig[] = [];
     public categories: ICategory[] = [];
+    public customCategories: ICategory[] = [];
     public members: IMember[] = [];
     public inputItems: any[] = [];
 
     constructor() {
         this.app = firebase;
-        console.log('public runtime config: ', publicRuntimeConfig.FIREBASE);
         !firebase.apps.length
           ? firebase.initializeApp(publicRuntimeConfig.FIREBASE)
           : firebase.app();
@@ -69,6 +71,12 @@ export class FirebaseService {
     public async getCategories(): Promise<ICategory[]> {
         return this.categories.length > 0 ? this.categories
              : await this.db?.ref(refsMap.categories).once('value').then((snapshot) => snapshot.val());
+    }
+
+    public async getCustomCategories(gid: string): Promise<ICategory[]> {
+        const path = refsMap.customCategories.replace(templateGroupId, gid);
+        return this.customCategories.length > 0 ? this.categories
+             : await this.db?.ref(path).once('value').then((snapshot) => snapshot.val()) || [];
     }
 
     public async getConfigs(): Promise<IConfig[]> {
