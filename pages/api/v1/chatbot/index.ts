@@ -19,7 +19,7 @@ const firebase = new FirebaseService();
 type IHandler = (req: NextApiRequest, res: NextApiResponse) => void
 
 export default function ChatbotApi(req: NextApiRequest, res: NextApiResponse) {
-  console.log(`call ${apiName} api start:`, req.url, req);
+  console.log(`call ${apiName} api start:`, req.url, firebase.app);
   switch (req.method) {
     case 'POST':
       return wrapHandler(req, res, postHandler, preProcess, postProcess);

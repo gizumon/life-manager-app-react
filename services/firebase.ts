@@ -31,6 +31,7 @@ export class FirebaseService {
 
     constructor() {
         this.app = firebase;
+        console.log('public runtime config: ', publicRuntimeConfig.FIREBASE);
         !firebase.apps.length
           ? firebase.initializeApp(publicRuntimeConfig.FIREBASE)
           : firebase.app();
