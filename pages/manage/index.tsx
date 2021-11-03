@@ -76,6 +76,7 @@ export default function Manage() {
   const [isOpenAddCategoryModal, setIsOpenAddCategoryModal] = useState<boolean>(false);
   const [isOpenSuccessModal, setIsOpenSuccessModal] = useState<boolean>(false);
   const [errMessage, setErrMessage] = useState<string>('');
+  const [copyErrMessage, setCopyErrMessage] = useState<string>('');
   const [addCategoryModalConfig, setAddCategoryModalConfig] = useState<IModalInputConfig>(defaultConfig);
   const [themeSetting, setThemeSetting] = useState<IThemeSetting>(groupTheme || {selectedTheme: 'default'});
   const [accountSetting, setAccountSetting] = useState<IAccountSetting>({name: (defaultMember?.name || ''), lineId: selectedUserId});
@@ -132,7 +133,15 @@ export default function Manage() {
   };
 
   const onAccountClickBtn = () => {
-    navigator.clipboard && navigator.clipboard.writeText(selectedGroupId);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(selectedGroupId).then(() => {
+        setCopyErrMessage('ペアリングコードをコピーしました😉');
+      }).catch((e) => {
+        setCopyErrMessage(`ペアリングコードのコピーができませんでした。。😭\n${e}`);
+      });
+    } else {
+      setCopyErrMessage('クリップボードを操作する権限がありませんでした。。😢');
+    }
   };
   const saveAccount = () => {
     // if (selectedGroupId !== accountSetting.groupId) {
@@ -238,6 +247,7 @@ export default function Manage() {
         <InputDialogV1 configs={[addCategoryModalConfig]} isOpen={isOpenAddCategoryModal} onClose={onCloseAddCategoryModal}/>
         <ModalV1 open={isOpenSuccessModal} body={'更新しました😉'} onClose={() => setIsOpenSuccessModal(false)}/>
         <ModalV1 open={errMessage !== ''} body={errMessage} onClose={() => setErrMessage('')} />
+        <ModalV1 open={copyErrMessage !== ''} body={copyErrMessage} onClose={() => setCopyErrMessage('')} />
       </div>
     </>
   );
