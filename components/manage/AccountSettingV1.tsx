@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function AccountSetting({setting, setSetting, onUpdated, onClickButton}: IProps) {
   const classes = useStyles();
-  const [isClicked, setIsClicked] = useState(false);
+  // const [isClicked, setIsClicked] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setSetting((state) => {
@@ -45,16 +45,16 @@ export default function AccountSetting({setting, setSetting, onUpdated, onClickB
   };
 
   const handleClick = () => {
-    if (isClicked) {
-      return false;
-    }
-    setIsClicked(true);
+    // if (isClicked) {
+    //   return false;
+    // }
+    // setIsClicked(true);
     onClickButton && onClickButton();
   };
 
-  useEffect(() => {
-    isClicked && setTimeout(() => setIsClicked(false), 3000);
-  }, [isClicked]);
+  // useEffect(() => {
+  //   isClicked && setTimeout(() => setIsClicked(false), 3000);
+  // }, [isClicked]);
 
   return (
     <div>
@@ -86,7 +86,7 @@ export default function AccountSetting({setting, setSetting, onUpdated, onClickB
         onClick={handleClick}
         startIcon={<AssignmentTurnedInIcon />}
       >
-        {isClicked ? 'ペアリングコードをコピーしました' : 'ペアリングコードを取得'}
+        ペアリングコードを取得
       </Button>
     </div>
   );

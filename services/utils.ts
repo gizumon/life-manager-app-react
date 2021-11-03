@@ -114,6 +114,22 @@ namespace Utils {
             return obj[key] as T;
         });
     };
+
+    export function searchKeyFromWordList(text: string, arr: {[key in string]: string[]}): string {
+        let result = '';
+        Object.keys(arr).some((key: string) => {
+          const hasKey = arr[key as string].some((word) => Utils.hasString(text, word));
+          if (hasKey) {
+            result = key;
+            return true;
+          }
+        });
+        return result;
+      };
+
+    export const isIncludesArr = (text: string, arr: string[]): boolean => {
+        return arr.some((word) => text.indexOf(word) > -1);
+    };
 }
 
 export default Utils;

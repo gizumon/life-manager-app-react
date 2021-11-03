@@ -25,7 +25,6 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function InputV1({config, model, setProps, type=''}: IProps) {
-  console.log('InputV1 model', model);
   const classes = useStyles();
 
   const onChangeHandler = (event: any) => {

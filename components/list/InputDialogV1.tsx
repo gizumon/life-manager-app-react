@@ -17,7 +17,7 @@ export interface IModalInputConfig {
   args?: any[]
 }
 
-export interface IProps {
+interface IProps {
   title?: string;
   configs: IModalInputConfig[];
   isOpen: boolean;

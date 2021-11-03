@@ -1,10 +1,9 @@
 /**
  * Deprecated: Replaced to useFirebese.tsx
  */
-import CONST from './constants';
 import firebase from 'firebase/app';
 import 'firebase/database';
-import { IConfig, ICategory, IMember, IFormData, IConfigType, FirebaseData, IToBuy } from '../interfaces/index';
+import { IConfig, ICategory, IMember, IFormData, IConfigType, FirebaseData, IToBuy, IToDo, IPay } from '../interfaces/index';
 import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from './utils';
 import getConfig from 'next/config';
@@ -65,7 +64,24 @@ export class FirebaseService {
         this.categories = await this.getCategories();
         this.configs = await this.getConfigs();
         // this.members = await this.getMembers();
-        console.log('set properties: ', this.categories, this.configs, this.members);
+        // console.log('set properties: ', this.categories, this.configs, this.members);
+    }
+
+    public async getUserByLId(lid: string) {
+        return new Promise<IMember>((resolve, reject) => {
+            if (!this.db) {
+                return reject('DB has not defined...');
+            }
+            if(!lid) {
+                return reject(`id is missing.`);
+            }
+            this.db?.ref(refsMap.members).child(lid).once('value').then((snapshot) => {
+                const m = snapshot.val() as IMember;
+                return resolve(m);
+            }).catch(e => {
+                return reject(e);
+            });
+        });
     }
 
     public async getCategories(): Promise<ICategory[]> {
@@ -130,7 +146,7 @@ export class FirebaseService {
                               : input.type === 'select-btns' && validate.type === 'isInclude' ? input.dataList?.map(data => data.id)
                               : input.type === 'multi-check' && validate.type === 'isIncludeAll' ? input.dataList?.map(data => data.id)
                               : validate.args;
-                console.log('!!!check:', input.type, validate.type, validate.args);
+                // console.log('!!!check:', input.type, validate.type, validate.args);
             });
           });
         });
@@ -143,10 +159,10 @@ export class FirebaseService {
                 return reject(`id or type is missing. id: ${id}: type: ${type}`);
             }
             const refName = `${refsMap.inputs}/${id}/${type}`;
-            console.log('set Input: ', this.db, refName, data);
+            // console.log('set Input: ', this.db, refName, data);
             data['TIMESTAMP'] = firebase.database.ServerValue.TIMESTAMP;
             this.db?.ref(refName).push(data).then((e) => {
-                console.log(`show success: `, e);
+                // console.log(`show success: `, e);
                 return resolve(e);
             }).catch((e) => {
                 console.log(`show error: `, e);
@@ -154,4 +170,32 @@ export class FirebaseService {
             });
         });
     }
+
+    public pushToBuyInput(groupId: string, data: Partial<IToBuy>): Promise<firebase.database.Reference> {
+        return this.pushInput(groupId, 'tobuy', data);
+    }
+
+    private pushInput(
+        groupId: string,
+        type: string,
+        data: Partial<IPay> | Partial<IToBuy> | Partial<IToDo>
+    ): Promise<firebase.database.Reference> {
+        return new Promise<firebase.database.Reference>((resolve, reject) => {
+          if (!this.db) {
+            return reject('DB has not defined...');
+          }
+          if (!groupId || !type) {
+            return reject(`groupId or type is missing. groupId: ${groupId}: type: ${type}`);
+          }
+          const refName = `${refsMap.inputs}/${groupId}/${type}`;
+          data['timestamp'] = firebase.database.ServerValue.TIMESTAMP as any as number;
+          
+          this.db.ref(refName).push(data).then(val => {
+            return resolve(val);
+          }).catch(err => {
+            console.warn(err);
+            return reject(err);
+          });
+        });
+      };
 }

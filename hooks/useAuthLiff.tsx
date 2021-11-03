@@ -7,7 +7,6 @@ import getConfig from 'next/config';
 const AuthContext = createContext<typeof Liff | undefined>(undefined);
 
 export const AuthProvider: FC = ({ children }) => {
-  console.log('Env: ', getConfig())
   const { publicRuntimeConfig } = getConfig();
   const liffId = publicRuntimeConfig.LIFF_ID;
   const [liff, setLiff] = useState<typeof Liff>();
@@ -15,7 +14,6 @@ export const AuthProvider: FC = ({ children }) => {
   useEffect(() => {
     let unmounted = false;
     const func = async () => {
-      console.log("ENV: ", liffId);
       const liff = (await import('@line/liff')).default;
       console.log('import liff');
       // TODO: Use process env
@@ -37,8 +35,8 @@ export const AuthProvider: FC = ({ children }) => {
     >
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
 type UseAuthReturn = {
   isInitialized: boolean;
@@ -94,7 +92,7 @@ export const makeMemberFromUser = (user: UserState, groupId: string = '', id: st
     lineId: user.userId,
     picture: user.pictureUrl,
     groupId: groupId,
-  }
+  };
 };
 // export const useMessage = (): any => {
 //   if (!liff) {
