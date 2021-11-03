@@ -137,10 +137,19 @@ export default function Manage() {
       navigator.clipboard.writeText(selectedGroupId).then(() => {
         setCopyErrMessage('ペアリングコードをコピーしました😉');
       }).catch((e) => {
-        setCopyErrMessage(`ペアリングコードのコピーができませんでした。。😭\n${e}`);
+        setCopyErrMessage(
+          'ペアリングコードのコピーができませんでした。。😭\n' +
+          '(' + String(e) + ')\n\n' +
+          '下記のコードをコピーしてください🙇‍♂️\n' +
+          String(defaultMember.groupId)
+        );
       });
     } else {
-      setCopyErrMessage('クリップボードを操作する権限がありませんでした。。😢');
+      setCopyErrMessage(
+        'クリップボードを操作する権限がありませんでした。。😢\n\n' +
+        '下記のコードをコピーしてください🙇‍♂️\n' +
+        String(defaultMember.groupId)
+      );
     }
   };
   const saveAccount = () => {
