@@ -113,7 +113,7 @@ export type IUseFirebaseReturn = IFirebaseDataStates & {
   getMember?: (lineId: string) => Promise<IMember>;
   updateMember?: (lineId: string, data: IMember) => Promise<firebase.database.Reference>;
   pushGroup?: (data?: IGroup) => Promise<firebase.database.Reference>;
-  updateGroupMember?: (groupId: string, data: IMember) => Promise<firebase.database.Reference>;
+  updateGroupMember?: (groupId: string, data: Partial<IMember>) => Promise<firebase.database.Reference>;
   isExistGroup?: (groupId: string) => Promise<boolean>;
   isExistMember?: (lineId: string) => Promise<boolean>;
   activateGroup?: (groupId: string) => Promise<void>;
@@ -309,7 +309,7 @@ const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
   });
 };
 
-const updateGroupMember = (groupId: string, data: IMember) => {
+const updateGroupMember = (groupId: string, data: Partial<IMember>) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
       return reject('DB has not defined...');

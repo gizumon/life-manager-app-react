@@ -72,14 +72,14 @@ export default function Manage() {
   const selectedGroupId = sessionStorage.getItem('gid') || '';
   const {updateCustomCategories, updateCustomThemeSetting, updateGroupMember} = useFirebase();
   const {categories, groupTheme, groupMembers} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
-  const defaultMember = groupMembers.find((m) => m.lineId === selectedUserId);
+  const member = groupMembers.find((m) => m.lineId === selectedUserId);
   const [isOpenAddCategoryModal, setIsOpenAddCategoryModal] = useState<boolean>(false);
   const [isOpenSuccessModal, setIsOpenSuccessModal] = useState<boolean>(false);
   const [errMessage, setErrMessage] = useState<string>('');
   const [copyErrMessage, setCopyErrMessage] = useState<string>('');
   const [addCategoryModalConfig, setAddCategoryModalConfig] = useState<IModalInputConfig>(defaultConfig);
   const [themeSetting, setThemeSetting] = useState<IThemeSetting>(groupTheme || {selectedTheme: 'default'});
-  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({name: (defaultMember?.name || ''), lineId: selectedUserId});
+  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({name: (member?.name || member?.name || ''), lineId: selectedUserId});
   const [newCategories, setNewCategories] = useState<ICategory[]>(categories);
 
   useEffect(() => {
@@ -141,14 +141,14 @@ export default function Manage() {
           'ペアリングコードのコピーができませんでした。。😭\n' +
           '(' + String(e) + ')\n\n' +
           '下記のコードをコピーしてください🙇‍♂️\n' +
-          String(defaultMember.groupId)
+          String(member.groupId)
         );
       });
     } else {
       setCopyErrMessage(
         'クリップボードを操作する権限がありませんでした。。😢\n\n' +
         '下記のコードをコピーしてください🙇‍♂️\n' +
-        String(defaultMember.groupId)
+        String(member.groupId)
       );
     }
   };

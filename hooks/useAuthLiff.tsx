@@ -1,5 +1,5 @@
-import { createContext, FC, useContext, useEffect, useState } from "react"
-import Liff from '@line/liff'
+import { createContext, FC, useContext, useEffect, useState } from "react";
+import Liff from '@line/liff';
 import { UserState } from '../ducks/user/slice';
 import { IMember } from "../interfaces";
 import getConfig from 'next/config';
@@ -16,16 +16,15 @@ export const AuthProvider: FC = ({ children }) => {
     const func = async () => {
       const liff = (await import('@line/liff')).default;
       console.log('import liff');
-      // TODO: Use process env
       await liff.init({ liffId: liffId || ""});
       if (!unmounted) {
         setLiff(liff);
       }
-    }
+    };
     func();
     const cleanup = () => {
       unmounted = true;
-    }
+    };
     return cleanup;
   }, []);
 
@@ -83,7 +82,7 @@ export const useAuth = (): UseAuthReturn => {
       }
     },
   };
-}
+};
 
 export const makeMemberFromUser = (user: UserState, groupId: string = '', id: string = ''): IMember => {
   return {

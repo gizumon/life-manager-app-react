@@ -61,6 +61,7 @@ const Layout: FC = ({children}) => {
   const baseUri = publicRuntimeConfig.ROOT_URL;
   const redirectUri = baseUri + router.asPath;
   const isLoginPage = router.asPath.indexOf('/login') > -1;
+  const hasPrepared = !!firebase.activateGroup;
 
   useEffect(() => {
     const groupId = sessionStorage.getItem('gid');
@@ -98,7 +99,7 @@ const Layout: FC = ({children}) => {
     );
   }
 
-  if (!isInitialized || !firebase.getMember || !firebase.activateGroup) {
+  if (!isInitialized || !hasPrepared) {
     return (
       <FadeWrapper>
         <Progress message="準備中。。。"/>
@@ -110,19 +111,28 @@ const Layout: FC = ({children}) => {
   if (!isGroupActivated && state === stateMap.isInitializing) {
     firebase.getMember(liff.userId as string).then((member) => {
       const isExistMember = !!member;
+      const hasGoupId = !!member.groupId;
+      const isSameGroupId = member.groupId === sessionStorage.getItem('gid');
+      const isProd = publicRuntimeConfig.NODE_ENV === 'production';
       setState(isExistMember ? stateMap.isExistMember : stateMap.isNotExistMember);
-      if (isExistMember && firebase.activateGroup && member.groupId) {
-        if (member.groupId === sessionStorage.getItem('gid')) {
-          firebase.activateGroup(member.groupId);
-        } else {
-          if (publicRuntimeConfig.NODE_ENV !== 'production') {
-            firebase.activateGroup(sessionStorage.getItem('gid') || member.groupId);
-          } else {
-            console.log('Remove session because member group id is different from own session gid', member.groupId, sessionStorage.getItem('gid'));
-            sessionStorage.removeItem('gid');
-          }
-        }
+      if (!isExistMember || !hasPrepared || !hasGoupId) {
+        // has not prepared yet
+        return;
       }
+      if (isSameGroupId) {
+        if (!!liff.user && !!liff.user.pictureUrl && member.picture !== liff.user.pictureUrl) {
+          firebase.updateGroupMember(member.groupId, {picture: liff.user.pictureUrl});
+        }
+        firebase.activateGroup(member.groupId);
+        return;
+      }
+      // member groupId is different form session gid
+      if (!isProd) {
+        firebase.activateGroup(sessionStorage.getItem('gid') || member.groupId);
+        return;
+      }
+      console.log('Remove session (member groupId is different from session gid', member.groupId, sessionStorage.getItem('gid'));
+      sessionStorage.removeItem('gid');
     });
   }
 
