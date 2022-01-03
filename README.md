@@ -1,3 +1,5 @@
+[![CI](https://github.com/gizumon/life-manager-app-react/actions/workflows/ci.yml/badge.svg)](https://github.com/gizumon/life-manager-app-react/actions/workflows/ci.yml)
+
 # Life-manager-app
 
 This application will support your life with your partner on the LINE platform.  
