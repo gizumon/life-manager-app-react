@@ -49,7 +49,6 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function SearchBox({value, setValue}: IProps) {
-  console.log(value, setValue);
   const classes = useStyles();
   const [isClose, setIsOpen] = useState<boolean>(true);
 

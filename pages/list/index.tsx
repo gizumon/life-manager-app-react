@@ -20,6 +20,16 @@ import {useSelector} from 'react-redux';
 import {StoreState} from '../../ducks/createStore';
 import {FirebaseState} from '../../ducks/firebase/slice';
 
+interface ICalculation {
+  id: string;
+  name: string;
+  picture: string;
+  shouldReceive: number;
+  shouldPay: number;
+  diff: number;
+  hasReimbursement: Boolean;
+}
+
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
   toType: {
@@ -235,9 +245,9 @@ export default function ListPage() {
     return (displayDataObj && displayDataObj[type]) ? displayDataObj[type] : [];
   };
 
-  const getCalculations = (): {id: string, name: string, picture: string, shouldReceive: number, shouldPay: number, diff: number, hasReimbursement: Boolean}[] => {
-    // way: calculate the amount payed for someone
-    const arr: {id: string, name: string, picture: string, shouldReceive: number, shouldPay: number, diff: number, hasReimbursement: Boolean}[] = [];
+  // calculate the amount payed for someone
+  const getCalculations = (): ICalculation[] => {
+    const arr: ICalculation[] = [];
     groupMembers.forEach((member) => {
       const calcObj = {
         id: member.id || '',
@@ -390,6 +400,9 @@ export default function ListPage() {
             <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
           </Tabs>
           <CardContent>
+            <div>
+              <SearchBox value={searchKey} setValue={setSearchKey} />
+            </div>
             <div>
               <SearchBox value={searchKey} setValue={setSearchKey} />
             </div>
