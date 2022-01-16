@@ -64,7 +64,7 @@ export default function Login() {
   const {publicRuntimeConfig} = getConfig();
   const router = useRouter();
   const {user, sendText} = useAuth();
-  const {isInitialized, pushGroup, updateGroupMember, isExistGroup, updateMember, getMember} = useFirebase();
+  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup, updateMember} = useFirebase();
   const [code, setCode] = useState<string>();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
@@ -72,8 +72,8 @@ export default function Login() {
   const [onCloseFn, setOnCloseFn] = useState<() => void>(() => {});
   const classes = useStyles();
   const redirectUri = router.query['redirectUri'] as string ||
-                   Utils.getQueryParam(router.asPath, 'redirectUri') ||
-                   publicRuntimeConfig.ROOT_URL + '/input?type=pay';
+                      Utils.getQueryParam(router.asPath, 'redirectUri') ||
+                      publicRuntimeConfig.ROOT_URL + '/input?type=pay';
   const groupId = sessionStorage.getItem('gid');
 
   const onChangeHandler = (event: any) => setCode(event.target.value);
@@ -153,14 +153,24 @@ export default function Login() {
 
   // user is exist in auth, but not in member.
   if (user && isInitialized) {
-    // no request when already check user open
-    if (getMember && state === stateMap.isInitializing) {
-      getMember(user.userId).then((member) => {
-        if (member) {
-          redirectWithLogin(redirectUri, member.groupId);
-        }
-        setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
-      });
+    // should not request when already check user was opened
+    if (state === stateMap.isInitializing) {
+      const lineId = user.userId;
+      const pictureUrl = user.pictureUrl;
+      const gid = sessionStorage.getItem('gid');
+      if (lineId && pictureUrl && gid) {
+        getGroupMember(gid, lineId).then((member) => {
+          setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
+          const isSameImage = pictureUrl === member?.picture;
+          if (member && !isSameImage) {
+            updateGroupMember(member.groupId, { lineId: lineId, picture: pictureUrl });
+          }
+    
+          if (member) {
+            redirectWithLogin(redirectUri, member.groupId);
+          }
+        });  
+      }
     }
     if (state === stateMap.isNotFoundUser) {
       return (

@@ -113,6 +113,7 @@ export type IUseFirebaseReturn = IFirebaseDataStates & {
   getMember?: (lineId: string) => Promise<IMember>;
   updateMember?: (lineId: string, data: IMember) => Promise<firebase.database.Reference>;
   pushGroup?: (data?: IGroup) => Promise<firebase.database.Reference>;
+  getGroupMember?: (groupId: string, lineId: string) => Promise<IMember>;
   updateGroupMember?: (groupId: string, data: Partial<IMember>) => Promise<firebase.database.Reference>;
   isExistGroup?: (groupId: string) => Promise<boolean>;
   isExistMember?: (lineId: string) => Promise<boolean>;
@@ -192,6 +193,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
     getMember: getMember,
     updateMember: updateMember,
     pushGroup: pushGroup,
+    getGroupMember: getGroupMember,
     updateGroupMember: runActivateWrapper(updateGroupMember),
     isExistGroup: isExistGroup,
     isExistMember: isExistMember,
@@ -229,7 +231,7 @@ const pushData = async (refPath: string, data: any): Promise<void> => {
 const pushInput = (groupId: string, type: string, data: any): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if (!groupId || !type) {
       return reject(`groupId or type is missing. groupId: ${groupId}: type: ${type}`);
@@ -249,7 +251,7 @@ const pushInput = (groupId: string, type: string, data: any): Promise<firebase.d
 const deleteInput = (groupId: string, type: IConfigType, id: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if (!type || !groupId || !id) {
       return reject(`type or groupId or record id is missing. groupId: ${groupId}, type: ${type}, id: ${id}`);
@@ -265,7 +267,7 @@ const deleteInput = (groupId: string, type: IConfigType, id: string): Promise<vo
 const getMember = (lineId: string): Promise<IMember> => {
   return new Promise<IMember>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if(!lineId) {
       return reject(`id is missing.`);
@@ -281,7 +283,7 @@ const getMember = (lineId: string): Promise<IMember> => {
 const updateMember = (lineId: string, data: IMember): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB || !lineId || !data) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
 
@@ -297,7 +299,7 @@ const updateMember = (lineId: string, data: IMember): Promise<firebase.database.
 const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
     DB.ref(refsMap.groups).push(data).then(val => {
@@ -309,13 +311,27 @@ const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
   });
 };
 
+const getGroupMember = (groupId: string, lineId: string): Promise<IMember> => {
+  return new Promise<IMember>((resolve, reject) => {
+    if (!DB) return reject('DB is not defined...');
+    if (!groupId) return reject('groupId is not defined...');
+    if (!lineId) return reject('lineId is not defined...');
+    DB.ref(refsMap.groups).child(`${groupId}/members`).child(lineId).once('value').then(snapshot => {
+      return resolve(snapshot.val());
+    }).catch(err => {
+      console.warn(err);
+      return reject(err);
+    });
+  });
+};
+
 const updateGroupMember = (groupId: string, data: Partial<IMember>) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if (!data.lineId) {
-      return reject('lineId has not defined...');
+      return reject('lineId is not defined...');
     }
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
     DB.ref(refsMap.groups).child(`${groupId}/members`).child(data.lineId).update(data).then(val => {
@@ -330,7 +346,7 @@ const updateGroupMember = (groupId: string, data: Partial<IMember>) => {
 const isExistGroup = (groupId: string = '') => {
   return new Promise<boolean>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if (!groupId) {
       return resolve(false);
@@ -348,7 +364,7 @@ const isExistGroup = (groupId: string = '') => {
 const isExistMember = (lineId: string) => {
   return new Promise<boolean>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if (!lineId) {
       return resolve(false);
@@ -434,10 +450,10 @@ const convertGroupInputsToArray = (obj: {[key in IConfigType]: {[key: string]: I
 const updateCustomCategories = (groupId: string, data: ICategory[]) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if (!groupId || !data) {
-      return reject('lineId has not defined...');
+      return reject('lineId is not defined...');
     }
 
     DB?.ref(refsMap.customCategories.replace(templateGroupId, groupId)).set(data).then(val => {
@@ -452,10 +468,10 @@ const updateCustomCategories = (groupId: string, data: ICategory[]) => {
 const updateCustomConfigs = (groupId: string, data: IConfig[]) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if (!groupId || !data) {
-      return reject('lineId has not defined...');
+      return reject('lineId is not defined...');
     }
 
     DB?.ref(refsMap.customConfigs.replace(templateGroupId, groupId)).set(data).then(val => {
@@ -470,10 +486,10 @@ const updateCustomConfigs = (groupId: string, data: IConfig[]) => {
 const updateCustomThemeSetting = (groupId: string, data: IConfig[]) => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
     if (!DB) {
-      return reject('DB has not defined...');
+      return reject('DB is not defined...');
     }
     if (!groupId || !data) {
-      return reject('lineId has not defined...');
+      return reject('lineId is not defined...');
     }
 
     DB?.ref(refsMap.groups).child(groupId).child('themeSetting').update(data).then(val => {

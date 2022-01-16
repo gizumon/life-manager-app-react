@@ -48,6 +48,23 @@ const stateMap = {
   isCompletedInitialize: 3,
 };
 
+// logging check process
+//   0. isInitializing
+//     - description: sdk and data are initializing
+//     - from       : - (initial status)
+//     - to         : 1 or 2
+//   1. isNotExistMember
+//     - description: user could not find in database
+//     - from       : 0
+//     - to         : redirect to /login page
+//   2. isExistMember
+//     - description: user could find in database
+//     - from       : 0
+//     - to         : 3 (with setting user in session storage)
+//   3. isCompletedInitialize
+//     - description: initialize completed
+//     - from       : 2
+//     - to         : show child components
 const Layout: FC = ({children}) => {
   const classes = useStyles();
   const router = useRouter();
@@ -70,6 +87,7 @@ const Layout: FC = ({children}) => {
     }
   });
 
+  // line is not ready
   if (!liff.isInitialized) {
     return (
       <FadeWrapper>
@@ -78,6 +96,7 @@ const Layout: FC = ({children}) => {
     );
   }
 
+  // user not logged in
   if (!liff.isLoggedIn) {
     return (
       <FadeWrapper>
@@ -99,6 +118,7 @@ const Layout: FC = ({children}) => {
     );
   }
 
+  // firebase is not ready
   if (!isInitialized || !hasPrepared) {
     return (
       <FadeWrapper>
@@ -107,22 +127,19 @@ const Layout: FC = ({children}) => {
     );
   }
 
-  // TODO: Can you login without activate group?
+  // is not activated the user group && status is initializing
   if (!isGroupActivated && state === stateMap.isInitializing) {
     firebase.getMember(liff.userId as string).then((member) => {
       const isExistMember = !!member;
-      const hasGoupId = !!member.groupId;
+      const hasGroupId = !!member.groupId;
       const isSameGroupId = member.groupId === sessionStorage.getItem('gid');
       const isProd = publicRuntimeConfig.NODE_ENV === 'production';
       setState(isExistMember ? stateMap.isExistMember : stateMap.isNotExistMember);
-      if (!isExistMember || !hasPrepared || !hasGoupId) {
+      if (!isExistMember || !hasPrepared || !hasGroupId) {
         // has not prepared yet
         return;
       }
       if (isSameGroupId) {
-        if (!!liff.user && !!liff.user.pictureUrl && member.picture !== liff.user.pictureUrl) {
-          firebase.updateGroupMember(member.groupId, {picture: liff.user.pictureUrl});
-        }
         firebase.activateGroup(member.groupId);
         return;
       }
