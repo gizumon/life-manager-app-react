@@ -84,7 +84,7 @@ const Layout: FC = ({children}) => {
         <div className={classes.root}>
           <CardMedia
             className={classes.media}
-            image="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260"
+            image="house.jpeg"
             title="Login Attentions"
           >
             <Button
