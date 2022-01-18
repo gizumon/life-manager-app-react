@@ -64,7 +64,7 @@ export default function Login() {
   const {publicRuntimeConfig} = getConfig();
   const router = useRouter();
   const {user, sendText} = useAuth();
-  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup, updateMember} = useFirebase();
+  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup, getMember, updateMember} = useFirebase();
   const [code, setCode] = useState<string>();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
@@ -157,20 +157,22 @@ export default function Login() {
     if (state === stateMap.isInitializing) {
       const lineId = user.userId;
       const pictureUrl = user.pictureUrl;
-      const gid = sessionStorage.getItem('gid');
-      if (lineId && pictureUrl && gid) {
-        getGroupMember(gid, lineId).then((member) => {
-          setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
-          const isSameImage = pictureUrl === member?.picture;
-          if (member && !isSameImage) {
-            updateGroupMember(member.groupId, { lineId: lineId, picture: pictureUrl });
-          }
-    
-          if (member) {
-            redirectWithLogin(redirectUri, member.groupId);
-          }
-        });  
-      }
+      getMember(lineId).then(member => {
+        const gid = member.groupId;
+        if (lineId && pictureUrl && gid) {
+          getGroupMember(gid, lineId).then((member) => {
+            setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
+            const isSameImage = pictureUrl === member?.picture;
+            if (member && !isSameImage) {
+              updateGroupMember(member.groupId, { lineId: lineId, picture: pictureUrl });
+            }
+      
+            if (member) {
+              redirectWithLogin(redirectUri, member.groupId);
+            }
+          });  
+        }  
+      })
     }
     if (state === stateMap.isNotFoundUser) {
       return (
