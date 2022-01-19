@@ -172,7 +172,7 @@ export default function Login() {
             }
           });  
         }  
-      })
+      });
     }
     if (state === stateMap.isNotFoundUser) {
       return (
