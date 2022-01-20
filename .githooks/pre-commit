@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo '🚀 Run pre-commit hooks 🚀'
+
+yarn lint --fix
+
+echo '✨ Done pre-commit hooks ✨'
