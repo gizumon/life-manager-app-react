@@ -1,10 +1,10 @@
 import React from 'react';
-import Document, {Html, Head, Main, NextScript} from 'next/document';
-import {ServerStyleSheets} from '@material-ui/core/styles';
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+import { ServerStyleSheets } from '@material-ui/core/styles';
 import theme from '../styles/theme';
 import AdTag from '../components/AdTag';
 
-import { existsGaId } from '../services/gtag';
+import { existsGaId, GA_ID } from '../services/gtag';
 export default class MyDocument extends Document {
   render() {
     return (
