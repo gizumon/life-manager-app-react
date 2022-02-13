@@ -97,6 +97,36 @@ const blueTheme: PaletteOptions = {
   }
 };
 
+const craftTheme: PaletteOptions = {
+  primary: {
+    main: '#34485e',
+  },
+  secondary: {
+    main: '#a2a2ad',
+    dark: '#5e5e6a',
+  },
+  error: {
+    main: '#fc2f60',
+  },
+  warning: {
+    main: '#fc2f60',
+  },
+  info: {
+    main: red.A400,
+  },
+  success: {
+    main: blue.A400,
+  },
+  background: {
+    default: '#dcd5c8',
+  },
+  text: {
+    primary: '#222222',
+    // secondary: '#EEEEEE',
+    hint: '#EEEEEE',
+  }
+};
+
 const retroTheme: PaletteOptions = {
   primary: {
     main: '#F24C30',
@@ -131,9 +161,9 @@ export const themeConfigs: IThemeConfig[] = [{
   label: 'おすすめ',
   palettesOptions: defaultTheme,
 }, {
-  id: 'toy',
-  label: 'TOY',
-  palettesOptions: redTheme,
+  id: 'craft',
+  label: 'CRAFT',
+  palettesOptions: craftTheme,
 },{
   id: 'cool',
   label: 'COOL',

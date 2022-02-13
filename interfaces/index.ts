@@ -27,7 +27,7 @@ export interface IRatioSetting {
     ratio: Number;
 };
 
-export type IThemeType = 'default' | 'toy' | 'cool' | 'retro' | 'custom';
+export type IThemeType = 'default' | 'toy' | 'craft' | 'cool' | 'retro' | 'custom';
 export type IThemeConfig = {
     id: IThemeType;
     label: string;
