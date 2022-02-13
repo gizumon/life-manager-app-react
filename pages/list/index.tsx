@@ -4,6 +4,7 @@ import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Avatar, Link, Grid, List, ListItem, ListItemText, Divider} from '@material-ui/core';
 import {Card, CardContent, Tabs, Tab, Box, Chip} from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
+import EqualizerIcon from '@material-ui/icons/Equalizer';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import {IConfigType, IInputData, IInput, IConfig} from '../../interfaces';
@@ -19,6 +20,7 @@ import SearchBox from '../../components/list/SearchBoxV1';
 import {useSelector} from 'react-redux';
 import {StoreState} from '../../ducks/createStore';
 import {FirebaseState} from '../../ducks/firebase/slice';
+import IconButton from '@material-ui/core/IconButton';
 
 interface ICalculation {
   id: string;
@@ -141,6 +143,17 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .MuiDivider-vertical': {
       height: '16px',
+    },
+  },
+  graphIcon: {
+    display: 'flex',
+    float: 'right',
+    width: '30px',
+    height: '30px',
+    alignContent: 'center',
+    justifyContent: 'center',
+    '& .MuiIconButton-root': {
+      padding: 0,
     },
   },
 }));
@@ -324,6 +337,8 @@ export default function ListPage() {
     return result;
   };
 
+  const onClickGraphIcon = () => router.push(Utils.makeUrl('/list/graph', selectedType), undefined, { shallow: true });
+
   // TODO: should move in utils
   const convertDisplayValue = (id: string, value: any): string | string[] => {
     const convertFnMap: {[key in keyof IInputData]?: any} = {
@@ -415,6 +430,11 @@ export default function ListPage() {
             <Tab label={<><AddShoppingCartIcon /> ToBuy</>} {...getTabProps(tabMap.toIndex['tobuy'])} />
           </Tabs>
           <CardContent>
+            <div className={classes.graphIcon}>
+              <IconButton aria-label="graph" onClick={onClickGraphIcon}>
+                <EqualizerIcon />
+              </IconButton>
+            </div>
             <div>
               <SearchBox value={searchKey} setValue={setSearchKey} />
             </div>

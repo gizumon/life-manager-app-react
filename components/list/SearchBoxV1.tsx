@@ -13,8 +13,8 @@ type IProps = {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      width: '100%',
-      padding: '0px 4px',
+      width: 'calc(100% - 30px)',
+      padding: '0px 1px',
       display: 'flex',
       alignItems: 'center',
       marginBottom: '8px',
