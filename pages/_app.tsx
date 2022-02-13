@@ -18,6 +18,7 @@ import store, {StoreState} from '../ducks/createStore';
 import {FirebaseState} from '../ducks/firebase/slice';
 import {CustomThemeProvider} from '../components/provider/CustomThemeProvider';
 import getConfig from 'next/config';
+import { useGA } from '../hooks/useGA';
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
@@ -174,6 +175,9 @@ const Layout: FC = ({children}) => {
 
 export default function MyApp(props: any) {
   const {Component, pageProps} = props;
+  
+  // use Google Analytics (track spa routing)
+  useGA();
 
   useEffect(() => {
     // Remove the server-side injected CSS.

@@ -59,6 +59,7 @@ module.exports = {
         messagingSenderId: "228392641348",
         appId: "1:228392641348:web:9291e5a9d7554f7e296d11",
         measurementId: "G-KC6X7VM4SE"
-      } : {}
+      } : {},
+    GA_ID: process.env.GA_ID,
   },
 };

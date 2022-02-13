@@ -4,6 +4,7 @@ import {ServerStyleSheets} from '@material-ui/core/styles';
 import theme from '../styles/theme';
 import AdTag from '../components/AdTag';
 
+import { existsGaId } from '../services/gtag';
 export default class MyDocument extends Document {
   render() {
     return (
@@ -15,6 +16,23 @@ export default class MyDocument extends Document {
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
           />
+          {existsGaId && (
+            <>
+              <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${GA_ID}', {
+                      page_path: window.location.pathname,
+                    });
+                  `,
+                }}
+              />
+            </>
+          )}
         </Head>
         <body>
           <Main />

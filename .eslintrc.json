@@ -19,7 +19,7 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "semi": "error",
+        "semi": "warn",
         "max-len": ["warn", { "code": 140 }]
     }
 }

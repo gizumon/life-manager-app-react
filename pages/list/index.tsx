@@ -282,9 +282,13 @@ export default function ListPage() {
   const isRowDisplay = (row: IDisplayData[] = []) => {
     return row.some((col) => {
       const value = convertDisplayValue(col.id, col.value);
-      return typeof value === 'string' ? Utils.hasString(value, searchKey) :
-                                      (Array.isArray(col.value) ? col.value.some((memberId) => Utils.hasString(getMemberName(memberId), searchKey)) :
-                                                                  Utils.hasString(getMemberName(String(col.value)), searchKey));
+      if (typeof value === 'string') {
+        return Utils.hasString(value, searchKey);
+      }
+      if (Array.isArray(col.value)) {
+        return col.value.some((memberId) => Utils.hasString(getMemberName(memberId), searchKey));
+      }
+      return Utils.hasString(getMemberName(String(col.value)), searchKey);
     });
   };
 
@@ -296,13 +300,24 @@ export default function ListPage() {
       custom: (arg1: number, arg2: number) => (arg1 - arg2),
     };
 
-    for (const setting of getConfig(selectedType as IConfigType).setting.order) {
-      if (setting.id === 'datetime') {
+    const orders = [ ...getConfig(selectedType as IConfigType).setting.order ];
+    // orders.sort((o1, o2) => o1.id - o2.id);
+
+    for (const order of orders) {
+      if (order.id === 'datetime') {
         result = 0;
       } else {
-        const arg1 = setting.type === 'custom' ? categories.find((category) => category.id === row1.find((col) => col.id === setting.id)?.value)?.setting?.order : row1.find((col) => col.id === setting.id)?.value;
-        const arg2 = setting.type === 'custom' ? categories.find((category) => category.id === row2.find((col) => col.id === setting.id)?.value)?.setting?.order : row2.find((col) => col.id === setting.id)?.value;
-        result = orderFuncMap[setting.type](arg1, arg2);
+        if (order.type === 'custom') {
+          const id1 = row1.find((col) => col.id === order.id)?.value;
+          const id2 = row2.find((col) => col.id === order.id)?.value;
+          const arg1 = categories.find((category) => category.id === id1).setting.order;
+          const arg2 = categories.find((category) => category.id === id2).setting.order;
+          result = orderFuncMap[order.type](arg1, arg2);
+        } else {
+          const arg1 = row1.find((col) => col.id === order.id)?.value;
+          const arg2 = row2.find((col) => col.id === order.id)?.value;
+          result = orderFuncMap[order.type](arg1, arg2);
+        }
       }
       if (result !== 0) break;
     }
@@ -496,7 +511,15 @@ export default function ListPage() {
             </>
           </CardContent>
         </Card>
-        <DialogV1 id={targetId} value={targetId} title="Remove?" open={isDeleteModalOpen} content={modalContent(getDisplayDataList(selectedType as IConfigType)?.find((row) => row[0]?.dataId === targetId) || [])} onClose={onCloseHandler}/>
+        <DialogV1
+          id={targetId}
+          value={targetId}
+          title="Remove?"
+          open={isDeleteModalOpen}
+          content={
+            modalContent(getDisplayDataList(selectedType as IConfigType)?.find((row) => row[0]?.dataId === targetId) || [])
+          }
+          onClose={onCloseHandler}/>
       </Box>
     </>
   );
