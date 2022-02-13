@@ -418,9 +418,6 @@ export default function ListPage() {
             <div>
               <SearchBox value={searchKey} setValue={setSearchKey} />
             </div>
-            <div>
-              <SearchBox value={searchKey} setValue={setSearchKey} />
-            </div>
             <>
               {
                 isPay && (
