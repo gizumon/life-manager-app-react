@@ -110,7 +110,7 @@ export type IUseFirebaseReturn = IFirebaseDataStates & {
   pushInput?: (groupId: string, type: string, data: any) => Promise<firebase.database.Reference>;
   deleteInput?: (groupId: string, type: IConfigType, id: string) => Promise<void>;
   // pushMember?: (data: IMember) => Promise<firebase.database.Reference>;
-  getMember?: (lineId: string) => Promise<IMember>;
+  // getMember?: (lineId: string) => Promise<IMember>;
   updateMember?: (lineId: string, data: IMember) => Promise<firebase.database.Reference>;
   pushGroup?: (data?: IGroup) => Promise<firebase.database.Reference>;
   getGroupMember?: (groupId: string, lineId: string) => Promise<IMember>;
@@ -190,7 +190,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
     pushData: pushData,
     pushInput: runActivateWrapper(pushInput),
     deleteInput: runActivateWrapper(deleteInput),
-    getMember: getMember,
+    // getMember: getMember,
     updateMember: updateMember,
     pushGroup: pushGroup,
     getGroupMember: getGroupMember,

@@ -32,20 +32,22 @@ interface ILineAuthResponse {
 }
 
 const { publicRuntimeConfig } = getConfig();
-const { LINE_AUTH_ENDPOINT, LINE_AUTH_CLIENT_ID, LINE_AUTH_CLIENT_SECRET } = publicRuntimeConfig;
+const { LINE_AUTH_ENDPOINT, LINE_AUTH_CLIENT_ID } = publicRuntimeConfig;
 
 export const postAuthHandler = (req: NextPostApiRequest<IAuthRequest>, res: NextApiResponse<IAuthResponse | IErrorResponse>) => {
   const { idToken } = req.body;
-  console.log('[INFO]Run get auth handler', idToken, LINE_AUTH_CLIENT_ID, LINE_AUTH_CLIENT_SECRET, LINE_AUTH_ENDPOINT);
+  console.log('[INFO]Run get auth handler');
   const requestForm= new URLSearchParams();
   requestForm.append('id_token', idToken);
   requestForm.append('client_id', LINE_AUTH_CLIENT_ID);
-  console.log('[INFO]Send request auth handler', requestForm);
-  return axios.post(LINE_AUTH_ENDPOINT, requestForm).then(async ({ data }: { data: ILineAuthResponse}) => {
-    console.log('[INFO]Success auth request', data);
+  console.log('[INFO]Send request auth handler');
+  axios.post(LINE_AUTH_ENDPOINT, requestForm).then(async ({ data }: { data: ILineAuthResponse}) => {
+    console.log('[INFO]Success auth request');
     const firebase = new FirebaseService();
-    const userId = await firebase.getUserIdByLid(data.sub);
-    let user
+    const userId = await firebase.getUserIdByLid(data.sub).catch((e) => {
+      console.error('[ERROR]Failed to get user id by lid', e);
+    });
+    let user;
     console.log('[INFO]Success get user id from firebase', userId);
     if (userId) {
       const existingUser = await firebase.getUserById(userId).catch(e => {
@@ -69,7 +71,7 @@ export const postAuthHandler = (req: NextPostApiRequest<IAuthRequest>, res: Next
         return {};
       });
     }
-    console.log('[INFO]Success get user from firebase', user);
+    console.log('[INFO]Success get user from firebase', user.id);
     if (!user) {
       return res.status(401).json(errors.DB_ERROR('Failed to access firebase in auth handler'));
     }

@@ -69,7 +69,7 @@ export default function Login() {
   const router = useRouter();
   const { user: lineUser, sendText } = useAuth();
   const { user } = useUserState();
-  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup, getMember, updateMember} = useFirebase();
+  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup, updateMember} = useFirebase();
   const [code, setCode] = useState<string>();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
