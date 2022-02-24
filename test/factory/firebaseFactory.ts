@@ -1,4 +1,5 @@
-import firebase from 'firebase/app';
+import firebase from 'firebase';
+import admin from 'firebase-admin';
 import CONST from '../../services/constants';
 
 const data = {
@@ -9,19 +10,20 @@ const data = {
 }
 
 namespace FirebaseFactory {
-  async function updateIsUseFactory(db: firebase.database.Database) {
+  async function updateIsUseFactory(db: admin.database.Database | firebase.database.Database) {
     await db.ref('triggers/isUseFactory').set(false);
   }
   
-  async function prepareCategories(db: firebase.database.Database) {
+  async function prepareCategories(db: admin.database.Database | firebase.database.Database) {
     await db.ref('masterdata/categories').set(data.masterdata.categories);
   }
 
-  async function prepareConfigs(db: firebase.database.Database) {
+  async function prepareConfigs(db: admin.database.Database | firebase.database.Database) {
     await db.ref('masterdata/configs').set(data.masterdata.configs);
   }
 
-  export async function prepareAll(db: firebase.database.Database) {
+  export async function prepareAll(db?: firebase.database.Database | admin.database.Database) {
+    if (!db) return;
     console.log('Run firebase factory', db);
     await prepareCategories(db);
     await prepareConfigs(db);

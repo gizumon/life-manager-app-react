@@ -35,7 +35,7 @@ export default function ModalV1({title, body, open, onClose}: IProps) {
     <Fragment>
       <Modal
         open={open}
-        onClose={() => onClose()}
+        onClose={onClose}
       >
         <div className={classes.paper}>
           <h2 id="simple-modal-title">{title}</h2>

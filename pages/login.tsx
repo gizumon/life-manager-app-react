@@ -12,6 +12,10 @@ import TapAndPlayIcon from '@material-ui/icons/TapAndPlay';
 import SpeakerPhoneIcon from '@material-ui/icons/SpeakerPhone';
 import ModalV1 from '../components/common/ModalV1';
 import getConfig from 'next/config';
+import { useUserState } from '../ducks/user/selector';
+import InternalAPI from '../services/api';
+
+const client = new InternalAPI();
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -63,13 +67,14 @@ const stateMap = {
 export default function Login() {
   const {publicRuntimeConfig} = getConfig();
   const router = useRouter();
-  const {user, sendText} = useAuth();
+  const { user: lineUser, sendText } = useAuth();
+  const { user } = useUserState();
   const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup, getMember, updateMember} = useFirebase();
   const [code, setCode] = useState<string>();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
   const [state, setState] = useState<number>(stateMap.isInitializing);
-  const [onCloseFn, setOnCloseFn] = useState<() => void>(() => {});
+  const [onCloseFn, setOnCloseFn] = useState<{fn: () => void }>({fn: () => {}});
   const classes = useStyles();
   const redirectUri = router.query['redirectUri'] as string ||
                       Utils.getQueryParam(router.asPath, 'redirectUri') ||
@@ -80,13 +85,13 @@ export default function Login() {
   const onCloseModalHandler = () => {
     setIsOpenModal(false);
     setModalMessage('');
-    onCloseFn();
+    onCloseFn.fn();
   };
 
-  const modalOn = (message: string, fn: () => void = () => {}) => {
+  const modalOn = (message: string, closeFn = () => {}) => {
     setModalMessage(message);
     // TODO: should detect onclose and should useModal
-    setOnCloseFn(() => fn);
+    setOnCloseFn({fn: closeFn});
     setIsOpenModal(true);
   };
 
@@ -100,86 +105,90 @@ export default function Login() {
   }
 
   const generateCode = () => {
-    if (user && updateMember && pushGroup && updateGroupMember) {
-      const newMember = makeMemberFromUser(user);
-      pushGroup().then((ref) => {
-        if (ref.key === null) {
-          console.error('push group does not success', ref);
-          modalOn('Groupの作成に失敗しました。。');
-          return;
-        }
-        newMember.groupId = ref.key;
-        updateGroupMember(newMember.groupId, newMember);
-        updateMember(user.userId, newMember).then((_) => {
-          // TODO: should ¥n
-          const message = `ペアリングしたいユーザーへ下記のコードを共有ください。　ペアリングコード：「${newMember.groupId}」`;
-          try {
-            // TODO: Should avoid error
-            (sendText as (message: string) => void)(message);
-          } catch {
-            console.warn('Could not send text using liff', message);
-          }
-          modalOn(message, () => {
-            // TODO: should detect onclose and should useModal
+    if (!user || !updateGroupMember || !updateMember || !isExistGroup) {
+      return modalOn('初期化に失敗しました再度ログインお試しください');
+    }
+
+    const newMember = { ...user };
+    pushGroup().then((ref) => {
+      if (ref.key === null) {
+        console.error('push group does not success', ref);
+        modalOn('Groupの作成に失敗しました。。');
+        return;
+      }
+      newMember.groupId = ref.key;
+      updateGroupMember(newMember.groupId, newMember);
+      updateMember(user.id, newMember).then((_) => {
+        let message = `ペアリングしたいユーザーへ下記のコードを共有ください🙇‍♂️\nペアリングコード：\n\n${newMember.groupId}`;
+        sendText(message).then(() => {
+          modalOn('ペアリングコードをチャットに送信しました👍\nペアリングしたいユーザーに送信ください😉', () => {
             redirectWithLogin(redirectUri, newMember.groupId);
-            setOnCloseFn(() => {});
-          });
+            setOnCloseFn({ fn: () => {} });
+          });  
+        }).catch((e) => {
+          console.warn('Could not send text using liff', e);
+          modalOn(message, () => {
+            redirectWithLogin(redirectUri, newMember.groupId);
+            setOnCloseFn({ fn: () => {} });
+          });  
         });
       });
-    } else {
-      console.warn('firebase need to initialize...');
-    }
+    });
   };
 
   const applyCode = () => {
     if (!code) {
-      return modalOn('ペアリングコードが入力されていません');
+      return modalOn('ペアリングコードが入力されていません🙅‍♂️');
     }
-    if (user && updateGroupMember && updateMember && isExistGroup) {
-      isExistGroup(code)?.then((isExist) => {
-        if (!isExist) {
-          return modalOn(`入力されたペアリングコードは正しくないみたいです。。`);
-        }
-        const newMember = makeMemberFromUser(user);
-        newMember.groupId = code;
-        updateGroupMember(newMember.groupId as string, newMember).then((_) => {
-          updateMember(user.userId, newMember).then((_) => {
+    if (!user || !updateGroupMember || !updateMember || !isExistGroup) {
+      return modalOn('初期化に失敗しました再度ログインお試しください🙇‍♂️');
+    }
+    isExistGroup(code)?.then((isExist) => {
+      if (!isExist) {
+        return modalOn(`入力されたペアリングコードは正しくないみたいです。。`);
+      }
+      const newMember = { ...user };
+      newMember.groupId = code;
+      updateGroupMember(newMember.groupId as string, newMember).then((_) => {
+        client.postUser(newMember).then((_) => {
+          return modalOn(`ペアリングに成功しました🎉\n引き続きご利用宜しくお願いします👼`, () => {
             redirectWithLogin(redirectUri, newMember.groupId);
           });
+        }).catch(e => {
+          console.error(e);
+          return modalOn(`ごめんなさい！！ユーザーの追加に失敗しました🙇‍♂️お手数ですが、お問い合わせ下さい🙇‍♂️`);
         });
       });
-    }
+    });
   };
 
   // user is exist in auth, but not in member.
-  if (user && isInitialized) {
+  if (lineUser && user && isInitialized) {
     // should not request when already check user was opened
     if (state === stateMap.isInitializing) {
-      const lineId = user.userId;
-      const pictureUrl = user.pictureUrl;
-      getMember(lineId).then(member => {
-        const gid = member.groupId;
-        if (lineId && pictureUrl && gid) {
-          getGroupMember(gid, lineId).then((member) => {
-            setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
-            const isSameImage = pictureUrl === member?.picture;
-            if (member && !isSameImage) {
-              updateGroupMember(member.groupId, { lineId: lineId, picture: pictureUrl });
-            }
-      
-            if (member) {
-              redirectWithLogin(redirectUri, member.groupId);
-            }
-          });  
-        }  
-      });
+      const { id, picture, groupId } = user;
+
+      if (!groupId) {
+        return setState(stateMap.isNotFoundUser);
+      }
+      getGroupMember(groupId, id).then((member) => {
+        setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
+        const isSameImage = picture === member?.picture;
+        if (member && !isSameImage) {
+          updateGroupMember(groupId, { id, picture });
+        }
+  
+        if (member) {
+          redirectWithLogin(redirectUri, member.groupId);
+        }
+      }).catch((e) => console.error(e));
     }
     if (state === stateMap.isNotFoundUser) {
       return (
         <>
           <Card className={classes.card}>
             <CardContent>
-              <span>共有されたペアリングコードがある場合：</span>
+              <span>共有されたペアリングコードをお持ちの場合(グループに参加)：</span>
               <div className={classes.block}>
                 <TextField
                   id="code"
@@ -194,7 +203,7 @@ export default function Login() {
                 </IconButton>
               </div>
               <Divider className={classes.divider} orientation="horizontal" />
-              <span>ペアリングコードを持っていない場合：</span>
+              <span>ペアリングコードを持っていない場合(グループを作成)：</span>
               <div className={classes.block}>
                 <Button variant="contained" color="primary" onClick={generateCode} endIcon={<SpeakerPhoneIcon />}>ペアリングコード発行</Button>
               </div>
@@ -207,8 +216,8 @@ export default function Login() {
   }
 
   const message = state === stateMap.isInitializing ? 'ログイン中。。。' :
-                state === stateMap.isFoundUser ? 'ユーザー確認中。。。' :
-                'ユーザーが見つかりませんでした。。。';
+                  state === stateMap.isFoundUser ? 'ユーザー確認中。。。' :
+                  'ユーザーが見つかりませんでした。。。';
   return <FadeWrapper><Progress message={message}/></FadeWrapper>;
 }
 

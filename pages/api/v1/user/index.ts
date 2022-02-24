@@ -1,17 +1,18 @@
 import {NextApiRequest, NextApiResponse} from 'next';
-import * as line from '@line/bot-sdk';
 import { wrapHandler } from '../../../../services/api';
-import { lineConfig, postChatbotHandler } from '../../../../handlers/chatbotHandler';
 import Utils from '../../../../services/utils';
 import errors from '../../../../models/errorResponse';
+import { postUserHandler } from '../../../../handlers/userHandler';
 
-const apiName = 'chatbot';
+const apiName = 'user';
 
-export default function ChatbotApi(req: NextApiRequest, res: NextApiResponse) {
+export default function UsersApi(req: NextApiRequest, res: NextApiResponse) {
   console.log(`call ${apiName} api start:`, req.url);
   switch (req.method) {
+    // case 'GET':
+    //   return wrapHandler(req, res, getUserHandler, preProcess, postProcess);
     case 'POST':
-      return wrapHandler(req, res, postChatbotHandler, preProcess, postProcess);
+      return wrapHandler(req, res, postUserHandler, preProcess, postProcess);
     default:
       return wrapHandler(req, res, (_, response) => {
         response.status(404).json(errors.NOT_FOUND_ERROR(`${req.url} is not found`));
@@ -21,7 +22,6 @@ export default function ChatbotApi(req: NextApiRequest, res: NextApiResponse) {
 
 const preProcess = (req, _res) => {
   console.log(`[INFO]Start ${apiName} API:`, Utils.getDateTime(), req.url, req.body);
-  line.middleware(lineConfig as line.MiddlewareConfig);
 };
 
 const postProcess = (_req, _res) => {

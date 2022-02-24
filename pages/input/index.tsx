@@ -21,8 +21,6 @@ import {useFirebase} from '../../hooks/useFirebase';
 import FadeWrapper from '../../components/common/FadeWrapper';
 import Progress from '../../components/common/AnimationProgressV1';
 import {useSelector} from 'react-redux';
-// import { useUserState } from '../../ducks/user/selector';
-// import { useAuth } from '../../hooks/useAuthLiff';
 import {StoreState} from '../../ducks/createStore';
 import {FirebaseState} from '../../ducks/firebase/slice';
 

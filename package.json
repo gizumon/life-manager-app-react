@@ -20,6 +20,7 @@
     "@types/lodash": "^4.14.172",
     "@types/react-redux": "^7.1.16",
     "firebase": "^8.6.3",
+    "firebase-admin": "^10.0.2",
     "lodash": "^4.17.21",
     "next": "^11.1.2",
     "next-sitemap": "^1.6.168",

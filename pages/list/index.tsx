@@ -119,6 +119,7 @@ const useStyles = makeStyles((theme) => ({
     opacity: 0.9,
   },
   messageBox: {
+    'width': '100%',
     'display': 'flex',
     'alignItems': 'center',
     'justifyContent': 'center',

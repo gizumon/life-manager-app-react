@@ -1,18 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IAuthResponse } from '../../handlers/authHandler';
 
-export type UserState = {
-  userId: string;
-  displayName: string;
-  pictureUrl: string;
-  statusMessage: string;
-  timestamp?: any;
-};
-
+export type UserState = IAuthResponse & { picture: string };
 export const initialState: UserState = {
-  userId: '',
-  displayName: '',
-  pictureUrl: '',
-  statusMessage: ''
+  id: '',
+  // lineId: '', // not store for security
+  name: '',
+  picture: '',
+  groupId: '',
 };
 
 const userSlice = createSlice({

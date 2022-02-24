@@ -54,7 +54,7 @@ export type IInputType = 'number' | 'text' | 'date' | 'select' | 'multi-check' |
 export interface IMember {
     id?: string;
     lineId?: string;
-    name: string;
+    name?: string;
     picture?: string;
     groupId?: string;
     timestamp?: any;

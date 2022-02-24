@@ -1,8 +1,7 @@
 /**
- * Deprecated: Replaced to useFirebese.tsx
+ * For server side
  */
-import firebase from 'firebase/app';
-import 'firebase/database';
+import firebase from 'firebase-admin';
 import { IConfig, ICategory, IMember, IFormData, IConfigType, FirebaseData, IToBuy, IToDo, IPay } from '../interfaces/index';
 import FirebaseFactory from '../test/factory/firebaseFactory';
 import Utils from './utils';
@@ -14,12 +13,13 @@ const refsMap = {
     configs: 'masterdata/configs',
     categories: 'masterdata/categories',
     customCategories: `groups/${templateGroupId}/categories`, 
-    members: 'users',
+    users: 'users',
     groups: 'groups',
     inputs: 'data/inputs'
 };
 
 const { publicRuntimeConfig } = getConfig();
+const { FIREBASE_ADMIN, FIREBASE_DB_URL} = publicRuntimeConfig;
 
 export class FirebaseService {
     public app;
@@ -33,9 +33,17 @@ export class FirebaseService {
 
     constructor() {
         this.app = firebase;
-        !firebase.apps.length
-          ? firebase.initializeApp(publicRuntimeConfig.FIREBASE)
-          : firebase.app();
+        if (firebase.apps.length) {
+            firebase.app();
+        } else {
+            firebase.initializeApp({
+                credential: firebase.credential.cert(FIREBASE_ADMIN),
+                databaseURL: FIREBASE_DB_URL,
+                databaseAuthVariableOverride: {
+                    uid: "admin-client"
+                },
+            });
+        }
 
         // init database
         this.db = firebase.database();
@@ -56,7 +64,7 @@ export class FirebaseService {
         this.db?.ref(refsMap.isUseFactory).once('value').then((snapshot: firebase.database.DataSnapshot) => {
             const isUseFactory = snapshot.val();
             if (!isUseFactory) { return; }
-            FirebaseFactory.prepareAll(this.db as firebase.database.Database);
+            FirebaseFactory.prepareAll(this.db);
         });
     }
 
@@ -67,15 +75,31 @@ export class FirebaseService {
         // console.log('set properties: ', this.categories, this.configs, this.members);
     }
 
-    public async getUserByLId(lid: string) {
+    // const getUser = (lineId: string): Promise<IMember> => {
+    //     return new Promise<IMember>((resolve, reject) => {
+    //         if (!this.db) {
+    //             return reject('DB is not defined...');
+    //         }
+    //         if(!lineId) {
+    //             return reject(`id is missing.`);
+    //         }
+    //         this.db?.ref(refsMap.users).child(lineId).once('value').then((snapshot) => {
+    //             return resolve(snapshot.val());
+    //         }).catch(e => {
+    //             return reject(e);
+    //         });
+    //     });
+    // };
+
+    public async getUserById(id: string) {
         return new Promise<IMember>((resolve, reject) => {
             if (!this.db) {
                 return reject('DB has not defined...');
             }
-            if(!lid) {
+            if(!id) {
                 return reject(`id is missing.`);
             }
-            this.db?.ref(refsMap.members).child(lid).once('value').then((snapshot) => {
+            this.db?.ref(refsMap.users).child(id).once('value').then((snapshot) => {
                 const m = snapshot.val() as IMember;
                 return resolve(m);
             }).catch(e => {
@@ -108,7 +132,7 @@ export class FirebaseService {
     public async getToBuyInputs(gid: string): Promise<IToBuy[]> {
         const inputs = await this.getInputs();
         return (!inputs[gid] || !inputs[gid].tobuy) ? [] : Utils.convertObjectToArray<IToBuy>(inputs[gid].tobuy);
-    };
+    }
 
     public async getGroupIdByUserId(lid: string): Promise<string> {
         return new Promise<string>((resolve, reject) => {
@@ -118,7 +142,7 @@ export class FirebaseService {
             if(!lid) {
                 return reject(`id is missing.`);
             }
-            this.db?.ref(refsMap.members).child(lid).once('value').then((snapshot) => {
+            this.db?.ref(refsMap.users).child(lid).once('value').then((snapshot) => {
                 const m = snapshot.val() as IMember;
                 return resolve(m ? m.groupId : '');
             }).catch(e => {
@@ -127,20 +151,40 @@ export class FirebaseService {
         });
     }
 
+    public getUserIdByLid = (lineId: string) => {
+        return new Promise<string>((resolve, reject) => {
+          if (!this.db) {
+            return reject('DB is not defined...');
+          }
+          if (!lineId) {
+            return reject('line id is not specified');
+          }
+          this.db.ref(refsMap.users).once('value').then(snapshot => {
+            const users: { [key in string]: IMember } = snapshot.val();
+            const userId = Object.keys(users).find((uid: string) => (users[uid].lineId === lineId));
+            return resolve(userId);
+            // return resolve(isExist);
+          }).catch(err => {
+            console.warn(err);
+            return reject(err);
+          });
+        });
+    };
+
     public makePageConfigs(configs: IConfig[], categories: ICategory[] = [], members: IMember[] = []): IConfig[] {
         configs.forEach((config) => {
           config.inputs.forEach((input) => {
             input.dataList = input.id === 'payedFor' ? members
-                          : input.id === 'payedCategory' ? categories.filter((category) => category.type === 'pay')
-                          : input.id === 'payedBy' ? members
-                          : input.id === 'doBy' ? members.concat({id: 'ALL', name: '全員'})
-                          : input.id === 'doCategory' ?  categories.filter((category) => category.type === 'todo')
-                          : input.id === 'buyCategory' ?  categories.filter((category) => category.type === 'tobuy')
-                          : input.id === 'buyBy' ? members.concat({id: 'ALL', name: '全員'})
-                          : [];
+                           : input.id === 'payedCategory' ? categories.filter((category) => category.type === 'pay')
+                           : input.id === 'payedBy' ? members
+                           : input.id === 'doBy' ? members.concat({id: 'ALL', name: '全員'})
+                           : input.id === 'doCategory' ?  categories.filter((category) => category.type === 'todo')
+                           : input.id === 'buyCategory' ?  categories.filter((category) => category.type === 'tobuy')
+                           : input.id === 'buyBy' ? members.concat({id: 'ALL', name: '全員'})
+                           : [];
             input.model    = input.id === 'payedFor' ? members.map((member) => member.id)
-                          : input.type === 'date' ? Utils.formatDate(new Date())
-                          : input.model;
+                           : input.type === 'date' ? Utils.formatDate(new Date())
+                           : input.model;
             input.validates?.forEach((validate) => {
                 validate.args = input.type === 'select' && validate.type === 'isInclude' ? input.dataList?.map(data => data.id)
                               : input.type === 'select-btns' && validate.type === 'isInclude' ? input.dataList?.map(data => data.id)
@@ -181,21 +225,61 @@ export class FirebaseService {
         data: Partial<IPay> | Partial<IToBuy> | Partial<IToDo>
     ): Promise<firebase.database.Reference> {
         return new Promise<firebase.database.Reference>((resolve, reject) => {
-          if (!this.db) {
-            return reject('DB has not defined...');
-          }
-          if (!groupId || !type) {
-            return reject(`groupId or type is missing. groupId: ${groupId}: type: ${type}`);
-          }
-          const refName = `${refsMap.inputs}/${groupId}/${type}`;
-          data['timestamp'] = firebase.database.ServerValue.TIMESTAMP as any as number;
-          
-          this.db.ref(refName).push(data).then(val => {
-            return resolve(val);
-          }).catch(err => {
-            console.warn(err);
-            return reject(err);
-          });
+            if (!this.db) {
+                return reject('DB has not defined...');
+            }
+            if (!groupId || !type) {
+                return reject(`groupId or type is missing. groupId: ${groupId}: type: ${type}`);
+            }
+            const refName = `${refsMap.inputs}/${groupId}/${type}`;
+            data['timestamp'] = firebase.database.ServerValue.TIMESTAMP as any as number;
+            
+            this.db.ref(refName).push(data).then(val => {
+                return resolve(val);
+            }).catch(err => {
+                console.warn(err);
+                return reject(err);
+            });
         });
-      };
+    };
+
+    public pushMember(data: IMember): Promise<IMember> {
+        return new Promise<IMember>((resolve, reject) => {
+            if (!this.db || !data) {
+                return reject('DB is not defined...');
+            }
+            data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
+        
+            const ref = this.db.ref(refsMap.users).push(data);
+            const id = ref.key;
+            ref.once('value').then((snapshot) => {
+                return resolve({
+                    id,
+                    ...snapshot.val(),
+                });
+            }).catch(err => {
+                console.warn(err);
+                return reject(err);
+            });
+        });
+    };
+
+    public updateMember(data: IMember): Promise<IMember> {
+        return new Promise<IMember>((resolve, reject) => {
+            if (!this.db || !data) {
+                return reject('DB is not defined...');
+            }
+            if (!data.id) {
+                return reject('id is not defined...');
+            }
+            data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
+        
+            this.db.ref(refsMap.users).child(data.id).update(data).then((snapshot) => {
+                return resolve(snapshot.val());
+            }).catch(err => {
+                console.warn(err);
+                return reject(err);
+            });
+        });
+    };
 }

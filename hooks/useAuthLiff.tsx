@@ -1,6 +1,5 @@
 import { createContext, FC, useContext, useEffect, useState } from "react";
 import Liff from '@line/liff';
-import { UserState } from '../ducks/user/slice';
 import { IMember } from "../interfaces";
 import getConfig from 'next/config';
 
@@ -37,19 +36,21 @@ export const AuthProvider: FC = ({ children }) => {
   );
 };
 
+type IProfile = ReturnType<typeof Liff.getProfile> extends Promise<infer T> ? T : never;
+
 type UseAuthReturn = {
   isInitialized: boolean;
   isLoggedIn: boolean;
-  user?: UserState;
+  user?: IProfile;
   userId?: string;
   login: (obj?: {redirectUri: string}) => void;
   liff?: typeof Liff;
-  sendText?: (message: string) => void;
+  sendText?: (message: string) => Promise<void>;
 }
 
 export const useAuth = (): UseAuthReturn => {
   const liff = useContext(AuthContext);
-  const [user, setUser] = useState<UserState>();
+  const [user, setUser] = useState<IProfile>();
 
   if (!liff) {
     return {
@@ -60,7 +61,7 @@ export const useAuth = (): UseAuthReturn => {
   }
 
   if (liff.isLoggedIn() && !user) {
-    liff.getProfile().then((u) => setUser(u as UserState));
+    liff.getProfile().then((u) => setUser(u));
   }
 
   return {
@@ -70,21 +71,14 @@ export const useAuth = (): UseAuthReturn => {
     user: user,
     userId: liff.getContext()?.userId,
     liff: liff,
-    sendText: (message: string) => {
-      if (liff && liff.isApiAvailable('shareTargetPicker')) {
-        liff.sendMessages([{
-          type: 'text',
-          text: message,
-        }]);
-      } else {
-        console.error('Error in send messages', liff);
-        alert(message);
-      }
-    },
+    sendText: (message: string) => liff.sendMessages([{
+      type: 'text',
+      text: message,
+    }])
   };
 };
 
-export const makeMemberFromUser = (user: UserState, groupId: string = '', id: string = ''): IMember => {
+export const makeMemberFromUser = (user: IProfile, groupId: string = '', id: string = ''): IMember => {
   return {
     id: id,
     name: user.displayName,

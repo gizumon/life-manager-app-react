@@ -19,6 +19,9 @@ import {FirebaseState} from '../ducks/firebase/slice';
 import {CustomThemeProvider} from '../components/provider/CustomThemeProvider';
 import getConfig from 'next/config';
 import { useGA } from '../hooks/useGA';
+import InternalAPI from '../services/api';
+
+const client = new InternalAPI();
 
 const useStyles = makeStyles((_: Theme) =>
   createStyles({
@@ -47,6 +50,7 @@ const stateMap = {
   isNotExistMember: 1,
   isExistMember: 2,
   isCompletedInitialize: 3,
+  hasError: 9,
 };
 
 // logging check process
@@ -98,7 +102,7 @@ const Layout: FC = ({children}) => {
   }
 
   // user not logged in
-  if (!liff.isLoggedIn) {
+  if (!liff.isLoggedIn || state === stateMap.hasError) {
     return (
       <FadeWrapper>
         <div className={classes.root}>
@@ -130,37 +134,56 @@ const Layout: FC = ({children}) => {
 
   // is not activated the user group && status is initializing
   if (!isGroupActivated && state === stateMap.isInitializing) {
-    firebase.getMember(liff.userId as string).then((member) => {
-      const isExistMember = !!member;
-      const hasGroupId = !!member.groupId;
-      const isSameGroupId = member.groupId === sessionStorage.getItem('gid');
+    const idToken = liff.liff.getIDToken();
+    client.postAuth({ idToken }).then(({ data: user }) => {
+      const hasGroupId = !!user.groupId;
+      const isSameGroupId = user.groupId === sessionStorage.getItem('gid');
       const isProd = publicRuntimeConfig.NODE_ENV === 'production';
-      setState(isExistMember ? stateMap.isExistMember : stateMap.isNotExistMember);
-      if (!isExistMember || !hasPrepared || !hasGroupId) {
+      setState(hasGroupId ? stateMap.isExistMember : stateMap.isNotExistMember);
+      if (!hasPrepared || !hasGroupId) {
         // has not prepared yet
+        dispatch(setUser({ picture: liff.user.pictureUrl, ...user }));
         return;
       }
+      console.log('set gid and uid', user.groupId, user.id);
+      sessionStorage.setItem('gid', user.groupId);
+      sessionStorage.setItem('uid', user.id);
+      dispatch(setUser({ picture: liff.user.pictureUrl, ...user }));
       if (isSameGroupId) {
-        firebase.activateGroup(member.groupId);
+        firebase.activateGroup(user.groupId);
         return;
       }
-      // member groupId is different form session gid
       if (!isProd) {
-        firebase.activateGroup(sessionStorage.getItem('gid') || member.groupId);
+        // for debug. user groupId is different form session gid
+        firebase.activateGroup(sessionStorage.getItem('gid') || user.groupId);
         return;
       }
-      console.log('Remove session (member groupId is different from session gid', member.groupId, sessionStorage.getItem('gid'));
+      console.log('Remove session (member groupId is different from session gid', user.groupId, sessionStorage.getItem('gid'));
+      sessionStorage.removeItem('uid');
       sessionStorage.removeItem('gid');
+      liff.liff.logout();
+    }).catch((err) => {
+      console.error(err);
+      setState(stateMap.hasError);
+      sessionStorage.removeItem('uid');
+      sessionStorage.removeItem('gid');
+      liff.liff.logout();
     });
+    return (
+      <FadeWrapper>
+        <Progress message="準備中。。。"/>
+      </FadeWrapper>
+    );
   }
 
   if (state === stateMap.isNotExistMember && !isLoginPage) {
     router.push(baseUri + '/login?redirectUri=' + redirectUri, undefined, {shallow: true});
+    return (
+      <>{children}</>
+    );
   }
 
   if (state !== stateMap.isCompletedInitialize) {
-    dispatch(setUser(liff.user as UserState));
-    sessionStorage.setItem('uid', liff.userId || '');
     setState(stateMap.isCompletedInitialize);
   }
 
