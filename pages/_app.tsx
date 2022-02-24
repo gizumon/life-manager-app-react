@@ -53,6 +53,7 @@ const stateMap = {
   hasError: 9,
 };
 
+// TODO: Should refactor (Make it more simple)
 // logging check process
 //   0. isInitializing
 //     - description: sdk and data are initializing
@@ -142,13 +143,13 @@ const Layout: FC = ({children}) => {
       setState(hasGroupId ? stateMap.isExistMember : stateMap.isNotExistMember);
       if (!hasPrepared || !hasGroupId) {
         // has not prepared yet
-        dispatch(setUser({ picture: liff.user.pictureUrl, ...user }));
+        dispatch(setUser({ ...user }));
         return;
       }
       console.log('set gid and uid', user.groupId, user.id);
       sessionStorage.setItem('gid', user.groupId);
       sessionStorage.setItem('uid', user.id);
-      dispatch(setUser({ picture: liff.user.pictureUrl, ...user }));
+      dispatch(setUser({ ...user }));
       if (isSameGroupId) {
         firebase.activateGroup(user.groupId);
         return;
