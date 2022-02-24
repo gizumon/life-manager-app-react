@@ -14,6 +14,7 @@ export default class BaseModel {
   public firebase: FirebaseService;
 
   public name: ICmdKey;
+  public id: string;
   public lid: string;
   public client: line.Client;
 
@@ -66,7 +67,8 @@ export default class BaseModel {
 
   public async initialize() {
     // should override here;
-    this.user = await this.firebase.getUserByLId(this.lid);
+    this.id = await this.firebase.getUserIdByLid(this.lid); 
+    this.user = await this.firebase.getUserById(this.id);
     this.categories = [].concat(
       await this.firebase.getCategories(),
       await this.firebase.getCustomCategories(this.user.groupId),
