@@ -79,7 +79,6 @@ export default function Login() {
   const redirectUri = router.query['redirectUri'] as string ||
                       Utils.getQueryParam(router.asPath, 'redirectUri') ||
                       publicRuntimeConfig.ROOT_URL + '/input?type=pay';
-  const groupId = sessionStorage.getItem('gid');
 
   const onChangeHandler = (event: any) => setCode(event.target.value);
   const onCloseModalHandler = () => {
@@ -96,12 +95,13 @@ export default function Login() {
   };
 
   const redirectWithLogin = (url: string, groupId: string = '') => {
-    sessionStorage.setItem('gid', groupId);
     router.push(url, undefined, {shallow: true});
   };
 
-  if (groupId) {
-    redirectWithLogin(redirectUri, groupId);
+  if (user.groupId) {
+    // login
+    redirectWithLogin(redirectUri, user.groupId);
+    return <FadeWrapper><Progress message={'リダイレクトします。。。'}/></FadeWrapper>;
   }
 
   const generateCode = () => {
@@ -118,7 +118,7 @@ export default function Login() {
       }
       newMember.groupId = ref.key;
       updateGroupMember(newMember.groupId, newMember);
-      updateMember(user.id, newMember).then((_) => {
+      client.postUser(newMember).then((_) => {
         let message = `ペアリングしたいユーザーへ下記のコードを共有ください🙇‍♂️\nペアリングコード：\n\n${newMember.groupId}`;
         sendText(message).then(() => {
           modalOn('ペアリングコードをチャットに送信しました👍\nペアリングしたいユーザーに送信ください😉', () => {
@@ -130,8 +130,10 @@ export default function Login() {
           modalOn(message, () => {
             redirectWithLogin(redirectUri, newMember.groupId);
             setOnCloseFn({ fn: () => {} });
-          });  
+          });
         });
+      }).catch((e) => {
+        modalOn('ユーザーの更新に失敗しました。。。\n\n' + JSON.stringify(e));
       });
     });
   };
@@ -165,25 +167,10 @@ export default function Login() {
   // user is exist in auth, but not in member.
   if (lineUser && user && isInitialized) {
     // should not request when already check user was opened
-    if (state === stateMap.isInitializing) {
-      const { id, picture, groupId } = user;
+    const { id, picture, groupId } = user;
 
-      if (!groupId) {
-        return setState(stateMap.isNotFoundUser);
-      }
-      getGroupMember(groupId, id).then((member) => {
-        setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
-        const isSameImage = picture === member?.picture;
-        if (member && !isSameImage) {
-          updateGroupMember(groupId, { id, picture });
-        }
-  
-        if (member) {
-          redirectWithLogin(redirectUri, member.groupId);
-        }
-      }).catch((e) => console.error(e));
-    }
-    if (state === stateMap.isNotFoundUser) {
+    if (!groupId) {
+      // not found user
       return (
         <>
           <Card className={classes.card}>
@@ -213,6 +200,21 @@ export default function Login() {
         </>
       );
     }
+    // user found
+    getGroupMember(groupId, id).then((member) => {
+      setState(member ? stateMap.isFoundUser : stateMap.isNotFoundUser);
+      const isSameImage = picture === member?.picture;
+      if (member && !isSameImage) {
+        updateGroupMember(groupId, { id, picture });
+      }
+
+      if (member) {
+        redirectWithLogin(redirectUri, member.groupId);
+      }
+    }).catch((e) => {
+      console.error(e);
+      modalOn(JSON.stringify(e));
+    });
   }
 
   const message = state === stateMap.isInitializing ? 'ログイン中。。。' :

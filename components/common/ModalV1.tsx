@@ -1,7 +1,6 @@
-import React, {Fragment} from 'react';
+import React, {Fragment, useState} from 'react';
 import {makeStyles, Theme, createStyles} from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
-
 export interface IProps {
   title?: string;
   body?: string;
@@ -28,7 +27,6 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function ModalV1({title, body, open, onClose}: IProps) {
-  console.log('on modal open: ', title, body);
   const classes = useStyles();
 
   return (
@@ -47,3 +45,35 @@ export default function ModalV1({title, body, open, onClose}: IProps) {
     </Fragment>
   );
 }
+
+export interface IModalConfig {
+  isOpen?: boolean;
+  message?: string;
+}
+
+export interface IUseModal {
+  isOpen: boolean;
+  message: string;
+  funcObj: {fn: () => void};
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+  setFuncObj: React.Dispatch<React.SetStateAction<{fn: () => void}>>;
+}
+
+export const useModal = (conf: IModalConfig = {}) => {
+  const [isOpen, setIsOpen] = useState<IUseModal['isOpen']>(conf.isOpen || false);
+  const [message, setMessage] = useState<IUseModal['message']>(conf.message || '');
+  const [funcObj, setFuncObj] = useState<IUseModal['funcObj']>({fn: () => {
+    setIsOpen(false);
+    setMessage('');
+  }});
+
+  return {
+    isOpen,
+    message,
+    funcObj,
+    setIsOpen,
+    setMessage,
+    setFuncObj,
+  };
+};

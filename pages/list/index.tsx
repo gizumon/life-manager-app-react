@@ -1,7 +1,8 @@
 import React, {useEffect} from 'react';
+import Link from 'next/link';
 import {makeStyles} from '@material-ui/core/styles';
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Avatar, Link, Grid, List, ListItem, ListItemText, Divider} from '@material-ui/core';
+  Paper, Avatar, Grid, List, ListItem, ListItemText, Divider} from '@material-ui/core';
 import {Card, CardContent, Tabs, Tab, Box, Chip} from '@material-ui/core';
 import PaymentIcon from '@material-ui/icons/Payment';
 import EqualizerIcon from '@material-ui/icons/Equalizer';
@@ -21,6 +22,7 @@ import {useSelector} from 'react-redux';
 import {StoreState} from '../../ducks/createStore';
 import {FirebaseState} from '../../ducks/firebase/slice';
 import IconButton from '@material-ui/core/IconButton';
+import { useUserState } from '../../ducks/user/selector';
 
 interface ICalculation {
   id: string;
@@ -173,10 +175,10 @@ function getTabProps(index: number) {
 export default function ListPage() {
   const classes = useStyles();
   const router = useRouter();
+  const { user } = useUserState();
   const {configs, inputs, groupMembers, categories} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
   const {activateGroup, deleteInput} = useFirebase();
 
-  const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type') || 'pay';
 
   const [tabIndex, setTabIndex] = React.useState<ITabIndex>(tabMap.toIndex[selectedType as IConfigType] || tabMap.toIndex['pay']);
@@ -230,7 +232,7 @@ export default function ListPage() {
       setDisplayDataObj(dataObj);
     }
     console.log('created displayDataObjMap', displayDataObj, displayMap);
-  }, [inputs, selectedType, selectedId]);
+  }, [inputs, selectedType, user.id]);
 
   const onTabChange = (_: React.ChangeEvent<{}>, index: ITabIndex) => {
     setTabIndex(index);
@@ -240,9 +242,7 @@ export default function ListPage() {
   const onCloseHandler = (value?: string) => {
     setIsDeleteModalOpen(false);
     if (value && deleteInput && activateGroup) {
-      deleteInput(selectedId, selectedType as IConfigType, value).then(() => {
-        activateGroup(selectedId);
-      }).catch(() => console.log('failed to delete'));
+      deleteInput(user.groupId, selectedType as IConfigType, value).catch(() => console.log('failed to delete'));
     }
   };
 

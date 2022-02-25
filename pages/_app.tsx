@@ -20,6 +20,12 @@ import {CustomThemeProvider} from '../components/provider/CustomThemeProvider';
 import getConfig from 'next/config';
 import { useGA } from '../hooks/useGA';
 import InternalAPI from '../services/api';
+import ModalV1, { useModal, IUseModal } from '../components/common/ModalV1';
+import { useUserState } from '../ducks/user/selector';
+
+type IModalSetObj = {
+  modalSetObj: Pick<IUseModal, 'setIsOpen' | 'setMessage' | 'setFuncObj'>;
+}
 
 const client = new InternalAPI();
 
@@ -71,27 +77,27 @@ const stateMap = {
 //     - description: initialize completed
 //     - from       : 2
 //     - to         : show child components
-const Layout: FC = ({children}) => {
+const Layout: FC<IModalSetObj> = ({ children, modalSetObj }) => {
   const classes = useStyles();
   const router = useRouter();
-  const {publicRuntimeConfig} = getConfig();
+  const { publicRuntimeConfig } = getConfig();
   // const { isInitialized, isLoggedIn, login, liff } = useAuth();
   const liff = useAuth();
   const firebase = useFirebase();
-  const {isInitialized, isGroupActivated} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
+  const { isInitialized, isGroupActivated } = useSelector<StoreState, FirebaseState>((state) => state.firebase);
   const dispatch = useDispatch();
-  const [state, setState] = useState<number>(stateMap.isInitializing);
+  const { user } = useUserState();
+  const [ state, setState ] = useState<number>(stateMap.isInitializing);
   const baseUri = publicRuntimeConfig.ROOT_URL;
   const redirectUri = baseUri + router.asPath;
   const isLoginPage = router.asPath.indexOf('/login') > -1;
   const hasPrepared = !!firebase.activateGroup;
 
   useEffect(() => {
-    const groupId = sessionStorage.getItem('gid');
-    if (!groupId && !isLoginPage) {
+    if ((!user || !user.groupId) && !isLoginPage) {
       router.push(baseUri + '/login?redirectUri=' + redirectUri, undefined, {shallow: true});
     }
-  });
+  }, [user.groupId]);
 
   // line is not ready
   if (!liff.isInitialized) {
@@ -103,7 +109,7 @@ const Layout: FC = ({children}) => {
   }
 
   // user not logged in
-  if (!liff.isLoggedIn || state === stateMap.hasError) {
+  if (!liff.isLoggedIn) {
     return (
       <FadeWrapper>
         <div className={classes.root}>
@@ -138,41 +144,24 @@ const Layout: FC = ({children}) => {
     const idToken = liff.liff.getIDToken();
     client.postAuth({ idToken }).then(({ data: user }) => {
       const hasGroupId = !!user.groupId;
-      const isSameGroupId = user.groupId === sessionStorage.getItem('gid');
-      const isProd = publicRuntimeConfig.NODE_ENV === 'production';
       setState(hasGroupId ? stateMap.isExistMember : stateMap.isNotExistMember);
       if (!hasPrepared || !hasGroupId) {
         // has not prepared yet
         dispatch(setUser({ ...user }));
         return;
       }
+
       console.log('set gid and uid', user.groupId, user.id);
-      sessionStorage.setItem('gid', user.groupId);
-      sessionStorage.setItem('uid', user.id);
       dispatch(setUser({ ...user }));
-      if (isSameGroupId) {
-        firebase.activateGroup(user.groupId);
-        return;
-      }
-      if (!isProd) {
-        // for debug. user groupId is different form session gid
-        firebase.activateGroup(sessionStorage.getItem('gid') || user.groupId);
-        return;
-      }
-      console.log('Remove session (member groupId is different from session gid', user.groupId, sessionStorage.getItem('gid'));
-      sessionStorage.removeItem('uid');
-      sessionStorage.removeItem('gid');
-      liff.liff.logout();
+      firebase.activateGroup(user.groupId);
+      return;
     }).catch((err) => {
       console.error(err);
-      setState(stateMap.hasError);
-      sessionStorage.removeItem('uid');
-      sessionStorage.removeItem('gid');
       liff.liff.logout();
     });
     return (
       <FadeWrapper>
-        <Progress message="準備中。。。"/>
+        <Progress message="初期化中。。。"/>
       </FadeWrapper>
     );
   }
@@ -180,7 +169,9 @@ const Layout: FC = ({children}) => {
   if (state === stateMap.isNotExistMember && !isLoginPage) {
     router.push(baseUri + '/login?redirectUri=' + redirectUri, undefined, {shallow: true});
     return (
-      <>{children}</>
+      <FadeWrapper>
+        <Progress message="ログインページへ遷移します💨"/>
+      </FadeWrapper>
     );
   }
 
@@ -188,8 +179,9 @@ const Layout: FC = ({children}) => {
     setState(stateMap.isCompletedInitialize);
   }
 
+  // TODO: required?
   if (!isGroupActivated) {
-    firebase.activateGroup(sessionStorage.getItem('gid') || '');
+    firebase.activateGroup(user.groupId);
   }
 
   return (
@@ -199,7 +191,10 @@ const Layout: FC = ({children}) => {
 
 export default function MyApp(props: any) {
   const {Component, pageProps} = props;
+  const {isOpen, message, funcObj, setIsOpen, setMessage, setFuncObj} = useModal();
   
+  const modalSetObj = { setIsOpen, setMessage, setFuncObj };
+
   // use Google Analytics (track spa routing)
   useGA();
 
@@ -220,7 +215,7 @@ export default function MyApp(props: any) {
       <AuthProvider>
         <FirebaseProvider>
           <Provider store={store}>
-            <Layout>
+            <Layout modalSetObj={modalSetObj}>
               <CustomThemeProvider>
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline />
@@ -228,6 +223,7 @@ export default function MyApp(props: any) {
                 <FooterV1 {...pageProps} />
               </CustomThemeProvider>
             </Layout>
+            <ModalV1 open={isOpen} title='' body={message} onClose={funcObj.fn} />
           </Provider>
         </FirebaseProvider>
       </AuthProvider>

@@ -40,7 +40,7 @@ export interface IThemeSetting {
 }
 
 export interface IAccountSetting {
-    lineId: string;
+    id: string;
     name: string;
     // groupId: string;
 }

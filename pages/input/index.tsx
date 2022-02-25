@@ -23,6 +23,7 @@ import Progress from '../../components/common/AnimationProgressV1';
 import {useSelector} from 'react-redux';
 import {StoreState} from '../../ducks/createStore';
 import {FirebaseState} from '../../ducks/firebase/slice';
+import { useUserState } from '../../ducks/user/selector';
 
 type ITabIndex = 0 | 1 | 2;
 type ITabMap = {
@@ -98,10 +99,10 @@ function getTabProps(index: number) {
 export default function Input() {
   const classes = useStyles();
   const router = useRouter();
+  const { user } = useUserState();
   const {isGroupActivated, pushInput} = useFirebase();
   const {configs} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
 
-  const selectedId = sessionStorage.getItem('gid') || '';
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
 
   const [tabIndex, setTabIndex] = React.useState<ITabIndex>(tabMap.toIndex[selectedType as IConfigType] || tabMap.toIndex['pay']);
@@ -162,7 +163,7 @@ export default function Input() {
     }
     const [isValid, errMsg] = validator.validate(reqData);
     if (isValid && pushInput) {
-      pushInput(selectedId, selectedType as IConfigType, reqData).then(() => {
+      pushInput(user.groupId, selectedType as IConfigType, reqData).then(() => {
         setModalBody({success: `「${tabMap.toName[selectedType as IConfigType]}」が登録されました`});
         setIsOpenSuccessModal(true);
         // liff?.sendMessages([
@@ -177,7 +178,7 @@ export default function Input() {
       console.log('Invalid req data: ', formData, reqData, errMsg);
       setIsOpenErrorModal(true);
     } else {
-      console.warn('unknown error', selectedId, selectedType);
+      console.warn('unknown error', user.groupId, selectedType);
     }
   });
 
@@ -188,7 +189,7 @@ export default function Input() {
       setFormData(makeDefaultFormData(configs));
       setIsPageInitialized(true);
     }
-  }, [configs]);
+  }, [configs, isGroupActivated]);
 
   const isLoading = !configs || configs.length === 0 || !isPageInitialized;
   if (isLoading) {

@@ -8,7 +8,7 @@ const AuthContext = createContext<typeof Liff | undefined>(undefined);
 export const AuthProvider: FC = ({ children }) => {
   const { publicRuntimeConfig } = getConfig();
   const liffId = publicRuntimeConfig.LIFF_ID;
-  const [liff, setLiff] = useState<typeof Liff>();
+  const [ liff, setLiff ] = useState<typeof Liff>();
 
   useEffect(() => {
     let unmounted = false;

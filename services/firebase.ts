@@ -264,8 +264,8 @@ export class FirebaseService {
         });
     };
 
-    public updateMember(data: IMember): Promise<IMember> {
-        return new Promise<IMember>((resolve, reject) => {
+    public updateMember(data: IMember): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             if (!this.db || !data) {
                 return reject('DB is not defined...');
             }
@@ -274,9 +274,7 @@ export class FirebaseService {
             }
             data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
         
-            this.db.ref(refsMap.users).child(data.id).update(data).then((snapshot) => {
-                return resolve(snapshot.val());
-            }).catch(err => {
+            this.db.ref(refsMap.users).child(data.id).update(data).then(resolve).catch(err => {
                 console.warn(err);
                 return reject(err);
             });

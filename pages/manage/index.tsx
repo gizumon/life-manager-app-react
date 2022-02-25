@@ -13,6 +13,8 @@ import * as _ from 'lodash';
 import ThemeSetting from '../../components/manage/ThemeSettingV1';
 import AccountSetting from '../../components/manage/AccountSettingV1';
 import ModalV1 from '../../components/common/ModalV1';
+import { useUserState } from '../../ducks/user/selector';
+import Utils from '../../services/utils';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -68,18 +70,17 @@ const categoryTypeList = [
 
 export default function Manage() {
   const classes = useStyles();
-  const selectedUserId = sessionStorage.getItem('uid') || '';
-  const selectedGroupId = sessionStorage.getItem('gid') || '';
+  const { user } = useUserState();
   const {updateCustomCategories, updateCustomThemeSetting, updateGroupMember} = useFirebase();
   const {categories, groupTheme, groupMembers} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
-  const member = groupMembers.find((m) => m.lineId === selectedUserId);
+  const member = groupMembers.find((m) => m.id === user.id);
   const [isOpenAddCategoryModal, setIsOpenAddCategoryModal] = useState<boolean>(false);
   const [isOpenSuccessModal, setIsOpenSuccessModal] = useState<boolean>(false);
   const [errMessage, setErrMessage] = useState<string>('');
   const [copyErrMessage, setCopyErrMessage] = useState<string>('');
   const [addCategoryModalConfig, setAddCategoryModalConfig] = useState<IModalInputConfig>(defaultConfig);
   const [themeSetting, setThemeSetting] = useState<IThemeSetting>(groupTheme || {selectedTheme: 'default'});
-  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({name: (member?.name || member?.name || ''), lineId: selectedUserId});
+  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({name: (member?.name || member?.name || ''), id: member.id});
   const [newCategories, setNewCategories] = useState<ICategory[]>(categories);
 
   useEffect(() => {
@@ -125,7 +126,7 @@ export default function Manage() {
             },
           } as ICategory);
         }
-        updateCustomCategories && updateCustomCategories(selectedGroupId, updateStates);
+        updateCustomCategories && updateCustomCategories(user.groupId, updateStates);
         return [...updateStates];
       });
     }
@@ -133,37 +134,42 @@ export default function Manage() {
   };
 
   const onAccountClickBtn = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(selectedGroupId).then(() => {
-        setCopyErrMessage('ペアリングコードをコピーしました😉');
-      }).catch((e) => {
-        setCopyErrMessage(
-          'ペアリングコードのコピーができませんでした。。😭\n' +
-          '(' + String(e) + ')\n\n' +
-          '下記のコードをコピーしてください🙇‍♂️\n' +
-          String(member.groupId)
-        );
-      });
-    } else {
-      setCopyErrMessage(
-        'クリップボードを操作する権限がありませんでした。。😢\n\n' +
-        '下記のコードをコピーしてください🙇‍♂️\n' +
-        String(member.groupId)
-      );
-    }
+    const result = Utils.copyClipboard(user.groupId);
+    setCopyErrMessage(result ? 'ペアリングコードをコピーしました😉' : 'ペアリングコードのコピーができませんでした。。😭\n下記のコードをコピーしてください🙇‍♂️\n\n' + String(member.groupId));
+    // if (navigator.clipboard) {
+    //   navigator.clipboard.writeText(user.groupId).then(() => {
+    //     setCopyErrMessage('ペアリングコードをコピーしました😉');
+    //   }).catch((e) => {
+
+    //     setCopyErrMessage(
+    //       'ペアリングコードのコピーができませんでした。。😭\n' +
+    //       '(' + String(e) + ')\n\n' +
+    //       '下記のコードをコピーしてください🙇‍♂️\n' +
+    //       String(member.groupId)
+    //     );
+    //   });
+    // } else {
+    //   setCopyErrMessage(
+    //     'クリップボードを操作する権限がありませんでした。。😢\n\n' +
+    //     '下記のコードをコピーしてください🙇‍♂️\n' +
+    //     String(member.groupId)
+    //   );
+    // }
   };
   const saveAccount = () => {
     // if (selectedGroupId !== accountSetting.groupId) {
     //   removeGroupMember(selectedGroupId, accountSetting)
     // }
     console.log('on account update click', accountSetting);
-    if (!accountSetting.name || !accountSetting.lineId) {
+    if (!accountSetting.name || !accountSetting.id) {
       return setErrMessage(!accountSetting.name ? 'Nameを入力してください' : 'エラーが発生しました');
     }
-    return updateGroupMember && updateGroupMember(selectedGroupId, accountSetting).then(() => setIsOpenSuccessModal(true));
+    return updateGroupMember && updateGroupMember(user.groupId, accountSetting).then(() => setIsOpenSuccessModal(true));
   };
 
-  const saveTheme = () => updateCustomThemeSetting && updateCustomThemeSetting(selectedGroupId, themeSetting).then(() => setIsOpenSuccessModal(true));
+  const saveTheme = () => {
+    updateCustomThemeSetting && updateCustomThemeSetting(user.groupId, themeSetting).then(() => setIsOpenSuccessModal(true));
+  };
 
   return (
     <>
@@ -243,7 +249,7 @@ export default function Manage() {
                         dataList={newCategories}
                         setDataList={setNewCategories}
                         onClickUpsertBtn={(id?: string) => onOpenAddCategory(categoryType.type, id)}
-                        onUpdated={(data: ICategory[]) => updateCustomCategories && updateCustomCategories(selectedGroupId, data)}
+                        onUpdated={(data: ICategory[]) => updateCustomCategories && updateCustomCategories(user.groupId, data)}
                       />
                       <Divider />
                     </div>

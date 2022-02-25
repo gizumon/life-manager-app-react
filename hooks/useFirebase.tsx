@@ -111,7 +111,7 @@ export type IUseFirebaseReturn = IFirebaseDataStates & {
   deleteInput?: (groupId: string, type: IConfigType, id: string) => Promise<void>;
   // pushMember?: (data: IMember) => Promise<firebase.database.Reference>;
   // getMember?: (lineId: string) => Promise<IMember>;
-  updateMember?: (lineId: string, data: IMember) => Promise<firebase.database.Reference>;
+  // updateMember?: (lineId: string, data: IMember) => Promise<void>;
   pushGroup?: (data?: IGroup) => Promise<firebase.database.Reference>;
   getGroupMember?: (groupId: string, lineId: string) => Promise<IMember>;
   updateGroupMember?: (groupId: string, data: Partial<IMember>) => Promise<firebase.database.Reference>;
@@ -281,21 +281,21 @@ const deleteInput = (groupId: string, type: IConfigType, id: string): Promise<vo
 //   });
 // };
 
-const updateMember = (lineId: string, data: IMember): Promise<firebase.database.Reference> => {
-  return new Promise<firebase.database.Reference>((resolve, reject) => {
-    if (!DB || !lineId || !data) {
-      return reject('DB is not defined...');
-    }
-    data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
+// const updateMember = (lineId: string, data: IMember): Promise<void> => {
+//   return new Promise<void>((resolve, reject) => {
+//     if (!DB || !lineId || !data) {
+//       return reject('DB is not defined...');
+//     }
+//     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
 
-    DB.ref(refsMap.members).child(lineId).update(data).then(val => {
-      return resolve(val);
-    }).catch(err => {
-      console.warn(err);
-      return reject(err);
-    });
-  });
-};
+//     DB.ref(refsMap.members).child(lineId).update(data).then(() => {
+//       return resolve();
+//     }).catch(err => {
+//       console.warn(err);
+//       return reject(err);
+//     });
+//   });
+// };
 
 const pushGroup = (data: IGroup = {}): Promise<firebase.database.Reference> => {
   return new Promise<firebase.database.Reference>((resolve, reject) => {
@@ -338,12 +338,7 @@ const updateGroupMember = (groupId: string, data: Partial<IMember>) => {
       return reject('group id is not defined...');
     }
     data['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
-    DB.ref(refsMap.groups).child(`${groupId}/members`).child(data.id).update({
-      id: data.id,
-      groupId: groupId,
-      name: data.name,
-      picture: data.picture,
-    }).then(val => {
+    DB.ref(refsMap.groups).child(`${groupId}/members`).child(data.id).update(data).then(val => {
       return resolve(val);
     }).catch(err => {
       console.warn(err);

@@ -130,6 +130,17 @@ namespace Utils {
     export const isIncludesArr = (text: string, arr: string[]): boolean => {
         return arr.some((word) => text.indexOf(word) > -1);
     };
+
+    export const copyClipboard = (text: string): boolean => {
+        const input = document.createElement('input');
+        input.hidden = true;
+        document.body.appendChild(input);
+        input.value = text;
+        input.select();
+        const result = document.execCommand('copy');
+        document.body.removeChild(input);
+        return result;
+    };
 }
 
 export default Utils;
