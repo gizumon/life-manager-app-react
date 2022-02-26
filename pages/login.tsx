@@ -117,7 +117,9 @@ export default function Login() {
         return;
       }
       newMember.groupId = ref.key;
-      updateGroupMember(newMember.groupId, newMember);
+      updateGroupMember(newMember.groupId, newMember).catch(e => {
+        modalOn('グループメンバーの更新に失敗しました。。。\n\n' + JSON.stringify(e));
+      });
       client.postUser(newMember).then((_) => {
         let message = `ペアリングしたいユーザーへ下記のコードを共有ください🙇‍♂️\nペアリングコード：\n\n${newMember.groupId}`;
         sendText(message).then(() => {
@@ -135,6 +137,8 @@ export default function Login() {
       }).catch((e) => {
         modalOn('ユーザーの更新に失敗しました。。。\n\n' + JSON.stringify(e));
       });
+    }).catch(e => {
+      modalOn('グループの追加に失敗しました。。。\n\n' + JSON.stringify(e));
     });
   };
 
