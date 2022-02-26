@@ -191,7 +191,7 @@ export const useFirebase = (): IUseFirebaseReturn => {
     pushInput: runActivateWrapper(pushInput),
     deleteInput: runActivateWrapper(deleteInput),
     // getMember: getMember,
-    updateMember: updateMember,
+    // updateMember: updateMember,
     pushGroup: pushGroup,
     getGroupMember: getGroupMember,
     updateGroupMember: runActivateWrapper(updateGroupMember),
