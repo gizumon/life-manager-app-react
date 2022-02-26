@@ -69,7 +69,7 @@ export default function Login() {
   const router = useRouter();
   const { user: lineUser, sendText } = useAuth();
   const { user } = useUserState();
-  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup, updateMember} = useFirebase();
+  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup} = useFirebase();
   const [code, setCode] = useState<string>();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
@@ -105,7 +105,7 @@ export default function Login() {
   }
 
   const generateCode = () => {
-    if (!user || !updateGroupMember || !updateMember || !isExistGroup) {
+    if (!user || !updateGroupMember || !isExistGroup) {
       return modalOn('初期化に失敗しました再度ログインお試しください');
     }
 
@@ -142,7 +142,7 @@ export default function Login() {
     if (!code) {
       return modalOn('ペアリングコードが入力されていません🙅‍♂️');
     }
-    if (!user || !updateGroupMember || !updateMember || !isExistGroup) {
+    if (!user || !updateGroupMember || !isExistGroup) {
       return modalOn('初期化に失敗しました再度ログインお試しください🙇‍♂️');
     }
     isExistGroup(code)?.then((isExist) => {

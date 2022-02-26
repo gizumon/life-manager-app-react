@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import getConfig from 'next/config';
 import { NextPostApiRequest } from '../interfaces/api';
 import axios, { AxiosError } from 'axios';
-import { UserState } from '../ducks/user/slice';
 import { FirebaseService } from '../services/firebase';
 import { IMember } from '../interfaces/index';
 import errors, { IErrorResponse } from '../models/errorResponse';

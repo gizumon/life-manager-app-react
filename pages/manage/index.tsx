@@ -73,21 +73,25 @@ export default function Manage() {
   const { user } = useUserState();
   const {updateCustomCategories, updateCustomThemeSetting, updateGroupMember} = useFirebase();
   const {categories, groupTheme, groupMembers} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
-  const member = groupMembers.find((m) => m.id === user.id);
   const [isOpenAddCategoryModal, setIsOpenAddCategoryModal] = useState<boolean>(false);
   const [isOpenSuccessModal, setIsOpenSuccessModal] = useState<boolean>(false);
   const [errMessage, setErrMessage] = useState<string>('');
   const [copyErrMessage, setCopyErrMessage] = useState<string>('');
   const [addCategoryModalConfig, setAddCategoryModalConfig] = useState<IModalInputConfig>(defaultConfig);
   const [themeSetting, setThemeSetting] = useState<IThemeSetting>(groupTheme || {selectedTheme: 'default'});
-  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({name: (member?.name || member?.name || ''), id: member.id});
+  const [accountSetting, setAccountSetting] = useState<IAccountSetting>({name: '', id: '' });
   const [newCategories, setNewCategories] = useState<ICategory[]>(categories);
 
   useEffect(() => {
     if (categories.length > 0) {
       setNewCategories(categories);
     }
-  }, [categories]);
+    if (groupMembers.length > 0) {
+      const member = groupMembers.find((m) => m.id === user.id);
+      console.log(member);
+      setAccountSetting({name: (member?.name || ''), id: (member?.id || '') });
+    }
+  }, [categories, groupMembers]);
 
   const onOpenAddCategory = (categoryType: string, id: string = '') => {
     const isUpdate = !!id;
@@ -135,7 +139,7 @@ export default function Manage() {
 
   const onAccountClickBtn = () => {
     const result = Utils.copyClipboard(user.groupId);
-    setCopyErrMessage(result ? 'ペアリングコードをコピーしました😉' : 'ペアリングコードのコピーができませんでした。。😭\n下記のコードをコピーしてください🙇‍♂️\n\n' + String(member.groupId));
+    setCopyErrMessage(result ? 'ペアリングコードをコピーしました😉' : 'ペアリングコードのコピーができませんでした。。😭\n下記のコードをコピーしてください🙇‍♂️\n\n' + String(user.groupId));
     // if (navigator.clipboard) {
     //   navigator.clipboard.writeText(user.groupId).then(() => {
     //     setCopyErrMessage('ペアリングコードをコピーしました😉');
