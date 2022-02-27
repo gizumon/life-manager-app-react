@@ -131,10 +131,15 @@ export const useFirebase = (): IUseFirebaseReturn => {
   DB = firebaseApp?.database();
 
   const activateGroup = async (groupId: string) => {
-    if (!DB || !groupId || states.configs.length < 1 || states.isGroupActivated) { return; }
+    console.log('Run activate group', groupId);
+    if (!DB || !groupId || states.configs.length < 1 || states.isGroupActivated) {
+      return;
+    }
     const group: IGroup = (await DB.ref(refsMap.groups).child(groupId).once('value'))?.val();
 
-    if (!group || !group.members) { return; }
+    if (!group || !group.members) {
+      return;
+    }
     const groupMembers = convertObjectToArray(group.members as {[key: string]: IMember}) as IMember[];
     const groupTheme = group.themeSetting;
     const customConfigs: IConfig[] = (await DB?.ref(refsMap.customConfigs.replace(templateGroupId, groupId)).once('value'))?.val() || [];

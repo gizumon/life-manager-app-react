@@ -1,3 +1,4 @@
+import { useDispatch } from 'react-redux';
 import FadeWrapper from '../components/common/FadeWrapper';
 import Progress from '../components/common/AnimationProgressV1';
 import {useAuth, makeMemberFromUser} from '../hooks/useAuthLiff';
@@ -14,6 +15,7 @@ import ModalV1 from '../components/common/ModalV1';
 import getConfig from 'next/config';
 import { useUserState } from '../ducks/user/selector';
 import InternalAPI from '../services/api';
+import { setUser } from '../ducks/user/slice';
 
 const client = new InternalAPI();
 
@@ -69,7 +71,8 @@ export default function Login() {
   const router = useRouter();
   const { user: lineUser, sendText } = useAuth();
   const { user } = useUserState();
-  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup} = useFirebase();
+  const dispatch = useDispatch();
+  const {isInitialized, pushGroup, getGroupMember, updateGroupMember, isExistGroup, activateGroup} = useFirebase();
   const [code, setCode] = useState<string>();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
@@ -89,7 +92,6 @@ export default function Login() {
 
   const modalOn = (message: string, closeFn = () => {}) => {
     setModalMessage(message);
-    // TODO: should detect onclose and should useModal
     setOnCloseFn({fn: closeFn});
     setIsOpenModal(true);
   };
@@ -124,21 +126,22 @@ export default function Login() {
         let message = `ペアリングしたいユーザーへ下記のコードを共有ください🙇‍♂️\nペアリングコード：\n\n${newMember.groupId}`;
         sendText(message).then(() => {
           modalOn('ペアリングコードをチャットに送信しました👍\nペアリングしたいユーザーに送信ください😉', () => {
+            dispatch(setUser(newMember));
             redirectWithLogin(redirectUri, newMember.groupId);
-            setOnCloseFn({ fn: () => {} });
-          });  
+          });
         }).catch((e) => {
           console.warn('Could not send text using liff', e);
           modalOn(message, () => {
+            dispatch(setUser((newMember)));
             redirectWithLogin(redirectUri, newMember.groupId);
-            setOnCloseFn({ fn: () => {} });
           });
         });
       }).catch((e) => {
-        modalOn('ユーザーの更新に失敗しました。。。\n\n' + JSON.stringify(e));
+        modalOn('ユーザーの更新に失敗しました。。。\n\n' + e?.message);
       });
+      
     }).catch(e => {
-      modalOn('グループの追加に失敗しました。。。\n\n' + JSON.stringify(e));
+      modalOn('グループの追加に失敗しました。。。\n\n' + e?.message);
     });
   };
 
@@ -158,6 +161,7 @@ export default function Login() {
       updateGroupMember(newMember.groupId as string, newMember).then((_) => {
         client.postUser(newMember).then((_) => {
           return modalOn(`ペアリングに成功しました🎉\n引き続きご利用宜しくお願いします👼`, () => {
+            dispatch(setUser(newMember));
             redirectWithLogin(redirectUri, newMember.groupId);
           });
         }).catch(e => {

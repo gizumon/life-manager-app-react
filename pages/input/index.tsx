@@ -100,7 +100,7 @@ export default function Input() {
   const classes = useStyles();
   const router = useRouter();
   const { user } = useUserState();
-  const {isGroupActivated, pushInput} = useFirebase();
+  const {isGroupActivated, pushInput, activateGroup} = useFirebase();
   const {configs} = useSelector<StoreState, FirebaseState>((state) => state.firebase);
 
   const selectedType = router.query['type'] as string || Utils.getQueryParam(router.asPath, 'type');
@@ -195,7 +195,7 @@ export default function Input() {
   if (isLoading) {
     return (
       <FadeWrapper>
-        <Progress message="データを準備してます。。。" />
+        <Progress message="データを準備しています。。。" />
       </FadeWrapper>
     );
   }
