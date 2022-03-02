@@ -218,6 +218,7 @@ export default function Login() {
 
       if (member) {
         redirectWithLogin(redirectUri, member.groupId);
+        return <FadeWrapper><Progress message={'リダイレクトします。。。'}/></FadeWrapper>;
       }
     }).catch((e) => {
       console.error(e);

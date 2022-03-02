@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Head from 'next/head';
 import {makeStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import DateFnsUtils from '@date-io/date-fns';
+import { LocalizationProvider } from '@material-ui/pickers';
 import FooterV1 from '../components/FooterV1';
 import {AuthProvider, useAuth} from '../hooks/useAuthLiff';
 import {createStyles, Theme, CardMedia, Button} from '@material-ui/core';
@@ -10,7 +12,6 @@ import {Provider, useSelector} from 'react-redux';
 import {useDispatch} from 'react-redux';
 import {useRouter} from 'next/router';
 import {setUser} from '../ducks/user/slice';
-import {UserState} from '../ducks/user/slice';
 import {useFirebase, FirebaseProvider} from '../hooks/useFirebase';
 import Progress from '../components/common/AnimationProgressV1';
 import FadeWrapper from '../components/common/FadeWrapper';
@@ -207,27 +208,29 @@ export default function MyApp(props: any) {
   }, []);
 
   return (
+    <LocalizationProvider dateAdapter={DateFnsUtils}>
     <React.Fragment>
       <Head>
         <title>LifeManager🏠</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
       </Head>
-      <AuthProvider>
-        <FirebaseProvider>
-          <Provider store={store}>
-            <Layout modalSetObj={modalSetObj}>
-              <CustomThemeProvider>
-                {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-                <CssBaseline />
-                <Component {...pageProps} />
-                <FooterV1 {...pageProps} />
-              </CustomThemeProvider>
-            </Layout>
-            <ModalV1 open={isOpen} title='' body={message} onClose={funcObj.fn} />
-          </Provider>
-        </FirebaseProvider>
-      </AuthProvider>
+        <AuthProvider>
+          <FirebaseProvider>
+            <Provider store={store}>
+              <Layout modalSetObj={modalSetObj}>
+                <CustomThemeProvider>
+                  {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+                  <CssBaseline />
+                  <Component {...pageProps} />
+                  <FooterV1 {...pageProps} />
+                </CustomThemeProvider>
+              </Layout>
+              <ModalV1 open={isOpen} title='' body={message} onClose={funcObj.fn} />
+            </Provider>
+          </FirebaseProvider>
+        </AuthProvider>
     </React.Fragment>
+    </LocalizationProvider>
   );
 }
 

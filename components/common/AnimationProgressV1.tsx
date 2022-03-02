@@ -37,7 +37,7 @@ export default function Progress(props: IProps) {
   console.log('Child component', props);
   const classes = useStyles();
   // const loadingGifPath = '/resources/assets/img/loading.gif';
-  const loadingGifPath = './loading.gif';
+  const loadingGifPath = '/loading.gif';
 
   return (
     <div className={classes.root} >
