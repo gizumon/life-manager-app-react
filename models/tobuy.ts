@@ -50,10 +50,6 @@ export default class ToBuyModel extends BaseModel {
           return args.item = `${args.item} ${word}`.trim();
       }
     });
-    // Support add patter for "お買い物 きのこ"
-    if (args.action === 'list' && args.item) {
-      args.action = 'add';
-    }
     // Support none category pattern
     if (args.action === 'add' && !args.buyCategory) {
       args.buyCategory = 'none';
@@ -113,6 +109,12 @@ export default class ToBuyModel extends BaseModel {
   public async doAction(args: IToBuyArgs): Promise<boolean> {
     switch (args.action) {
       case '':
+        // Support add patter for "お買い物 きのこ"
+        if (args.item) {
+          args.action = 'add';
+          return await this.doAddTextReply(args);
+        }
+        return await this.doListTextReply(args);
       case 'list':
         return await this.doListTextReply(args);
       case 'add': // Add item to db
