@@ -175,12 +175,12 @@ export default class ToBuyModel extends BaseModel {
     if (!!errMsg) {
       return this.textReply(args.replyToken, errMsg);
     }
-    this.firebase.pushToBuyInput(this.user.groupId, this.makeData(newArgs)).then(() => {
-      const message = args.item + '(' + this.getCategoryNameFromId(args.buyCategory) + ')' + 'を追加しました🐶';
-      return this.textReply(args.replyToken, message);
-    }).catch((e) => {
+    await this.firebase.pushToBuyInput(this.user.groupId, this.makeData(newArgs)).catch((e) => {
       return this.textReply(args.replyToken, 'お買い物リストへの追加に失敗しました。。。😢\nしばらくしたらまたお試しください🙇‍♂️');
     });
+
+    const message = args.item + '(' + this.getCategoryNameFromId(args.buyCategory) + ')' + 'を追加しました🐶';
+    return this.textReply(args.replyToken, message);
   }
 
   public async doListTextReply(args: IToBuyArgs): Promise<boolean> {
@@ -196,6 +196,7 @@ export default class ToBuyModel extends BaseModel {
     let content = '🐶お買い物リスト🐶\n\n';
     if (!items.length) {
       content += `お買い物リストが登録されてないみたいです🐾\nTobuyから登録してね！`;
+      return this.textReply(args.replyToken, content);
     }
 
     const searchedItems = items.filter((item) => {
@@ -211,6 +212,7 @@ export default class ToBuyModel extends BaseModel {
 
     if (!searchedItems.length) {
       content += `検索結果がありませんでした。。🐾\n違う言葉か検索ワードなしで、また試してみてね！`;
+      return this.textReply(args.replyToken, content);
     }
 
     
