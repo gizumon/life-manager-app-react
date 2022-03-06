@@ -338,7 +338,7 @@ export default function ListPage() {
     return result;
   };
 
-  const onClickGraphIcon = () => router.push(Utils.makeUrl('/list/graph', selectedType), undefined, { shallow: true });
+  const onClickGraphIcon = () => router.push(Utils.makeUrl('/view', selectedType), undefined, { shallow: true });
 
   // TODO: should move in utils
   const convertDisplayValue = (id: string, value: any): string | string[] => {
