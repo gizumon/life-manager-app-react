@@ -112,6 +112,9 @@ export default class ToBuyModel extends BaseModel {
         // Support add patter for "お買い物 きのこ"
         if (args.item) {
           args.action = 'add';
+          if (!args.buyCategory) {
+            args.buyCategory = 'none';
+          }
           return await this.doAddTextReply(args);
         }
         return await this.doListTextReply(args);
