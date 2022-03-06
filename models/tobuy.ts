@@ -35,6 +35,7 @@ export default class ToBuyModel extends BaseModel {
       words: words,
       user: this.user,
       item: '',
+      buyCategory: 'none',
     };
     words.forEach((word, i) => {
       const isFirst = i === 0;
@@ -49,6 +50,10 @@ export default class ToBuyModel extends BaseModel {
           return args.item = `${args.item} ${word}`.trim();
       }
     });
+    // Support add patter for "お買い物 きのこ"
+    if (args.action === 'list' && args.item) {
+      args.action = 'add';
+    }
     console.log('[INFO] Parse words to args', words, args);
     return args;
   }
