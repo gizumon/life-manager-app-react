@@ -15,7 +15,7 @@ export default function UsersApi(req: NextApiRequest, res: NextApiResponse) {
       return wrapHandler(req, res, postUserHandler, preProcess, postProcess);
     default:
       return wrapHandler(req, res, (_, response) => {
-        response.status(404).json(errors.NOT_FOUND_ERROR(`${req.url} is not found`));
+        response.status(405).json(errors.NOT_FOUND_ERROR(apiName, `${req.method} ${req.url} is not found`));
       }, preProcess, postProcess);
   }
 };

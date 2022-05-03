@@ -280,4 +280,22 @@ export class FirebaseService {
             });
         });
     };
+
+    public isExistGroup(groupId: string): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            if (!this.db) {
+              return reject('DB is not defined...');
+            }
+            if (!groupId) {
+              return resolve(false);
+            }
+            this.db.ref(refsMap.groups).once('value').then(snapshot => {
+              const isExist = snapshot.hasChild(groupId);
+              return resolve(isExist);
+            }).catch(err => {
+              console.warn(err);
+              return reject(err);
+            });
+          });
+    }
 }

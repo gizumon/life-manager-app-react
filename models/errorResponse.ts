@@ -5,22 +5,29 @@ export interface IErrorResponse {
   code: string;
 };
 
+// TODO: Please match response status with this error response status.
 export const errors = {
-  DB_ERROR: (error_description = '') => ({
-    status: 401,
-    error: 'Failed to access db',
+  VALIDATION_ERROR: (apiName: string, error_description = 'validation error') => ({
+    status: 400,
+    error: `[${apiName}] Failed to validate parameters`,
+    code: 'VAL001',
+    error_description,
+  }),
+  DB_ERROR: (apiName: string, error_description = 'db error') => ({
+    status: 500,
+    error: `[${apiName}] Failed to access db`,
     code: 'DB0001',
     error_description,
   }),
-  API_ERROR: (error_description = '') => ({
+  API_ERROR: (apiName: string, error_description = 'api error') => ({
     status: 401,
-    error: 'Failed to request API',
+    error: `[${apiName}] Failed to request API`,
     code: 'API001',
     error_description,
   }),
-  NOT_FOUND_ERROR: (error_description = '') => ({
+  NOT_FOUND_ERROR: (apiName: string, error_description = 'not found error') => ({
     status: 404,
-    error: 'Not found',
+    error: `[${apiName}] Not found`,
     code: 'CLIENT001',
     error_description,
   }),

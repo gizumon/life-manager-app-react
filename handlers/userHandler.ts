@@ -9,12 +9,13 @@ export type IPostUsersRequest = IMember;
 export type IPostUserResponse = IMember;
 
 export const postUserHandler = (req: NextPostApiRequest<IPostUsersRequest>, res: NextApiResponse<IPostUserResponse | IErrorResponse>) => {
+  const apiName = 'postUser'
   const data = req.body;
   if (!data.id) {
-    return res.status(400).json(errors.DB_ERROR('id is missing in request parameters.'));
+    return res.status(400).json(errors.DB_ERROR(apiName, 'id is missing in request parameters.'));
   }
   if (!data.groupId) {
-    return res.status(400).json(errors.DB_ERROR('group id is missing in request parameters.'));
+    return res.status(400).json(errors.DB_ERROR(apiName, 'group id is missing in request parameters.'));
   }
   const firebase = new FirebaseService();
   const user = {
@@ -28,6 +29,6 @@ export const postUserHandler = (req: NextPostApiRequest<IPostUsersRequest>, res:
     return res.json(user);
   }).catch(e => {
     console.log('[INFO]Failed to access firebase via updateMember', e);
-    return res.status(401).json(errors.DB_ERROR('Failed to access firebase in auth handler'));
+    return res.status(500).json(errors.DB_ERROR(apiName, 'Failed to access firebase in auth handler'));
   });
 };
