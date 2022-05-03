@@ -34,6 +34,7 @@ const { publicRuntimeConfig } = getConfig();
 const { LINE_AUTH_ENDPOINT, LINE_AUTH_CLIENT_ID } = publicRuntimeConfig;
 
 export const postAuthHandler = (req: NextPostApiRequest<IAuthRequest>, res: NextApiResponse<IAuthResponse | IErrorResponse>) => {
+  const apiName = 'postAuth'
   const { idToken } = req.body;
   console.log('[INFO]Run get auth handler');
   const requestForm= new URLSearchParams();
@@ -72,7 +73,7 @@ export const postAuthHandler = (req: NextPostApiRequest<IAuthRequest>, res: Next
     }
     console.log('[INFO]Success get user from firebase', user.id);
     if (!user) {
-      return res.status(401).json(errors.DB_ERROR('Failed to access firebase in auth handler'));
+      return res.status(500).json(errors.DB_ERROR(apiName, 'Failed to access firebase in auth handler'));
     }
 
     return res.json({
@@ -83,6 +84,6 @@ export const postAuthHandler = (req: NextPostApiRequest<IAuthRequest>, res: Next
     });
   }).catch((e: AxiosError) =>{
     console.log('[INFO]Failed to request auth. code: ', e.code, 'message: ', e.message);
-    return res.status(400).json(errors.API_ERROR('Failed to access line auth api'));
+    return res.status(400).json(errors.API_ERROR(apiName, 'Failed to access line auth api'));
   });
 };

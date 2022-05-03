@@ -1,13 +1,18 @@
-import { ICategory, IToBuy } from "../interfaces";
+import { IToBuy } from "../interfaces";
 import { IArgs, IToBuyArgs } from '../interfaces/chatbot';
 import BaseModel from "./baseModel";
-import { IMember } from '../interfaces/index';
 import Utils from "../services/utils";
 import CONST from "../services/constants";
 import { IModelProps } from './baseModel';
 import * as line from '@line/bot-sdk';
 
 interface IProps extends Partial<IModelProps> {}
+
+export const defaultToBuy: Omit<IToBuy, 'buyDueDate' | 'timestamp' | 'id'> = {
+  item: 'default item name',
+  buyCategory: 'none',
+  buyBy: 'all',
+}
 
 export default class ToBuyModel extends BaseModel {
   constructor (props: IProps) {

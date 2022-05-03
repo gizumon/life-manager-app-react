@@ -6,7 +6,7 @@ export type IActionKey = 'add' | 'list' | 'delete' | 'help' | '';
 export interface IBaseArgs {
 	cmd: ICmdKey;
 	action: IActionKey;
-  replyToken: string;
+  replyToken?: string;
   user?: IMember;
   words?: string[];
 }
