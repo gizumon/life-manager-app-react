@@ -41,14 +41,8 @@ const useStyles = makeStyles((_: Theme) =>
 );
 
 export function DialogV1(props: ConfirmationDialogRawProps) {
-  const {classes, onClose, value: valueProp, open, content, cancelBtnTitle = 'cancel', okBtnTitle = 'OK', title, ...other} = props;
-  const [value, setValue] = React.useState(valueProp);
+  const {classes, onClose, value, open, content, cancelBtnTitle = 'cancel', okBtnTitle = 'OK', title, ...other} = props;
   const defaultClasses = useStyles();
-  React.useEffect(() => {
-    setValue(valueProp);
-  }, [valueProp, open]);
-
-  // const handleEntering = () => {};
 
   const handleCancel = () => {
     onClose();
@@ -73,11 +67,11 @@ export function DialogV1(props: ConfirmationDialogRawProps) {
         {content}
       </DialogContent>
       <DialogActions className={defaultClasses.btns}>
-        <Button autoFocus onClick={handleCancel} color="default">
-          {cancelBtnTitle}
-        </Button>
         <Button onClick={handleOk} color="primary">
           {okBtnTitle}
+        </Button>
+        <Button autoFocus onClick={handleCancel} color="default">
+          {cancelBtnTitle}
         </Button>
       </DialogActions>
     </Dialog>

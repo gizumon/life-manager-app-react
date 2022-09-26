@@ -217,16 +217,20 @@ export default function Input() {
         <CardContent>
           {
             getConfig(selectedType as IConfigType)?.inputs.filter((row) => !row.isHideInput).map((input) => {
-              if (input.type === 'text') {
-                return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
-              } else if (input.type === 'number') {
-                return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number" />);
-              } else if (input.type === 'select') {
-                return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
-              } else if (input.type === 'multi-check') {
-                return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
-              } else if (input.type === 'date') {
-                return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+              switch (input.type) {
+                case 'text':
+                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+                case 'number':
+                  return (<InputV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} type="number" />);
+                case 'select':
+                  return (<SelectV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+                case 'multi-check':
+                  return (<MultiCheckV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+                case 'date':
+                  return (<DateV1 key={input.id} config={input} model={formData[input.id]} setProps={setFormData} />);
+                default:
+                  console.error('input type does not exist: ', input.type);
+                  return (<></>)
               }
             })
           }

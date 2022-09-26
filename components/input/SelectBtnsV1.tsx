@@ -56,11 +56,14 @@ export default function SelectBtnsV1({config, setProps, onClick}: IProps) {
   const defaultMaxNumOfBtnInRow = 3;
   const classes = useStyles();
   const [isClick, setToggle] = useToggle();
-  const dataList = config.dataList?.filter((data) => data.hasOwnProperty('isHide') ? !(data as ICategory).isHide: true)
-      .sort((data1, data2) => data1.hasOwnProperty('setting') ? Utils.asc((data1 as ICategory).setting.order, (data2 as ICategory).setting.order) : 0) || [];
+  const dataList = config.dataList?.filter((data) => !(data as ICategory)?.isHide).sort((data1, data2) => {
+    if (!data1.hasOwnProperty('setting')) {
+      return 0;
+    }
+    return Utils.asc((data1 as ICategory).setting.order, (data2 as ICategory).setting.order);
+  }) || [];
   const maxNumberOfBtnInRow = config.args && config.args[0] && typeof config.args[0]['maxNumberOfBtnInRow'] === 'number' ?
                             config.args[0]['maxNumberOfBtnInRow'] : defaultMaxNumOfBtnInRow;
-  // const numOfRows = Math.floor((config.dataList?.length || 0) / maxNumberOfBtnInRow) + 1;
 
   const btnsRows = [];
   for (let i=0; i <= dataList.length; i = i + maxNumberOfBtnInRow) {

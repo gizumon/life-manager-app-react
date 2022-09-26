@@ -532,12 +532,14 @@ export default function ListPage() {
         <DialogV1
           id={targetId}
           value={targetId}
-          title="Remove?"
+          title="Detail"
           open={isDeleteModalOpen}
           content={
             modalContent(getDisplayDataList(selectedType as IConfigType)?.find((row) => row[0]?.dataId === targetId) || [])
           }
-          onClose={onCloseHandler}/>
+          onClose={onCloseHandler}
+          okBtnTitle="Remove"
+        />
       </Box>
     </>
   );

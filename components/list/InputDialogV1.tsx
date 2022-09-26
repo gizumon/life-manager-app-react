@@ -108,11 +108,11 @@ export function InputDialogV1(props: IProps) {
         }
       </DialogContent>
       <DialogActions className={classes.btns}>
-        <Button autoFocus onClick={handleCancel} color="default">
-          {cancelBtnTitle}
-        </Button>
         <Button onClick={handleOk} color="primary">
           {okBtnTitle}
+        </Button>
+        <Button autoFocus onClick={handleCancel} color="default">
+          {cancelBtnTitle}
         </Button>
       </DialogActions>
     </Dialog>
