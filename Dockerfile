@@ -7,10 +7,6 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 
-# Copy chakra config and prisma schema
-COPY ./configs  ./configs
-# COPY ./prisma  ./prisma # TODO: Removed when prisma is not needed
-
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
