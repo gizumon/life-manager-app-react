@@ -31,7 +31,7 @@ steps:
       - '--build-arg'
       - 'FIREBASE_ADMIN_CLIENT_ID=$_FIREBASE_ADMIN_CLIENT_ID'
       - '--build-arg'
-      - 'FIREBASE_ADMIN_CLIENT_x509_CERT_URL=$_FIREBASE_ADMIN_CLIENT_x509_CERT_URL'
+      - 'FIREBASE_ADMIN_CLIENT_x509_CERT_URL=$_FIREBASE_ADMIN_CLIENT_X509_CERT_URL'
 
       ####
       - '-t'
