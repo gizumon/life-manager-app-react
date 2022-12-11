@@ -9,6 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p $PORT",
+    "build:container": "docker build -t life-manager-app .",
+    "start:container": "docker run -p 3000:3000 life-manager-app",
     "lint": "next lint"
   },
   "dependencies": {
