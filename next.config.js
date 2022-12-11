@@ -9,6 +9,7 @@ console.log(`Run on ${isDev ? 'DEV' : isProd ? 'PROD' : 'UNKNOWN'} environment..
  *  - FIREBASE_API_KEY
  */
 module.exports = {
+  output: 'standalone',
   publicRuntimeConfig: {
     NODE_ENV: process.env.NODE_ENV,
     ROOT_URL: process.env.ROOT_URL,
