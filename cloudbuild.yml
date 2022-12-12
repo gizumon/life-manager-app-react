@@ -15,6 +15,8 @@ steps:
       - '--build-arg'
       - 'CHANNEL_ACCESS_TOKEN=$_CHANNEL_ACCESS_TOKEN'
       - '--build-arg'
+      - 'CHANNEL_SECRET=$_CHANNEL_SECRET'
+      - '--build-arg'
       - 'GA_ID=$_GA_ID'
       - '--build-arg'
       - 'LINE_AUTH_ENDPOINT=$_LINE_AUTH_ENDPOINT'
@@ -34,6 +36,8 @@ steps:
       - 'FIREBASE_ADMIN_CLIENT_ID=$_FIREBASE_ADMIN_CLIENT_ID'
       - '--build-arg'
       - 'FIREBASE_ADMIN_CLIENT_x509_CERT_URL=$_FIREBASE_ADMIN_CLIENT_X509_CERT_URL'
+      - '--build-arg'
+      - 'FIREBASE_DB_URL=$_FIREBASE_DB_URL'
 
       ####
       - '-t'
