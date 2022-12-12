@@ -55,6 +55,4 @@ const prodEnv = {
   },
 };
 
-console.log('prodEnv', prodEnv);
-
 module.exports = prodEnv;
