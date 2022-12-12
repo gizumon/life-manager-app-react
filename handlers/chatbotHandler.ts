@@ -5,10 +5,12 @@ import ToBuyModel from '../models/tobuy';
 import { ICmdKey } from '../interfaces/chatbot';
 import { NextApiResponse } from 'next';
 import { NextPostApiRequest } from '../interfaces/api';
+import getConfig from 'next/config';
 
+const { CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET } = getConfig().publicRuntimeConfig;
 export const lineConfig: line.Config = {
-  channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN || '',
-  channelSecret: process.env.CHANNEL_SECRET || '',
+  channelAccessToken: CHANNEL_ACCESS_TOKEN || '',
+  channelSecret: CHANNEL_SECRET || '',
 };
 
 const client = new line.Client(lineConfig as line.ClientConfig);
