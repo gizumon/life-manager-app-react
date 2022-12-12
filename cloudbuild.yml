@@ -7,6 +7,8 @@ steps:
       - '--build-arg'
       - 'APP_ENV=$_APP_ENV'
       - '--build-arg'
+      - 'ROOT_URL=$_ROOT_URL'
+      - '--build-arg'
       - LIFF_ID=$_LIFF_ID'
       - '--build-arg'
       - 'FIREBASE_API_KEY=$_FIREBASE_API_KEY'
