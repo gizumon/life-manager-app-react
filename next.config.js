@@ -8,7 +8,7 @@ console.log(`Run on ${isDev ? 'DEV' : isProd ? 'PROD' : 'UNKNOWN'} environment..
  *  - LIFF_ID
  *  - FIREBASE_API_KEY
  */
-module.exports = {
+const prodEnv = {
   output: 'standalone',
   publicRuntimeConfig: {
     NODE_ENV: process.env.NODE_ENV,
@@ -54,3 +54,7 @@ module.exports = {
     GA_ID: process.env.GA_ID,
   },
 };
+
+console.log('prodEnv', prodEnv);
+
+module.exports = prodEnv;
